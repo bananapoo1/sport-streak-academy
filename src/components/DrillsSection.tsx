@@ -1,54 +1,13 @@
+import { Link } from "react-router-dom";
 import DrillCard from "@/components/DrillCard";
 
 const sampleDrills = [
-  {
-    title: "Dribbling Cone Slalom",
-    sport: "Football",
-    duration: "10 min",
-    difficulty: "Beginner" as const,
-    players: "Solo",
-    isPremium: false,
-  },
-  {
-    title: "Wall Pass Accuracy",
-    sport: "Football",
-    duration: "15 min",
-    difficulty: "Intermediate" as const,
-    players: "Solo",
-    isPremium: false,
-  },
-  {
-    title: "Free Throw Challenge",
-    sport: "Basketball",
-    duration: "10 min",
-    difficulty: "Beginner" as const,
-    players: "Solo",
-    isPremium: false,
-  },
-  {
-    title: "Advanced Ball Handling",
-    sport: "Basketball",
-    duration: "20 min",
-    difficulty: "Advanced" as const,
-    players: "Solo",
-    isPremium: true,
-  },
-  {
-    title: "Serve & Return Practice",
-    sport: "Tennis",
-    duration: "15 min",
-    difficulty: "Intermediate" as const,
-    players: "2 Players",
-    isPremium: true,
-  },
-  {
-    title: "Putting Precision",
-    sport: "Golf",
-    duration: "12 min",
-    difficulty: "Beginner" as const,
-    players: "Solo",
-    isPremium: false,
-  },
+  { id: "dribbling-cone-slalom", sportSlug: "football", title: "Dribbling Cone Slalom", sport: "Football", duration: "10 min", difficulty: "Beginner" as const, players: "Solo", isPremium: false },
+  { id: "wall-pass-accuracy", sportSlug: "football", title: "Wall Pass Accuracy", sport: "Football", duration: "15 min", difficulty: "Intermediate" as const, players: "Solo", isPremium: false },
+  { id: "free-throw-challenge", sportSlug: "basketball", title: "Free Throw Challenge", sport: "Basketball", duration: "10 min", difficulty: "Beginner" as const, players: "Solo", isPremium: false },
+  { id: "advanced-ball-handling", sportSlug: "basketball", title: "Advanced Ball Handling", sport: "Basketball", duration: "20 min", difficulty: "Advanced" as const, players: "Solo", isPremium: true },
+  { id: "serve-return", sportSlug: "tennis", title: "Serve & Return Practice", sport: "Tennis", duration: "15 min", difficulty: "Intermediate" as const, players: "2 Players", isPremium: true },
+  { id: "basic-drill-1", sportSlug: "golf", title: "Putting Precision", sport: "Golf", duration: "12 min", difficulty: "Beginner" as const, players: "Solo", isPremium: false },
 ];
 
 export const DrillsSection = () => {
@@ -66,12 +25,10 @@ export const DrillsSection = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {sampleDrills.map((drill, index) => (
-            <div
-              key={drill.title}
-              className="animate-fade-in"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              <DrillCard {...drill} />
+            <div key={drill.id} className="animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
+              <Link to={`/drill/${drill.sportSlug}/${drill.id}`}>
+                <DrillCard {...drill} />
+              </Link>
             </div>
           ))}
         </div>
