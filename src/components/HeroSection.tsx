@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import Mascot from "@/components/Mascot";
 import { ArrowRight, Sparkles } from "lucide-react";
@@ -20,7 +21,7 @@ export const HeroSection = () => {
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-foreground mb-6 leading-tight animate-fade-in" style={{ animationDelay: "0.1s" }}>
               Level Up Your{" "}
-              <span className="text-gradient">Sports Skills</span>{" "}
+              <span className="text-gradient relative z-10">Sports Skills</span>{" "}
               with Fun Drills
             </h1>
 
@@ -29,13 +30,17 @@ export const HeroSection = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start animate-fade-in" style={{ animationDelay: "0.3s" }}>
-              <Button variant="hero" size="xl">
-                Start Training Free
-                <ArrowRight className="w-5 h-5" />
-              </Button>
-              <Button variant="outline" size="xl">
-                View All Sports
-              </Button>
+              <Link to="/sports">
+                <Button variant="hero" size="xl">
+                  Start Training Free
+                  <ArrowRight className="w-5 h-5" />
+                </Button>
+              </Link>
+              <Link to="/sports">
+                <Button variant="outline" size="xl">
+                  View All Sports
+                </Button>
+              </Link>
             </div>
 
             {/* Stats */}

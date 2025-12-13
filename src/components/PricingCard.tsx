@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Check, X, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -66,9 +67,11 @@ export const PricingCard = ({
         ))}
       </ul>
 
-      <Button variant={isPopular ? "hero" : "outline"} size="lg" className="w-full">
-        {ctaText}
-      </Button>
+      <Link to={name === "Free" ? "/sports" : `/checkout?plan=${name.toLowerCase().replace(" ", "-")}`}>
+        <Button variant={isPopular ? "hero" : "outline"} size="lg" className="w-full">
+          {ctaText}
+        </Button>
+      </Link>
     </div>
   );
 };

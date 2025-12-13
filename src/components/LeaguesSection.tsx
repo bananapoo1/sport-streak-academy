@@ -1,13 +1,14 @@
+import { Link } from "react-router-dom";
 import { Trophy, TrendingUp, Users, Flame } from "lucide-react";
 import LeagueBadge from "@/components/LeagueBadge";
 import StreakCounter from "@/components/StreakCounter";
 
 const leaderboard = [
-  { name: "Alex M.", xp: 2450, streak: 32, avatar: "🏀" },
-  { name: "Sarah K.", xp: 2380, streak: 28, avatar: "⚽" },
-  { name: "James L.", xp: 2290, streak: 25, avatar: "🎾" },
-  { name: "Emma R.", xp: 2150, streak: 21, avatar: "🏈" },
-  { name: "You", xp: 2100, streak: 7, avatar: "🌟", isUser: true },
+  { id: "alex-m", name: "Alex M.", xp: 2450, streak: 32, avatar: "🏀" },
+  { id: "sarah-k", name: "Sarah K.", xp: 2380, streak: 28, avatar: "⚽" },
+  { id: "james-l", name: "James L.", xp: 2290, streak: 25, avatar: "🎾" },
+  { id: "emma-r", name: "Emma R.", xp: 2150, streak: 21, avatar: "🏈" },
+  { id: "you", name: "You", xp: 2100, streak: 7, avatar: "🌟", isUser: true },
 ];
 
 export const LeaguesSection = () => {
@@ -66,12 +67,13 @@ export const LeaguesSection = () => {
 
             <div className="space-y-3">
               {leaderboard.map((player, index) => (
-                <div
-                  key={player.name}
+                <Link
+                  key={player.id}
+                  to={player.isUser ? "#" : `/profile/${player.id}`}
                   className={`flex items-center gap-4 p-3 rounded-xl transition-colors ${
                     player.isUser
                       ? "bg-primary/10 border-2 border-primary"
-                      : "bg-secondary/50 hover:bg-secondary"
+                      : "bg-secondary/50 hover:bg-secondary cursor-pointer"
                   }`}
                 >
                   <div className="w-8 h-8 flex items-center justify-center font-bold text-foreground">
@@ -88,7 +90,7 @@ export const LeaguesSection = () => {
                     <Flame className="w-4 h-4 fill-current" />
                     <span className="font-bold text-sm">{player.streak}</span>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
