@@ -21,7 +21,7 @@ const pricingPlans = [
   },
   {
     name: "Pro",
-    price: "£9.99",
+    price: "£19.99",
     period: "month",
     description: "Unlock everything for all sports",
     features: [
@@ -39,7 +39,7 @@ const pricingPlans = [
   },
   {
     name: "Single Sport",
-    price: "£4.99",
+    price: "£9.99",
     period: "month",
     description: "Master one sport at a time",
     features: [
