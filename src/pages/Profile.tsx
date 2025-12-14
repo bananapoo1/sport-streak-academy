@@ -1,25 +1,10 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Button } from "@/components/ui/button";
 import { Trophy, Flame, Target, Zap, Edit2, Lock, Check } from "lucide-react";
 import LeagueBadge from "@/components/LeagueBadge";
 import StreakCounter from "@/components/StreakCounter";
-
-// Mock user profile data
-const userProfile = {
-  name: "You",
-  avatar: "🎯",
-  league: "silver" as const,
-  rank: 12,
-  xp: 1250,
-  streak: 7,
-  drillsCompleted: 42,
-  joinDate: "2024-11-01",
-  favoriteSport: "Football",
-  weeklyXp: 320,
-  longestStreak: 14,
-};
+import { toast } from "@/hooks/use-toast";
 
 // Available customization options
 const avatarOptions = ["🎯", "⚽", "🏀", "🎾", "🏈", "⛳", "🏐", "🏑", "🏓", "🏏", "🏉", "⚾"];
@@ -45,6 +30,41 @@ const trophies = [
 ];
 
 const Profile = () => {
+  const [selectedAvatar, setSelectedAvatar] = useState("🎯");
+  const [selectedFrame, setSelectedFrame] = useState("default");
+
+  // User profile data with selected avatar
+  const userProfile = {
+    name: "You",
+    avatar: selectedAvatar,
+    league: "silver" as const,
+    rank: 12,
+    xp: 1250,
+    streak: 7,
+    drillsCompleted: 42,
+    joinDate: "2024-11-01",
+    favoriteSport: "Football",
+    weeklyXp: 320,
+    longestStreak: 14,
+  };
+
+  const handleAvatarChange = (avatar: string) => {
+    setSelectedAvatar(avatar);
+    toast({
+      title: "Avatar Updated!",
+      description: `Your avatar is now ${avatar}`,
+    });
+  };
+
+  const handleFrameChange = (frameId: string, unlocked: boolean) => {
+    if (!unlocked) return;
+    setSelectedFrame(frameId);
+    toast({
+      title: "Frame Updated!",
+      description: `Profile frame changed`,
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -110,8 +130,9 @@ const Profile = () => {
               {avatarOptions.map((avatar) => (
                 <button
                   key={avatar}
+                  onClick={() => handleAvatarChange(avatar)}
                   className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl border-2 transition-all hover:scale-110 ${
-                    userProfile.avatar === avatar
+                    selectedAvatar === avatar
                       ? "border-primary bg-primary/10"
                       : "border-border bg-secondary hover:border-primary/50"
                   }`}
@@ -130,18 +151,25 @@ const Profile = () => {
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {frameOptions.map((frame) => (
-                <div
+                <button
                   key={frame.id}
-                  className={`p-4 rounded-2xl border-2 transition-all ${
+                  onClick={() => handleFrameChange(frame.id, frame.unlocked)}
+                  className={`p-4 rounded-2xl border-2 transition-all text-left ${
                     frame.unlocked
-                      ? "border-border hover:border-primary cursor-pointer"
-                      : "border-border/50 opacity-60"
+                      ? selectedFrame === frame.id
+                        ? "border-primary bg-primary/10"
+                        : "border-border hover:border-primary cursor-pointer"
+                      : "border-border/50 opacity-60 cursor-not-allowed"
                   }`}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-semibold text-foreground">{frame.name}</span>
                     {frame.unlocked ? (
-                      <Check className="w-5 h-5 text-success" />
+                      selectedFrame === frame.id ? (
+                        <Check className="w-5 h-5 text-primary" />
+                      ) : (
+                        <Check className="w-5 h-5 text-success" />
+                      )
                     ) : (
                       <Lock className="w-5 h-5 text-muted-foreground" />
                     )}
@@ -149,7 +177,7 @@ const Profile = () => {
                   {!frame.unlocked && (
                     <p className="text-xs text-muted-foreground">{frame.requirement}</p>
                   )}
-                </div>
+                </button>
               ))}
             </div>
           </div>
