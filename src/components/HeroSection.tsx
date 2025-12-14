@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import Mascot from "@/components/Mascot";
 import { ArrowRight, Sparkles } from "lucide-react";
+import logoSports from "@/assets/logo-sports.png";
 
 export const HeroSection = () => {
   return (
@@ -21,7 +21,10 @@ export const HeroSection = () => {
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-foreground mb-6 leading-tight animate-fade-in" style={{ animationDelay: "0.1s" }}>
               Level Up Your{" "}
-              <span className="text-gradient relative z-10">Sports Skills</span>{" "}
+              <span className="relative inline-block">
+                <span className="absolute inset-0 bg-primary/20 rounded-lg -z-10 transform -skew-x-3" />
+                <span className="text-primary relative">Sports Skills</span>
+              </span>{" "}
               with Fun Drills
             </h1>
 
@@ -60,11 +63,15 @@ export const HeroSection = () => {
             </div>
           </div>
 
-          {/* Mascot */}
+          {/* Logo Image */}
           <div className="flex-1 flex justify-center lg:justify-end relative">
             <div className="relative">
               <div className="absolute inset-0 gradient-primary rounded-full blur-3xl opacity-20 scale-75" />
-              <Mascot size="xl" className="relative z-10 w-64 h-64 md:w-80 md:h-80" />
+              <img 
+                src={logoSports} 
+                alt="DrillZone - Sports Training" 
+                className="relative z-10 w-64 h-64 md:w-80 md:h-80 object-contain animate-float"
+              />
             </div>
           </div>
         </div>
