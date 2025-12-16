@@ -1,13 +1,17 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Flame, Trophy, Menu, X, User } from "lucide-react";
+import { Flame, Trophy, Menu, X, User, LogIn, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useProgress } from "@/hooks/useProgress";
 import logoSports from "@/assets/logo-sports.png";
 
 export const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+  const { streak } = useProgress();
 
   const handleNavClick = (hash: string) => {
     setMobileMenuOpen(false);
@@ -17,6 +21,11 @@ export const Navbar = () => {
       const element = document.querySelector(hash);
       element?.scrollIntoView({ behavior: "smooth" });
     }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
   };
 
   return (
@@ -47,23 +56,40 @@ export const Navbar = () => {
 
           {/* Stats & CTA */}
           <div className="hidden md:flex items-center gap-4">
-            <div className="flex items-center gap-1 text-streak">
-              <Flame className="w-5 h-5 fill-current" />
-              <span className="font-bold">7</span>
-            </div>
-            <div className="flex items-center gap-1 text-league-gold">
-              <Trophy className="w-5 h-5" />
-              <span className="font-bold text-sm">Gold</span>
-            </div>
-            <Link to="/profile">
-              <Button size="sm" variant="outline">
-                <User className="w-4 h-4" />
-                Profile
-              </Button>
-            </Link>
-            <Link to="/sports">
-              <Button size="sm">Get Started</Button>
-            </Link>
+            {user && (
+              <>
+                <div className="flex items-center gap-1 text-streak">
+                  <Flame className="w-5 h-5 fill-current" />
+                  <span className="font-bold">{streak}</span>
+                </div>
+                <div className="flex items-center gap-1 text-league-gold">
+                  <Trophy className="w-5 h-5" />
+                  <span className="font-bold text-sm">Gold</span>
+                </div>
+                <Link to="/profile">
+                  <Button size="sm" variant="outline">
+                    <User className="w-4 h-4" />
+                    Profile
+                  </Button>
+                </Link>
+                <Button size="sm" variant="ghost" onClick={handleSignOut}>
+                  <LogOut className="w-4 h-4" />
+                </Button>
+              </>
+            )}
+            {!user && (
+              <>
+                <Link to="/auth">
+                  <Button size="sm" variant="outline">
+                    <LogIn className="w-4 h-4" />
+                    Sign In
+                  </Button>
+                </Link>
+                <Link to="/sports">
+                  <Button size="sm">Get Started</Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -91,19 +117,43 @@ export const Navbar = () => {
               <button onClick={() => handleNavClick("#pricing")} className="font-medium text-muted-foreground hover:text-primary transition-colors py-2 text-left">
                 Pricing
               </button>
-              <div className="flex items-center gap-4 pt-2">
-                <div className="flex items-center gap-1 text-streak">
-                  <Flame className="w-5 h-5 fill-current" />
-                  <span className="font-bold">7</span>
-                </div>
-                <div className="flex items-center gap-1 text-league-gold">
-                  <Trophy className="w-5 h-5" />
-                  <span className="font-bold text-sm">Gold</span>
-                </div>
-              </div>
-              <Link to="/sports" onClick={() => setMobileMenuOpen(false)}>
-                <Button className="mt-2 w-full">Get Started</Button>
-              </Link>
+              {user && (
+                <>
+                  <div className="flex items-center gap-4 pt-2">
+                    <div className="flex items-center gap-1 text-streak">
+                      <Flame className="w-5 h-5 fill-current" />
+                      <span className="font-bold">{streak}</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-league-gold">
+                      <Trophy className="w-5 h-5" />
+                      <span className="font-bold text-sm">Gold</span>
+                    </div>
+                  </div>
+                  <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>
+                    <Button className="mt-2 w-full" variant="outline">
+                      <User className="w-4 h-4" />
+                      Profile
+                    </Button>
+                  </Link>
+                  <Button className="w-full" variant="ghost" onClick={handleSignOut}>
+                    <LogOut className="w-4 h-4" />
+                    Sign Out
+                  </Button>
+                </>
+              )}
+              {!user && (
+                <>
+                  <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
+                    <Button className="mt-2 w-full" variant="outline">
+                      <LogIn className="w-4 h-4" />
+                      Sign In
+                    </Button>
+                  </Link>
+                  <Link to="/sports" onClick={() => setMobileMenuOpen(false)}>
+                    <Button className="w-full">Get Started</Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         )}
