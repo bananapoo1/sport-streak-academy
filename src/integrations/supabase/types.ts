@@ -14,7 +14,207 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      completed_drills: {
+        Row: {
+          completed_at: string | null
+          drill_id: string
+          duration_minutes: number | null
+          id: string
+          sport: string
+          user_id: string
+          xp_earned: number | null
+        }
+        Insert: {
+          completed_at?: string | null
+          drill_id: string
+          duration_minutes?: number | null
+          id?: string
+          sport: string
+          user_id: string
+          xp_earned?: number | null
+        }
+        Update: {
+          completed_at?: string | null
+          drill_id?: string
+          duration_minutes?: number | null
+          id?: string
+          sport?: string
+          user_id?: string
+          xp_earned?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "completed_drills_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daily_progress: {
+        Row: {
+          date: string
+          drills_completed: number | null
+          goal_minutes: number | null
+          id: string
+          minutes_completed: number | null
+          user_id: string
+          xp_earned: number | null
+        }
+        Insert: {
+          date?: string
+          drills_completed?: number | null
+          goal_minutes?: number | null
+          id?: string
+          minutes_completed?: number | null
+          user_id: string
+          xp_earned?: number | null
+        }
+        Update: {
+          date?: string
+          drills_completed?: number | null
+          goal_minutes?: number | null
+          id?: string
+          minutes_completed?: number | null
+          user_id?: string
+          xp_earned?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_progress_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      friendships: {
+        Row: {
+          created_at: string | null
+          friend_id: string
+          id: string
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          friend_id: string
+          id?: string
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          friend_id?: string
+          id?: string
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "friendships_friend_id_fkey"
+            columns: ["friend_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "friendships_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_id: string | null
+          bio: string | null
+          created_at: string | null
+          current_streak: number | null
+          display_name: string | null
+          email: string | null
+          frame_id: string | null
+          id: string
+          location: string | null
+          longest_streak: number | null
+          social_links: Json | null
+          total_xp: number | null
+          updated_at: string | null
+          username: string | null
+          visibility: string | null
+        }
+        Insert: {
+          avatar_id?: string | null
+          bio?: string | null
+          created_at?: string | null
+          current_streak?: number | null
+          display_name?: string | null
+          email?: string | null
+          frame_id?: string | null
+          id: string
+          location?: string | null
+          longest_streak?: number | null
+          social_links?: Json | null
+          total_xp?: number | null
+          updated_at?: string | null
+          username?: string | null
+          visibility?: string | null
+        }
+        Update: {
+          avatar_id?: string | null
+          bio?: string | null
+          created_at?: string | null
+          current_streak?: number | null
+          display_name?: string | null
+          email?: string | null
+          frame_id?: string | null
+          id?: string
+          location?: string | null
+          longest_streak?: number | null
+          social_links?: Json | null
+          total_xp?: number | null
+          updated_at?: string | null
+          username?: string | null
+          visibility?: string | null
+        }
+        Relationships: []
+      }
+      reminder_settings: {
+        Row: {
+          email_reminders: boolean | null
+          id: string
+          in_app_reminders: boolean | null
+          reminder_time: string | null
+          user_id: string
+        }
+        Insert: {
+          email_reminders?: boolean | null
+          id?: string
+          in_app_reminders?: boolean | null
+          reminder_time?: string | null
+          user_id: string
+        }
+        Update: {
+          email_reminders?: boolean | null
+          id?: string
+          in_app_reminders?: boolean | null
+          reminder_time?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reminder_settings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
