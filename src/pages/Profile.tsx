@@ -1,12 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Trophy, Flame, Target, Zap, Edit2, Lock, Check } from "lucide-react";
+import { Trophy, Flame, Target, Zap, Edit2, Lock, Check, Users, UserPlus, Bell, Mail, X } from "lucide-react";
 import LeagueBadge from "@/components/LeagueBadge";
 import StreakCounter from "@/components/StreakCounter";
-import { toast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { useProgress } from "@/hooks/useProgress";
+import { useFriends } from "@/hooks/useFriends";
+import { supabase } from "@/integrations/supabase/client";
 
-// Available customization options
 const avatarOptions = ["🎯", "⚽", "🏀", "🎾", "🏈", "⛳", "🏐", "🏑", "🏓", "🏏", "🏉", "⚾"];
 
 const frameOptions = [
@@ -30,40 +38,120 @@ const trophies = [
 ];
 
 const Profile = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { streak, todayProgress } = useProgress();
+  const { friends, pendingRequests, sendFriendRequest, acceptFriendRequest, removeFriend } = useFriends();
+  
   const [selectedAvatar, setSelectedAvatar] = useState("🎯");
   const [selectedFrame, setSelectedFrame] = useState("default");
+  const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [friendUsername, setFriendUsername] = useState("");
+  const [inAppReminders, setInAppReminders] = useState(true);
+  const [emailReminders, setEmailReminders] = useState(false);
 
-  // User profile data with selected avatar
-  const userProfile = {
-    name: "You",
-    avatar: selectedAvatar,
-    league: "silver" as const,
-    rank: 12,
-    xp: 1250,
-    streak: 7,
-    drillsCompleted: 42,
-    joinDate: "2024-11-01",
-    favoriteSport: "Football",
-    weeklyXp: 320,
-    longestStreak: 14,
-  };
+  useEffect(() => {
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
 
-  const handleAvatarChange = (avatar: string) => {
+    const fetchProfile = async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (data) {
+        setProfile(data);
+        setSelectedAvatar(data.avatar_id || "🎯");
+        setSelectedFrame(data.frame_id || "default");
+      }
+
+      // Fetch reminder settings
+      const { data: settings } = await supabase
+        .from("reminder_settings")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (settings) {
+        setInAppReminders(settings.in_app_reminders);
+        setEmailReminders(settings.email_reminders);
+      }
+
+      setLoading(false);
+    };
+
+    fetchProfile();
+  }, [user, navigate]);
+
+  const handleAvatarChange = async (avatar: string) => {
     setSelectedAvatar(avatar);
-    toast({
-      title: "Avatar Updated!",
-      description: `Your avatar is now ${avatar}`,
-    });
+    if (user) {
+      await supabase
+        .from("profiles")
+        .update({ avatar_id: avatar })
+        .eq("id", user.id);
+    }
+    toast({ title: "Avatar Updated!", description: `Your avatar is now ${avatar}` });
   };
 
-  const handleFrameChange = (frameId: string, unlocked: boolean) => {
+  const handleFrameChange = async (frameId: string, unlocked: boolean) => {
     if (!unlocked) return;
     setSelectedFrame(frameId);
-    toast({
-      title: "Frame Updated!",
-      description: `Profile frame changed`,
-    });
+    if (user) {
+      await supabase
+        .from("profiles")
+        .update({ frame_id: frameId })
+        .eq("id", user.id);
+    }
+    toast({ title: "Frame Updated!", description: `Profile frame changed` });
   };
+
+  const handleAddFriend = async () => {
+    if (!friendUsername.trim()) return;
+    const result = await sendFriendRequest(friendUsername.trim());
+    if (!result.success) {
+      toast({ title: "Error", description: result.error, variant: "destructive" });
+    } else {
+      setFriendUsername("");
+    }
+  };
+
+  const handleReminderChange = async (type: "in_app" | "email", value: boolean) => {
+    if (!user) return;
+
+    if (type === "in_app") {
+      setInAppReminders(value);
+      await supabase
+        .from("reminder_settings")
+        .update({ in_app_reminders: value })
+        .eq("user_id", user.id);
+    } else {
+      setEmailReminders(value);
+      await supabase
+        .from("reminder_settings")
+        .update({ email_reminders: value })
+        .eq("user_id", user.id);
+    }
+
+    toast({ title: "Settings saved" });
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="pt-24 pb-16 flex items-center justify-center">
+          <div className="animate-pulse text-muted-foreground">Loading...</div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -77,20 +165,19 @@ const Profile = () => {
             <div className="flex flex-col sm:flex-row items-center gap-6">
               <div className="relative">
                 <div className="w-24 h-24 bg-secondary rounded-full flex items-center justify-center text-5xl border-4 border-primary">
-                  {userProfile.avatar}
+                  {selectedAvatar}
                 </div>
-                <button className="absolute -bottom-1 -right-1 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center shadow-button hover:scale-110 transition-transform">
-                  <Edit2 className="w-4 h-4" />
-                </button>
               </div>
               <div className="text-center sm:text-left flex-1">
-                <h2 className="text-3xl font-extrabold text-foreground mb-2">{userProfile.name}</h2>
+                <h2 className="text-3xl font-extrabold text-foreground mb-2">
+                  {profile?.username || profile?.display_name || "Athlete"}
+                </h2>
                 <p className="text-muted-foreground mb-4">
-                  Joined {new Date(userProfile.joinDate).toLocaleDateString("en-GB", { month: "long", year: "numeric" })}
+                  Joined {profile?.created_at ? new Date(profile.created_at).toLocaleDateString("en-GB", { month: "long", year: "numeric" }) : "Recently"}
                 </p>
                 <div className="flex flex-wrap gap-3 justify-center sm:justify-start">
-                  <LeagueBadge league={userProfile.league} rank={userProfile.rank} />
-                  <StreakCounter days={userProfile.streak} />
+                  <LeagueBadge league="silver" rank={12} />
+                  <StreakCounter days={streak} />
                 </div>
               </div>
             </div>
@@ -100,23 +187,123 @@ const Profile = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div className="bg-card border-2 border-border rounded-2xl p-4 text-center shadow-soft">
               <Trophy className="w-8 h-8 text-league-gold mx-auto mb-2" />
-              <div className="text-2xl font-extrabold text-foreground">{userProfile.xp.toLocaleString()}</div>
+              <div className="text-2xl font-extrabold text-foreground">{profile?.total_xp?.toLocaleString() || 0}</div>
               <div className="text-sm text-muted-foreground">Total XP</div>
             </div>
             <div className="bg-card border-2 border-border rounded-2xl p-4 text-center shadow-soft">
               <Target className="w-8 h-8 text-primary mx-auto mb-2" />
-              <div className="text-2xl font-extrabold text-foreground">{userProfile.drillsCompleted}</div>
-              <div className="text-sm text-muted-foreground">Drills Done</div>
+              <div className="text-2xl font-extrabold text-foreground">{todayProgress.drills_completed}</div>
+              <div className="text-sm text-muted-foreground">Today's Drills</div>
             </div>
             <div className="bg-card border-2 border-border rounded-2xl p-4 text-center shadow-soft">
               <Flame className="w-8 h-8 text-streak mx-auto mb-2" />
-              <div className="text-2xl font-extrabold text-foreground">{userProfile.longestStreak}</div>
+              <div className="text-2xl font-extrabold text-foreground">{profile?.longest_streak || 0}</div>
               <div className="text-sm text-muted-foreground">Best Streak</div>
             </div>
             <div className="bg-card border-2 border-border rounded-2xl p-4 text-center shadow-soft">
               <Zap className="w-8 h-8 text-success mx-auto mb-2" />
-              <div className="text-2xl font-extrabold text-foreground">{userProfile.weeklyXp}</div>
-              <div className="text-sm text-muted-foreground">This Week</div>
+              <div className="text-2xl font-extrabold text-foreground">{todayProgress.xp_earned}</div>
+              <div className="text-sm text-muted-foreground">Today's XP</div>
+            </div>
+          </div>
+
+          {/* Friends Section */}
+          <div className="bg-card border-2 border-border rounded-3xl p-6 mb-6 shadow-soft">
+            <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+              <Users className="w-5 h-5 text-primary" />
+              Friends ({friends.length})
+            </h3>
+
+            {/* Add Friend */}
+            <div className="flex gap-2 mb-4">
+              <Input
+                placeholder="Enter username to add friend"
+                value={friendUsername}
+                onChange={(e) => setFriendUsername(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleAddFriend()}
+              />
+              <Button onClick={handleAddFriend}>
+                <UserPlus className="w-4 h-4" />
+              </Button>
+            </div>
+
+            {/* Pending Requests */}
+            {pendingRequests.length > 0 && (
+              <div className="mb-4">
+                <h4 className="text-sm font-semibold text-muted-foreground mb-2">Pending Requests</h4>
+                <div className="space-y-2">
+                  {pendingRequests.map((request) => (
+                    <div key={request.id} className="flex items-center justify-between bg-secondary/50 p-3 rounded-xl">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">{request.avatar_id || "🎯"}</span>
+                        <span className="font-medium">{request.username || "Unknown"}</span>
+                      </div>
+                      <Button size="sm" onClick={() => acceptFriendRequest(request.id)}>
+                        Accept
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Friends List */}
+            {friends.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {friends.map((friend) => (
+                  <div key={friend.id} className="flex items-center justify-between bg-secondary/30 p-3 rounded-xl">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{friend.avatar_id || "🎯"}</span>
+                      <div>
+                        <span className="font-medium block">{friend.username || "Unknown"}</span>
+                        <span className="text-xs text-streak flex items-center gap-1">
+                          <Flame className="w-3 h-3" /> {friend.current_streak} day streak
+                        </span>
+                      </div>
+                    </div>
+                    <Button size="sm" variant="ghost" onClick={() => removeFriend(friend.id)}>
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-center py-4">No friends yet. Add someone above!</p>
+            )}
+          </div>
+
+          {/* Streak Reminders */}
+          <div className="bg-card border-2 border-border rounded-3xl p-6 mb-6 shadow-soft">
+            <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+              <Bell className="w-5 h-5 text-streak" />
+              Streak Reminders
+            </h3>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Bell className="w-5 h-5 text-muted-foreground" />
+                  <Label htmlFor="in-app-reminders">In-app reminders</Label>
+                </div>
+                <Switch
+                  id="in-app-reminders"
+                  checked={inAppReminders}
+                  onCheckedChange={(v) => handleReminderChange("in_app", v)}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Mail className="w-5 h-5 text-muted-foreground" />
+                  <Label htmlFor="email-reminders">Email reminders</Label>
+                </div>
+                <Switch
+                  id="email-reminders"
+                  checked={emailReminders}
+                  onCheckedChange={(v) => handleReminderChange("email", v)}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Friends can remind you to keep your streak going!
+              </p>
             </div>
           </div>
 

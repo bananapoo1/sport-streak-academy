@@ -1,17 +1,19 @@
-import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Play, Pause, CheckCircle, Clock, Users, Zap, Trophy, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, CheckCircle, Clock, Users, Zap, Trophy, ChevronDown, ChevronUp, LogIn } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
+import { useProgress } from "@/hooks/useProgress";
 
 // Drill data with video URLs and instructions
-const drillData: Record<string, Record<string, { title: string; duration: string; difficulty: string; players: string; xp: number; videoUrl: string; instructions: string[] }>> = {
+const drillData: Record<string, Record<string, { title: string; duration: number; difficulty: string; players: string; xp: number; videoUrl: string; instructions: string[] }>> = {
   football: {
     "dribbling-cone-slalom": {
       title: "Dribbling Cone Slalom",
-      duration: "10 min",
+      duration: 10,
       difficulty: "Beginner",
       players: "Solo",
       xp: 50,
@@ -28,7 +30,7 @@ const drillData: Record<string, Record<string, { title: string; duration: string
     },
     "wall-pass-accuracy": {
       title: "Wall Pass Accuracy",
-      duration: "15 min",
+      duration: 15,
       difficulty: "Intermediate",
       players: "Solo",
       xp: 75,
@@ -45,7 +47,7 @@ const drillData: Record<string, Record<string, { title: string; duration: string
     },
     "juggling-mastery": {
       title: "Juggling Mastery",
-      duration: "12 min",
+      duration: 12,
       difficulty: "Beginner",
       players: "Solo",
       xp: 60,
@@ -63,7 +65,7 @@ const drillData: Record<string, Record<string, { title: string; duration: string
   basketball: {
     "free-throw-challenge": {
       title: "Free Throw Challenge",
-      duration: "10 min",
+      duration: 10,
       difficulty: "Beginner",
       players: "Solo",
       xp: 50,
@@ -80,7 +82,7 @@ const drillData: Record<string, Record<string, { title: string; duration: string
     },
     "advanced-ball-handling": {
       title: "Advanced Ball Handling",
-      duration: "20 min",
+      duration: 20,
       difficulty: "Advanced",
       players: "Solo",
       xp: 100,
@@ -99,7 +101,7 @@ const drillData: Record<string, Record<string, { title: string; duration: string
   tennis: {
     "serve-return": {
       title: "Serve & Return Practice",
-      duration: "15 min",
+      duration: 15,
       difficulty: "Intermediate",
       players: "2 Players",
       xp: 80,
@@ -118,7 +120,7 @@ const drillData: Record<string, Record<string, { title: string; duration: string
 
 const defaultDrill = {
   title: "Skill Drill",
-  duration: "15 min",
+  duration: 15,
   difficulty: "Intermediate",
   players: "Solo",
   xp: 75,
@@ -134,18 +136,41 @@ const defaultDrill = {
 
 const DrillDetail = () => {
   const { sportSlug, drillId } = useParams();
-  const [isPlaying, setIsPlaying] = useState(false);
+  const navigate = useNavigate();
   const [isCompleted, setIsCompleted] = useState(false);
   const [showInstructions, setShowInstructions] = useState(true);
+  const { user } = useAuth();
+  const { completeTraining } = useProgress();
 
   const drill = drillData[sportSlug || ""]?.[drillId || ""] || defaultDrill;
   const sportName = sportSlug?.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") || "Sport";
 
-  const handleCompleteDrill = () => {
-    setIsCompleted(true);
-    toast.success(`Drill completed! +${drill.xp} XP earned! 🎉`, {
-      description: "Keep up the great work to maintain your streak!",
-    });
+  const handleCompleteDrill = async () => {
+    if (!user) {
+      toast.error("Please sign in to track your progress!", {
+        action: {
+          label: "Sign In",
+          onClick: () => navigate("/auth"),
+        },
+      });
+      return;
+    }
+
+    const result = await completeTraining(
+      drill.duration,
+      drill.xp,
+      sportSlug || "unknown",
+      drillId || "unknown"
+    );
+
+    if (result.success) {
+      setIsCompleted(true);
+      toast.success(`Drill completed! +${drill.xp} XP earned! 🎉`, {
+        description: "Keep up the great work to maintain your streak!",
+      });
+    } else {
+      toast.error("Failed to save progress. Please try again.");
+    }
   };
 
   return (
@@ -172,7 +197,7 @@ const DrillDetail = () => {
             <div className="flex flex-wrap gap-4">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Clock className="w-5 h-5" />
-                {drill.duration}
+                {drill.duration} min
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Users className="w-5 h-5" />
@@ -240,8 +265,17 @@ const DrillDetail = () => {
               className="w-full"
               onClick={handleCompleteDrill}
             >
-              <CheckCircle className="w-5 h-5" />
-              Mark as Complete (+{drill.xp} XP)
+              {user ? (
+                <>
+                  <CheckCircle className="w-5 h-5" />
+                  Mark as Complete (+{drill.xp} XP)
+                </>
+              ) : (
+                <>
+                  <LogIn className="w-5 h-5" />
+                  Sign In to Track Progress
+                </>
+              )}
             </Button>
           ) : (
             <div className="bg-success/10 border-2 border-success rounded-2xl p-6 text-center">
