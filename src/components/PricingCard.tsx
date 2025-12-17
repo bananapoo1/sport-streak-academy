@@ -1,6 +1,10 @@
-import { Link } from "react-router-dom";
-import { Check, X, Crown } from "lucide-react";
+import { Check, X, Crown, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useSubscription, STRIPE_PRODUCTS } from "@/hooks/useSubscription";
+import { toast } from "sonner";
 
 interface PricingCardProps {
   name: string;
@@ -10,7 +14,7 @@ interface PricingCardProps {
   features: { text: string; included: boolean }[];
   isPopular?: boolean;
   ctaText: string;
-  variant?: "default" | "popular";
+  priceId?: string;
 }
 
 export const PricingCard = ({
@@ -21,8 +25,49 @@ export const PricingCard = ({
   features,
   isPopular = false,
   ctaText,
-  variant = "default",
+  priceId,
 }: PricingCardProps) => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { subscribed, productId, createCheckout } = useSubscription();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const isCurrentPlan = 
+    (name === "Pro" && productId === STRIPE_PRODUCTS.pro.product_id) ||
+    (name === "Single Sport" && productId === STRIPE_PRODUCTS.single_sport.product_id);
+
+  const handleClick = async () => {
+    if (name === "Free") {
+      navigate("/sports");
+      return;
+    }
+
+    if (!user) {
+      toast.info("Please sign in first to subscribe");
+      navigate("/auth");
+      return;
+    }
+
+    if (isCurrentPlan) {
+      toast.info("You're already subscribed to this plan");
+      return;
+    }
+
+    if (!priceId) {
+      toast.error("Price not configured");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await createCheckout(priceId);
+    } catch (error) {
+      toast.error("Failed to start checkout. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div
       className={`relative flex flex-col p-6 rounded-3xl transition-all duration-300 ${
@@ -35,6 +80,12 @@ export const PricingCard = ({
         <div className="absolute -top-4 left-1/2 -translate-x-1/2 gradient-primary text-primary-foreground text-sm font-bold px-4 py-1 rounded-full flex items-center gap-1">
           <Crown className="w-4 h-4" />
           Most Popular
+        </div>
+      )}
+
+      {isCurrentPlan && (
+        <div className="absolute -top-4 right-4 bg-success text-success-foreground text-xs font-bold px-3 py-1 rounded-full">
+          Your Plan
         </div>
       )}
 
@@ -67,11 +118,24 @@ export const PricingCard = ({
         ))}
       </ul>
 
-      <Link to={name === "Free" ? "/sports" : `/checkout?plan=${name.toLowerCase().replace(" ", "-")}`}>
-        <Button variant={isPopular ? "hero" : "outline"} size="lg" className="w-full">
-          {ctaText}
-        </Button>
-      </Link>
+      <Button 
+        variant={isPopular ? "hero" : "outline"} 
+        size="lg" 
+        className="w-full"
+        onClick={handleClick}
+        disabled={isLoading || isCurrentPlan}
+      >
+        {isLoading ? (
+          <>
+            <Loader2 className="w-4 h-4 animate-spin mr-2" />
+            Loading...
+          </>
+        ) : isCurrentPlan ? (
+          "Current Plan"
+        ) : (
+          ctaText
+        )}
+      </Button>
     </div>
   );
 };
