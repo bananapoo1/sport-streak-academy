@@ -1,4 +1,5 @@
 import PricingCard from "@/components/PricingCard";
+import { STRIPE_PRODUCTS } from "@/hooks/useSubscription";
 
 const pricingPlans = [
   {
@@ -36,6 +37,7 @@ const pricingPlans = [
     ],
     ctaText: "Start Pro Trial",
     isPopular: true,
+    priceId: STRIPE_PRODUCTS.pro.price_id,
   },
   {
     name: "Single Sport",
@@ -54,6 +56,7 @@ const pricingPlans = [
     ],
     ctaText: "Choose Your Sport",
     isPopular: false,
+    priceId: STRIPE_PRODUCTS.single_sport.price_id,
   },
 ];
 
