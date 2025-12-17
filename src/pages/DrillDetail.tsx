@@ -7,6 +7,7 @@ import { ArrowLeft, CheckCircle, Clock, Users, Zap, Trophy, ChevronDown, Chevron
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProgress } from "@/hooks/useProgress";
+import { useCompletedDrills } from "@/hooks/useCompletedDrills";
 
 // Drill data with video URLs and instructions
 const drillData: Record<string, Record<string, { title: string; duration: number; difficulty: string; players: string; xp: number; videoUrl: string; instructions: string[] }>> = {
@@ -141,9 +142,17 @@ const DrillDetail = () => {
   const [showInstructions, setShowInstructions] = useState(true);
   const { user } = useAuth();
   const { completeTraining } = useProgress();
+  const { isDrillCompleted, loading: checkingCompletion } = useCompletedDrills(sportSlug);
 
   const drill = drillData[sportSlug || ""]?.[drillId || ""] || defaultDrill;
   const sportName = sportSlug?.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") || "Sport";
+
+  // Check if drill is already completed on mount
+  useEffect(() => {
+    if (!checkingCompletion && drillId && isDrillCompleted(drillId)) {
+      setIsCompleted(true);
+    }
+  }, [checkingCompletion, drillId, isDrillCompleted]);
 
   const handleCompleteDrill = async () => {
     if (!user) {
