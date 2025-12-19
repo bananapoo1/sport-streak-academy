@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProgress } from "@/hooks/useProgress";
 import { useCompletedDrills } from "@/hooks/useCompletedDrills";
-import { getDrill, getSportData } from "@/data/drillsData";
+import { getDrillById, getSportData } from "@/data/drillsData";
 
 const DrillDetail = () => {
   const { sportSlug, drillId } = useParams();
@@ -20,7 +20,7 @@ const DrillDetail = () => {
   const { isDrillCompleted, loading: checkingCompletion } = useCompletedDrills(sportSlug);
 
   // Get drill from unified data source
-  const drill = getDrill(sportSlug || "", drillId || "");
+  const drill = getDrillById(sportSlug || "", drillId || "");
   const sportData = getSportData(sportSlug || "");
 
   // Check if drill is already completed on mount
