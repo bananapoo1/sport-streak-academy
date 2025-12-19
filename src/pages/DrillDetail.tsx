@@ -3,137 +3,12 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, CheckCircle, Clock, Users, Zap, Trophy, ChevronDown, ChevronUp, LogIn } from "lucide-react";
+import { ArrowLeft, CheckCircle, Clock, Users, Zap, Trophy, ChevronDown, ChevronUp, LogIn, Crown } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProgress } from "@/hooks/useProgress";
 import { useCompletedDrills } from "@/hooks/useCompletedDrills";
-
-// Drill data with video URLs and instructions
-const drillData: Record<string, Record<string, { title: string; duration: number; difficulty: string; players: string; xp: number; videoUrl: string; instructions: string[] }>> = {
-  football: {
-    "dribbling-cone-slalom": {
-      title: "Dribbling Cone Slalom",
-      duration: 10,
-      difficulty: "Beginner",
-      players: "Solo",
-      xp: 50,
-      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-      instructions: [
-        "Set up 5-8 cones in a straight line, spaced about 1 meter apart",
-        "Start at one end with the ball at your feet",
-        "Dribble through the cones using the inside and outside of your feet",
-        "Keep the ball close to your body and your head up",
-        "Focus on quick, controlled touches",
-        "Turn around at the end and dribble back",
-        "Repeat for 10 minutes, trying to improve speed while maintaining control",
-      ],
-    },
-    "wall-pass-accuracy": {
-      title: "Wall Pass Accuracy",
-      duration: 15,
-      difficulty: "Intermediate",
-      players: "Solo",
-      xp: 75,
-      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-      instructions: [
-        "Find a solid wall without windows or obstacles",
-        "Mark a target area on the wall (use tape if possible)",
-        "Stand 3-5 meters from the wall",
-        "Pass the ball with your right foot to the target",
-        "Control the return and pass again with your left foot",
-        "Increase distance as accuracy improves",
-        "Track your hit percentage and try to beat your record",
-      ],
-    },
-    "juggling-mastery": {
-      title: "Juggling Mastery",
-      duration: 12,
-      difficulty: "Beginner",
-      players: "Solo",
-      xp: 60,
-      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-      instructions: [
-        "Start with the ball in your hands",
-        "Drop the ball and kick it back up to your hands",
-        "Practice with both feet alternately",
-        "Once comfortable, try two touches before catching",
-        "Progress to continuous juggling without catching",
-        "Set a goal: start with 10, work up to 50+ touches",
-      ],
-    },
-  },
-  basketball: {
-    "free-throw-challenge": {
-      title: "Free Throw Challenge",
-      duration: 10,
-      difficulty: "Beginner",
-      players: "Solo",
-      xp: 50,
-      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-      instructions: [
-        "Stand at the free-throw line with proper stance",
-        "Bend knees slightly, feet shoulder-width apart",
-        "Hold the ball with your shooting hand under and guide hand on the side",
-        "Focus on the front of the rim",
-        "Extend your arm and snap your wrist on release",
-        "Follow through with your arm pointing at the basket",
-        "Shoot 50 free throws and track your percentage",
-      ],
-    },
-    "advanced-ball-handling": {
-      title: "Advanced Ball Handling",
-      duration: 20,
-      difficulty: "Advanced",
-      players: "Solo",
-      xp: 100,
-      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-      instructions: [
-        "Start with basic stationary dribbles to warm up",
-        "Practice crossovers: right to left, left to right",
-        "Add between-the-legs dribbles",
-        "Include behind-the-back moves",
-        "Combine moves into combos: crossover + between legs",
-        "Practice at game speed, imagining defenders",
-        "Do each combo for 2 minutes, then switch",
-      ],
-    },
-  },
-  tennis: {
-    "serve-return": {
-      title: "Serve & Return Practice",
-      duration: 15,
-      difficulty: "Intermediate",
-      players: "2 Players",
-      xp: 80,
-      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-      instructions: [
-        "One player serves from the baseline",
-        "Partner stands in ready position to return",
-        "Server varies placement: wide, body, T",
-        "Returner focuses on getting racket back early",
-        "Switch roles every 10 serves",
-        "Track successful returns vs errors",
-      ],
-    },
-  },
-};
-
-const defaultDrill = {
-  title: "Skill Drill",
-  duration: 15,
-  difficulty: "Intermediate",
-  players: "Solo",
-  xp: 75,
-  videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-  instructions: [
-    "Warm up for 2-3 minutes with light movement",
-    "Practice the fundamental technique slowly",
-    "Gradually increase speed as form improves",
-    "Take short breaks if needed",
-    "Cool down and stretch after completing",
-  ],
-};
+import { getDrill, getSportData } from "@/data/drillsData";
 
 const DrillDetail = () => {
   const { sportSlug, drillId } = useParams();
@@ -144,8 +19,9 @@ const DrillDetail = () => {
   const { completeTraining } = useProgress();
   const { isDrillCompleted, loading: checkingCompletion } = useCompletedDrills(sportSlug);
 
-  const drill = drillData[sportSlug || ""]?.[drillId || ""] || defaultDrill;
-  const sportName = sportSlug?.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") || "Sport";
+  // Get drill from unified data source
+  const drill = getDrill(sportSlug || "", drillId || "");
+  const sportData = getSportData(sportSlug || "");
 
   // Check if drill is already completed on mount
   useEffect(() => {
@@ -165,6 +41,8 @@ const DrillDetail = () => {
       return;
     }
 
+    if (!drill) return;
+
     const result = await completeTraining(
       drill.duration,
       drill.xp,
@@ -182,6 +60,24 @@ const DrillDetail = () => {
     }
   };
 
+  // If drill not found, show error
+  if (!drill) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="pt-24 pb-16">
+          <div className="container mx-auto px-4 max-w-4xl text-center">
+            <h1 className="text-2xl font-bold text-foreground mb-4">Drill Not Found</h1>
+            <Link to={`/sports/${sportSlug}`}>
+              <Button variant="outline">Back to {sportData.name}</Button>
+            </Link>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -192,14 +88,25 @@ const DrillDetail = () => {
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to {sportName}
+            Back to {sportData.name}
           </Link>
 
           {/* Drill Header */}
           <div className="mb-6">
-            <span className="text-sm font-semibold text-primary uppercase tracking-wide">
-              {sportName}
-            </span>
+            <div className="flex items-center gap-2 mb-2">
+              <span 
+                className="text-sm font-semibold uppercase tracking-wide"
+                style={{ color: sportData.color }}
+              >
+                {sportData.name}
+              </span>
+              {drill.isBoss && (
+                <span className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <Crown className="w-3 h-3" />
+                  BOSS LEVEL
+                </span>
+              )}
+            </div>
             <h1 className="text-3xl md:text-4xl font-extrabold text-foreground mt-2 mb-4">
               {drill.title}
             </h1>
@@ -214,9 +121,9 @@ const DrillDetail = () => {
               </div>
               <div className="flex items-center gap-2 text-primary">
                 <Zap className="w-5 h-5" />
-                {drill.difficulty}
+                {drill.difficulty.charAt(0).toUpperCase() + drill.difficulty.slice(1)}
               </div>
-              <div className="flex items-center gap-2 text-xp">
+              <div className={`flex items-center gap-2 ${drill.isBoss ? "text-amber-500" : "text-xp"}`}>
                 <Trophy className="w-5 h-5" />
                 +{drill.xp} XP
               </div>
@@ -224,7 +131,11 @@ const DrillDetail = () => {
           </div>
 
           {/* Video Player */}
-          <div className="relative bg-card border-2 border-border rounded-2xl overflow-hidden mb-6 shadow-card">
+          <div className={`relative border-2 rounded-2xl overflow-hidden mb-6 shadow-card ${
+            drill.isBoss 
+              ? "bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-400/50" 
+              : "bg-card border-border"
+          }`}>
             <div className="aspect-video">
               <iframe
                 src={drill.videoUrl}
@@ -255,7 +166,11 @@ const DrillDetail = () => {
                 <ol className="space-y-3">
                   {drill.instructions.map((instruction, index) => (
                     <li key={index} className="flex gap-4">
-                      <span className="flex-shrink-0 w-8 h-8 bg-primary/10 text-primary font-bold rounded-full flex items-center justify-center">
+                      <span className={`flex-shrink-0 w-8 h-8 font-bold rounded-full flex items-center justify-center ${
+                        drill.isBoss 
+                          ? "bg-amber-500/20 text-amber-500" 
+                          : "bg-primary/10 text-primary"
+                      }`}>
                         {index + 1}
                       </span>
                       <p className="text-foreground pt-1">{instruction}</p>
@@ -271,13 +186,13 @@ const DrillDetail = () => {
             <Button 
               variant="hero" 
               size="xl" 
-              className="w-full"
+              className={`w-full ${drill.isBoss ? "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600" : ""}`}
               onClick={handleCompleteDrill}
             >
               {user ? (
                 <>
                   <CheckCircle className="w-5 h-5" />
-                  Mark as Complete (+{drill.xp} XP)
+                  {drill.isBoss ? `Defeat Boss Level (+${drill.xp} XP)` : `Mark as Complete (+${drill.xp} XP)`}
                 </>
               ) : (
                 <>
@@ -287,12 +202,18 @@ const DrillDetail = () => {
               )}
             </Button>
           ) : (
-            <div className="bg-success/10 border-2 border-success rounded-2xl p-6 text-center">
-              <CheckCircle className="w-12 h-12 text-success mx-auto mb-3" />
-              <h3 className="text-xl font-bold text-foreground mb-2">Drill Completed!</h3>
+            <div className={`border-2 rounded-2xl p-6 text-center ${
+              drill.isBoss 
+                ? "bg-gradient-to-r from-amber-500/10 to-orange-500/10 border-amber-400" 
+                : "bg-success/10 border-success"
+            }`}>
+              <CheckCircle className={`w-12 h-12 mx-auto mb-3 ${drill.isBoss ? "text-amber-500" : "text-success"}`} />
+              <h3 className="text-xl font-bold text-foreground mb-2">
+                {drill.isBoss ? "Boss Defeated!" : "Drill Completed!"}
+              </h3>
               <p className="text-muted-foreground mb-4">You earned {drill.xp} XP. Great work!</p>
               <Link to={`/sports/${sportSlug}`}>
-                <Button variant="outline">Try Another Drill</Button>
+                <Button variant="outline">Continue Training</Button>
               </Link>
             </div>
           )}

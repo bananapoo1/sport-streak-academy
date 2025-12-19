@@ -1,140 +1,26 @@
 import { useParams, Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { ArrowLeft } from "lucide-react";
-import DrillTree, { Drill } from "@/components/DrillTree";
+import { ArrowLeft, Trophy, Target, Flame } from "lucide-react";
+import LevelMap from "@/components/LevelMap";
 import { useCompletedDrills } from "@/hooks/useCompletedDrills";
-
-interface DrillData {
-  id: string;
-  title: string;
-  duration: string;
-  xp: number;
-  isPremium: boolean;
-}
-
-interface SportData {
-  name: string;
-  color: string;
-  beginner: DrillData[];
-  intermediate: DrillData[];
-  advanced: DrillData[];
-}
-
-const sportData: Record<string, SportData> = {
-  football: {
-    name: "Football",
-    color: "#22c55e",
-    beginner: [
-      { id: "dribbling-cone-slalom", title: "Dribbling Cone Slalom", duration: "10 min", xp: 50, isPremium: false },
-      { id: "wall-pass-basic", title: "Wall Pass Basics", duration: "8 min", xp: 45, isPremium: false },
-      { id: "juggling-intro", title: "Juggling Introduction", duration: "12 min", xp: 60, isPremium: false },
-      { id: "ball-control-basics", title: "Ball Control Basics", duration: "10 min", xp: 55, isPremium: false },
-    ],
-    intermediate: [
-      { id: "wall-pass-accuracy", title: "Wall Pass Accuracy", duration: "15 min", xp: 75, isPremium: false },
-      { id: "first-touch-drills", title: "First Touch Drills", duration: "15 min", xp: 80, isPremium: true },
-      { id: "dribbling-advanced", title: "Advanced Dribbling", duration: "18 min", xp: 85, isPremium: true },
-    ],
-    advanced: [
-      { id: "shooting-practice", title: "Shooting Practice", duration: "20 min", xp: 100, isPremium: true },
-      { id: "passing-combo", title: "Passing Combinations", duration: "25 min", xp: 120, isPremium: true },
-    ],
-  },
-  basketball: {
-    name: "Basketball",
-    color: "#f97316",
-    beginner: [
-      { id: "dribbling-basics", title: "Dribbling Basics", duration: "10 min", xp: 50, isPremium: false },
-      { id: "free-throw-intro", title: "Free Throw Introduction", duration: "12 min", xp: 55, isPremium: false },
-      { id: "passing-fundamentals", title: "Passing Fundamentals", duration: "10 min", xp: 50, isPremium: false },
-    ],
-    intermediate: [
-      { id: "layup-practice", title: "Layup Practice", duration: "15 min", xp: 70, isPremium: false },
-      { id: "crossover-moves", title: "Crossover Moves", duration: "15 min", xp: 75, isPremium: true },
-    ],
-    advanced: [
-      { id: "advanced-ball-handling", title: "Advanced Ball Handling", duration: "20 min", xp: 100, isPremium: true },
-      { id: "three-point-shooting", title: "Three-Point Shooting", duration: "18 min", xp: 95, isPremium: true },
-    ],
-  },
-  tennis: {
-    name: "Tennis",
-    color: "#eab308",
-    beginner: [
-      { id: "serve-basics", title: "Serve Basics", duration: "12 min", xp: 55, isPremium: false },
-      { id: "forehand-intro", title: "Forehand Introduction", duration: "10 min", xp: 50, isPremium: false },
-    ],
-    intermediate: [
-      { id: "backhand-practice", title: "Backhand Practice", duration: "15 min", xp: 70, isPremium: true },
-    ],
-    advanced: [
-      { id: "volley-drills", title: "Volley Drills", duration: "18 min", xp: 90, isPremium: true },
-    ],
-  },
-};
-
-// Default drills for sports not specifically defined
-const getDefaultDrills = (sportName: string): SportData => ({
-  name: sportName,
-  color: "#6b7280",
-  beginner: [
-    { id: "basic-drill-1", title: "Basic Fundamentals", duration: "10 min", xp: 50, isPremium: false },
-    { id: "basic-drill-2", title: "Coordination Training", duration: "12 min", xp: 55, isPremium: false },
-  ],
-  intermediate: [
-    { id: "intermediate-drill-1", title: "Skill Development", duration: "15 min", xp: 75, isPremium: true },
-  ],
-  advanced: [
-    { id: "advanced-drill-1", title: "Advanced Techniques", duration: "20 min", xp: 100, isPremium: true },
-  ],
-});
-
-// Calculate which drills are unlocked based on completion
-const calculateUnlockedDrills = (
-  drills: DrillData[],
-  isDrillCompleted: (id: string) => boolean,
-  previousLevelComplete: boolean
-): Drill[] => {
-  let canUnlock = previousLevelComplete;
-  return drills.map((drill, index) => {
-    const isCompleted = isDrillCompleted(drill.id);
-    const isUnlocked = canUnlock;
-    
-    // For the first drill in a level, it's unlocked if previous level is complete
-    // For subsequent drills, they unlock when the previous drill is completed
-    if (index === 0) {
-      canUnlock = isCompleted;
-    } else {
-      canUnlock = isCompleted;
-    }
-    
-    return {
-      ...drill,
-      isCompleted,
-      isUnlocked: index === 0 ? previousLevelComplete : isDrillCompleted(drills[index - 1].id),
-    };
-  });
-};
+import { getSportData } from "@/data/drillsData";
 
 const SportDetail = () => {
   const { sportSlug } = useParams();
-  const { isDrillCompleted, loading } = useCompletedDrills(sportSlug);
-  const formattedName = sportSlug?.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") || "Sport";
-  const sportBase = sportData[sportSlug || ""] || getDefaultDrills(formattedName);
-
-  // Calculate unlock status dynamically
-  const beginnerDrills = calculateUnlockedDrills(sportBase.beginner, isDrillCompleted, true);
-  const beginnerComplete = beginnerDrills.every(d => d.isCompleted);
+  const { completedDrills, loading } = useCompletedDrills(sportSlug);
   
-  const intermediateDrills = calculateUnlockedDrills(sportBase.intermediate, isDrillCompleted, beginnerComplete);
-  const intermediateComplete = intermediateDrills.every(d => d.isCompleted);
+  const sportData = getSportData(sportSlug || "");
+  const completedDrillIds = new Set(completedDrills.map(d => d.drill_id));
   
-  const advancedDrills = calculateUnlockedDrills(sportBase.advanced, isDrillCompleted, intermediateComplete);
-
-  const allDrills = [...beginnerDrills, ...intermediateDrills, ...advancedDrills];
-  const totalDrills = allDrills.length;
-  const completedDrillsCount = allDrills.filter(d => d.isCompleted).length;
+  const totalDrills = sportData.drills.length;
+  const completedCount = completedDrills.length;
+  const totalXP = sportData.drills.reduce((sum, d) => sum + d.xp, 0);
+  const earnedXP = sportData.drills
+    .filter(d => completedDrillIds.has(d.id))
+    .reduce((sum, d) => sum + d.xp, 0);
+  const bossLevels = sportData.drills.filter(d => d.isBoss).length;
+  const bossCompleted = sportData.drills.filter(d => d.isBoss && completedDrillIds.has(d.id)).length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -146,35 +32,75 @@ const SportDetail = () => {
             Back to Sports
           </Link>
 
-          <div className="mb-12">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-foreground mb-4" style={{ color: sportBase.color }}>
-              {sportBase.name} Drills
+          {/* Header */}
+          <div className="mb-8">
+            <h1 
+              className="text-4xl md:text-5xl font-extrabold mb-2"
+              style={{ color: sportData.color }}
+            >
+              {sportData.name}
             </h1>
             <p className="text-lg text-muted-foreground">
-              {loading ? "Loading..." : `${completedDrillsCount}/${totalDrills} drills completed. Complete drills in order to unlock the next one!`}
+              Master your skills through progressive training levels
             </p>
           </div>
 
-          <DrillTree
-            title="Beginner"
-            level="beginner"
-            drills={beginnerDrills}
-            sportSlug={sportSlug || ""}
-          />
+          {/* Stats Cards */}
+          <div className="grid grid-cols-3 gap-3 mb-8">
+            <div className="bg-card border-2 border-border rounded-2xl p-4 text-center">
+              <Target className="w-6 h-6 mx-auto mb-2 text-primary" />
+              <p className="text-2xl font-bold text-foreground">{completedCount}/{totalDrills}</p>
+              <p className="text-xs text-muted-foreground">Levels Done</p>
+            </div>
+            <div className="bg-card border-2 border-border rounded-2xl p-4 text-center">
+              <Flame className="w-6 h-6 mx-auto mb-2 text-xp" />
+              <p className="text-2xl font-bold text-foreground">{earnedXP}</p>
+              <p className="text-xs text-muted-foreground">XP Earned</p>
+            </div>
+            <div className="bg-card border-2 border-border rounded-2xl p-4 text-center">
+              <Trophy className="w-6 h-6 mx-auto mb-2 text-amber-500" />
+              <p className="text-2xl font-bold text-foreground">{bossCompleted}/{bossLevels}</p>
+              <p className="text-xs text-muted-foreground">Boss Levels</p>
+            </div>
+          </div>
 
-          <DrillTree
-            title="Intermediate"
-            level="intermediate"
-            drills={intermediateDrills}
-            sportSlug={sportSlug || ""}
-          />
+          {/* Progress Bar */}
+          <div className="mb-8">
+            <div className="flex justify-between text-sm mb-2">
+              <span className="text-muted-foreground">Progress</span>
+              <span className="font-bold text-foreground">{Math.round((completedCount / totalDrills) * 100)}%</span>
+            </div>
+            <div className="h-3 bg-muted rounded-full overflow-hidden">
+              <div 
+                className="h-full rounded-full transition-all duration-500"
+                style={{ 
+                  width: `${(completedCount / totalDrills) * 100}%`,
+                  backgroundColor: sportData.color 
+                }}
+              />
+            </div>
+          </div>
 
-          <DrillTree
-            title="Advanced"
-            level="advanced"
-            drills={advancedDrills}
-            sportSlug={sportSlug || ""}
-          />
+          {/* Level Map */}
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
+              <p className="text-muted-foreground">Loading your progress...</p>
+            </div>
+          ) : (
+            <div className="bg-card border-2 border-border rounded-3xl p-6 shadow-soft">
+              <h2 className="text-xl font-bold text-foreground mb-2 text-center">Training Journey</h2>
+              <p className="text-sm text-muted-foreground text-center mb-4">
+                Complete each level to unlock the next. Boss levels appear every 10 drills!
+              </p>
+              <LevelMap 
+                drills={sportData.drills}
+                sportSlug={sportSlug || ""}
+                completedDrillIds={completedDrillIds}
+                sportColor={sportData.color}
+              />
+            </div>
+          )}
         </div>
       </main>
       <Footer />
