@@ -20,7 +20,7 @@ export const useProgress = () => {
     minutes_completed: 0,
     xp_earned: 0,
     drills_completed: 0,
-    goal_minutes: 10,
+    goal_minutes: 30,
   });
   const [weekProgress, setWeekProgress] = useState<WeekDay[]>([]);
   const [streak, setStreak] = useState(0);
