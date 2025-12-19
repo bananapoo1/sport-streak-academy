@@ -16,7 +16,13 @@ export const Navbar = () => {
   const handleNavClick = (hash: string) => {
     setMobileMenuOpen(false);
     if (location.pathname !== "/") {
+      // Navigate to homepage with hash, then scroll after navigation
       navigate("/" + hash);
+      // Use setTimeout to allow navigation to complete, then scroll
+      setTimeout(() => {
+        const element = document.querySelector(hash);
+        element?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
     } else {
       const element = document.querySelector(hash);
       element?.scrollIntoView({ behavior: "smooth" });

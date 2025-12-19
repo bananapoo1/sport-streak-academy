@@ -1,14 +1,20 @@
 import { useParams, Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { ArrowLeft, Trophy, Target, Flame } from "lucide-react";
+import { ArrowLeft, Trophy, Target, Flame, Lock, Crown } from "lucide-react";
 import LevelMap from "@/components/LevelMap";
+import CategoryMap from "@/components/CategoryMap";
 import { useCompletedDrills } from "@/hooks/useCompletedDrills";
 import { getSportData } from "@/data/drillsData";
+import { useSubscription } from "@/hooks/useSubscription";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
 
 const SportDetail = () => {
   const { sportSlug } = useParams();
   const { completedDrills, loading } = useCompletedDrills(sportSlug);
+  const { isPro, isSingleSport, subscribed, loading: subLoading } = useSubscription();
+  const { user } = useAuth();
   
   const sportData = getSportData(sportSlug || "");
   const completedDrillIds = new Set(completedDrills.map(d => d.drill_id));
@@ -21,6 +27,10 @@ const SportDetail = () => {
     .reduce((sum, d) => sum + d.xp, 0);
   const bossLevels = sportData.drills.filter(d => d.isBoss).length;
   const bossCompleted = sportData.drills.filter(d => d.isBoss && completedDrillIds.has(d.id)).length;
+
+  // Check if user has paid access
+  const hasPaidAccess = isPro || isSingleSport;
+  const hasCategories = sportData.categories && sportData.categories.length > 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -41,7 +51,10 @@ const SportDetail = () => {
               {sportData.name}
             </h1>
             <p className="text-lg text-muted-foreground">
-              Master your skills through progressive training levels
+              {hasPaidAccess && hasCategories 
+                ? "Choose a skill category to focus your training"
+                : "Master your skills through progressive training levels"
+              }
             </p>
           </div>
 
@@ -81,18 +94,56 @@ const SportDetail = () => {
             </div>
           </div>
 
-          {/* Level Map */}
-          {loading ? (
+          {/* Paid users get category view, free users get linear view */}
+          {loading || subLoading ? (
             <div className="text-center py-12">
               <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
               <p className="text-muted-foreground">Loading your progress...</p>
             </div>
+          ) : hasPaidAccess && hasCategories ? (
+            // Category-based view for paid users
+            <div className="space-y-6">
+              <div className="bg-gradient-to-r from-primary/10 to-primary/5 border-2 border-primary/30 rounded-2xl p-4 flex items-center gap-3">
+                <Crown className="w-6 h-6 text-primary" />
+                <div>
+                  <p className="font-bold text-foreground">Pro Training Mode</p>
+                  <p className="text-sm text-muted-foreground">Train specific skills with categorized drills</p>
+                </div>
+              </div>
+              
+              <CategoryMap 
+                categories={sportData.categories!}
+                sportSlug={sportSlug || ""}
+                completedDrillIds={completedDrillIds}
+                sportColor={sportData.color}
+              />
+            </div>
           ) : (
+            // Linear level-based view for free users
             <div className="bg-card border-2 border-border rounded-3xl p-6 shadow-soft">
               <h2 className="text-xl font-bold text-foreground mb-2 text-center">Training Journey</h2>
               <p className="text-sm text-muted-foreground text-center mb-4">
                 Complete each level to unlock the next. Boss levels appear every 10 drills!
               </p>
+              
+              {/* Upgrade prompt for free users */}
+              {user && !hasPaidAccess && (
+                <div className="mb-6 p-4 bg-gradient-to-r from-amber-500/10 to-orange-500/10 border-2 border-amber-400/30 rounded-xl">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Lock className="w-5 h-5 text-amber-500" />
+                    <p className="font-bold text-foreground">Unlock Skill Categories</p>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Upgrade to Pro to train specific skills like dribbling, passing, and shooting separately!
+                  </p>
+                  <Link to="/#pricing">
+                    <Button size="sm" className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
+                      View Plans
+                    </Button>
+                  </Link>
+                </div>
+              )}
+              
               <LevelMap 
                 drills={sportData.drills}
                 sportSlug={sportSlug || ""}
