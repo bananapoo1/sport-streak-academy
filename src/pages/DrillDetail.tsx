@@ -3,11 +3,12 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, CheckCircle, Clock, Users, Zap, Trophy, ChevronDown, ChevronUp, LogIn, Crown } from "lucide-react";
+import { ArrowLeft, CheckCircle, Clock, Users, Zap, Trophy, ChevronDown, ChevronUp, LogIn, Crown, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProgress } from "@/hooks/useProgress";
 import { useCompletedDrills } from "@/hooks/useCompletedDrills";
+import { useFreeDrillLimit, FREE_DRILL_LIMIT } from "@/hooks/useFreeDrillLimit";
 import { getDrillById, getSportData } from "@/data/drillsData";
 
 const DrillDetail = () => {
@@ -18,6 +19,7 @@ const DrillDetail = () => {
   const { user } = useAuth();
   const { completeTraining } = useProgress();
   const { isDrillCompleted, loading: checkingCompletion } = useCompletedDrills(sportSlug);
+  const { canDoMoreDrills, hasSubscription, loading: limitLoading } = useFreeDrillLimit();
 
   // Get drill from unified data source
   const drill = getDrillById(sportSlug || "", drillId || "");
@@ -41,6 +43,17 @@ const DrillDetail = () => {
       return;
     }
 
+    // Check free drill limit
+    if (!hasSubscription && !canDoMoreDrills && !isCompleted) {
+      toast.error("You've used your free drill! Upgrade to Pro for unlimited access.", {
+        action: {
+          label: "View Plans",
+          onClick: () => navigate("/#pricing"),
+        },
+      });
+      return;
+    }
+
     if (!drill) return;
 
     const result = await completeTraining(
@@ -59,6 +72,9 @@ const DrillDetail = () => {
       toast.error("Failed to save progress. Please try again.");
     }
   };
+
+  // Check if user should be blocked (free user who has used their drill)
+  const isBlockedByLimit = user && !hasSubscription && !canDoMoreDrills && !isCompleted;
 
   // If drill not found, show error
   if (!drill) {
@@ -181,8 +197,23 @@ const DrillDetail = () => {
             )}
           </div>
 
-          {/* Complete Button */}
-          {!isCompleted ? (
+          {/* Blocked by free limit */}
+          {isBlockedByLimit ? (
+            <div className="border-2 border-amber-400 bg-gradient-to-r from-amber-500/10 to-orange-500/10 rounded-2xl p-6 text-center">
+              <Lock className="w-12 h-12 mx-auto mb-3 text-amber-500" />
+              <h3 className="text-xl font-bold text-foreground mb-2">
+                Free Drill Used
+              </h3>
+              <p className="text-muted-foreground mb-4">
+                You've used your {FREE_DRILL_LIMIT} free drill. Upgrade to Pro for unlimited access to all drills!
+              </p>
+              <Link to="/#pricing">
+                <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
+                  Upgrade to Pro
+                </Button>
+              </Link>
+            </div>
+          ) : !isCompleted ? (
             <Button 
               variant="hero" 
               size="xl" 

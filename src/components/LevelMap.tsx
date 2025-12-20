@@ -1,6 +1,8 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Lock, Check, Play, Crown, Star } from "lucide-react";
 import { DrillInfo } from "@/data/drillsData";
+import { useFreeDrillLimit } from "@/hooks/useFreeDrillLimit";
+import { toast } from "sonner";
 
 interface LevelMapProps {
   drills: DrillInfo[];
@@ -10,10 +12,55 @@ interface LevelMapProps {
 }
 
 const LevelMap = ({ drills, sportSlug, completedDrillIds, sportColor }: LevelMapProps) => {
-  // Calculate which drills are unlocked
+  const navigate = useNavigate();
+  const { canDoMoreDrills, hasSubscription, remainingFreeDrills } = useFreeDrillLimit();
+
+  // Calculate which drills are unlocked (progression-based)
   const isUnlocked = (index: number): boolean => {
     if (index === 0) return true;
     return completedDrillIds.has(drills[index - 1].id);
+  };
+
+  // Check if drill is accessible (considers free limit)
+  const isAccessible = (index: number): boolean => {
+    const drill = drills[index];
+    const isCompleted = completedDrillIds.has(drill.id);
+    const unlocked = isUnlocked(index);
+    
+    // Not unlocked by progression = not accessible
+    if (!unlocked) return false;
+    
+    // Subscribed users can access all unlocked drills
+    if (hasSubscription) return true;
+    
+    // Completed drills are always viewable
+    if (isCompleted) return true;
+    
+    // Free users can only access new drills if they haven't hit the limit
+    return canDoMoreDrills;
+  };
+
+  const handleDrillClick = (e: React.MouseEvent, index: number, drillId: string) => {
+    const unlocked = isUnlocked(index);
+    const accessible = isAccessible(index);
+    const isCompleted = completedDrillIds.has(drillId);
+
+    if (!unlocked) {
+      e.preventDefault();
+      toast.error("Complete the previous drill first!");
+      return;
+    }
+
+    if (!accessible && !isCompleted) {
+      e.preventDefault();
+      toast.error("You've used your free drill! Upgrade to Pro for unlimited access.", {
+        action: {
+          label: "View Plans",
+          onClick: () => navigate("/#pricing"),
+        },
+      });
+      return;
+    }
   };
 
   return (
@@ -35,7 +82,8 @@ const LevelMap = ({ drills, sportSlug, completedDrillIds, sportColor }: LevelMap
         {drills.map((drill, index) => {
           const isCompleted = completedDrillIds.has(drill.id);
           const unlocked = isUnlocked(index);
-          const isLocked = !unlocked;
+          const accessible = isAccessible(index);
+          const isLocked = !accessible;
           const isBoss = drill.isBoss;
           
           // Alternate left/right positioning for Mario-style path
@@ -68,21 +116,21 @@ const LevelMap = ({ drills, sportSlug, completedDrillIds, sportColor }: LevelMap
 
                 {/* Level node */}
                 <Link
-                  to={isLocked ? "#" : `/drill/${sportSlug}/${drill.id}`}
-                  onClick={(e) => isLocked && e.preventDefault()}
+                  to={accessible ? `/drill/${sportSlug}/${drill.id}` : "#"}
+                  onClick={(e) => handleDrillClick(e, index, drill.id)}
                   className={`
                     relative flex items-center justify-center shrink-0 transition-all duration-300
                     ${isBoss ? "w-20 h-20" : "w-16 h-16"}
                     ${isCompleted 
                       ? "scale-100" 
-                      : unlocked 
+                      : accessible 
                         ? "scale-110 animate-pulse" 
                         : "scale-90 opacity-60"
                     }
                   `}
                 >
-                  {/* Glow effect for unlocked */}
-                  {unlocked && !isCompleted && (
+                  {/* Glow effect for accessible drills */}
+                  {accessible && !isCompleted && (
                     <div 
                       className="absolute inset-0 rounded-full blur-lg opacity-50"
                       style={{ backgroundColor: sportColor }}
@@ -104,8 +152,8 @@ const LevelMap = ({ drills, sportSlug, completedDrillIds, sportColor }: LevelMap
                       }
                     `}
                     style={{
-                      borderColor: isCompleted ? undefined : unlocked && !isBoss ? sportColor : undefined,
-                      boxShadow: unlocked && !isCompleted ? `0 0 20px ${sportColor}40` : undefined
+                      borderColor: isCompleted ? undefined : accessible && !isBoss ? sportColor : undefined,
+                      boxShadow: accessible && !isCompleted ? `0 0 20px ${sportColor}40` : undefined
                     }}
                   >
                     {isCompleted ? (
@@ -130,8 +178,8 @@ const LevelMap = ({ drills, sportSlug, completedDrillIds, sportColor }: LevelMap
                 {/* Drill info card */}
                 <div className={`flex-1 ${isLeft ? "text-left" : "text-right"}`}>
                   <Link
-                    to={isLocked ? "#" : `/drill/${sportSlug}/${drill.id}`}
-                    onClick={(e) => isLocked && e.preventDefault()}
+                    to={accessible ? `/drill/${sportSlug}/${drill.id}` : "#"}
+                    onClick={(e) => handleDrillClick(e, index, drill.id)}
                     className={`
                       inline-block p-3 rounded-xl border-2 transition-all
                       ${isLocked 
