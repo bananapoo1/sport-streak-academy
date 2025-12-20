@@ -37,155 +37,250 @@ const createDefaultInstructions = (title: string): string[] => [
   "Cool down and stretch after completing",
 ];
 
-// Football drills - 15 drills with boss levels and categories
-const footballDrills: DrillInfo[] = [
-  // Dribbling category
-  { id: "fb-1", title: "Dribbling Cone Slalom", duration: 10, xp: 50, isPremium: false, difficulty: "beginner", players: "Solo", category: "Dribbling", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: ["Set up 5-8 cones in a straight line, spaced about 1 meter apart", "Start at one end with the ball at your feet", "Dribble through the cones using the inside and outside of your feet", "Keep the ball close and your head up", "Focus on quick, controlled touches", "Turn around at the end and dribble back", "Repeat for 10 minutes, improving speed while maintaining control"] },
-  { id: "fb-8", title: "Advanced Dribbling", duration: 18, xp: 85, isPremium: false, difficulty: "intermediate", players: "Solo", category: "Dribbling", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Advanced Dribbling") },
-  { id: "fb-13", title: "Speed Dribbling", duration: 15, xp: 90, isPremium: true, difficulty: "advanced", players: "Solo", category: "Dribbling", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Speed Dribbling") },
+// Helper to generate drills for a category
+const generateDrillsForCategory = (
+  sport: string,
+  category: string,
+  baseId: string,
+  count: number,
+  variations: string[]
+): DrillInfo[] => {
+  const drills: DrillInfo[] = [];
+  const difficulties: Array<"beginner" | "intermediate" | "advanced"> = ["beginner", "intermediate", "advanced"];
   
-  // Control category
-  { id: "fb-4", title: "Ball Control Basics", duration: 10, xp: 55, isPremium: false, difficulty: "beginner", players: "Solo", category: "Control", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Ball Control Basics") },
-  { id: "fb-7", title: "First Touch Drills", duration: 15, xp: 80, isPremium: false, difficulty: "intermediate", players: "Solo", category: "Control", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("First Touch Drills") },
-  { id: "fb-9", title: "Turn & Shield", duration: 12, xp: 70, isPremium: false, difficulty: "intermediate", players: "Solo", category: "Control", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Turn & Shield") },
+  for (let i = 0; i < count; i++) {
+    const difficultyIndex = Math.floor(i / (count / 3));
+    const difficulty = difficulties[Math.min(difficultyIndex, 2)];
+    const variationIndex = i % variations.length;
+    const isBoss = (i + 1) % 10 === 0;
+    const isPremium = difficulty === "advanced" || i > count * 0.6;
+    
+    const baseXp = difficulty === "beginner" ? 50 : difficulty === "intermediate" ? 75 : 100;
+    const xp = isBoss ? 150 + (Math.floor(i / 10) * 50) : baseXp + (i * 2);
+    const duration = isBoss ? 25 : 8 + Math.floor(i / 10) * 2;
+    
+    drills.push({
+      id: `${baseId}-${i + 1}`,
+      title: isBoss 
+        ? `🏆 ${category} Master Level ${Math.floor((i + 1) / 10)}`
+        : `${variations[variationIndex]} ${category} ${difficulty === "beginner" ? "Basics" : difficulty === "intermediate" ? "Training" : "Mastery"} ${Math.floor(i / variations.length) + 1}`,
+      duration,
+      xp,
+      isPremium,
+      difficulty,
+      players: "Solo",
+      isBoss,
+      category,
+      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+      instructions: createDefaultInstructions(`${category} ${variations[variationIndex]}`),
+    });
+  }
   
-  // Passing category
-  { id: "fb-2", title: "Wall Pass Basics", duration: 8, xp: 45, isPremium: false, difficulty: "beginner", players: "Solo", category: "Passing", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Wall Pass Basics") },
-  { id: "fb-5", title: "Passing Precision", duration: 10, xp: 55, isPremium: false, difficulty: "beginner", players: "Solo", category: "Passing", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Passing Precision") },
-  { id: "fb-6", title: "Wall Pass Accuracy", duration: 15, xp: 75, isPremium: false, difficulty: "intermediate", players: "Solo", category: "Passing", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: ["Find a solid wall without windows or obstacles", "Mark a target area on the wall", "Stand 3-5 meters from the wall", "Pass the ball with your right foot to the target", "Control the return and pass with your left foot", "Increase distance as accuracy improves", "Track your hit percentage"] },
-  { id: "fb-12", title: "Passing Combinations", duration: 25, xp: 120, isPremium: true, difficulty: "advanced", players: "2 Players", category: "Passing", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Passing Combinations") },
-  
-  // Shooting category
-  { id: "fb-11", title: "Shooting Practice", duration: 20, xp: 100, isPremium: true, difficulty: "advanced", players: "Solo", category: "Shooting", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Shooting Practice") },
-  { id: "fb-14", title: "Volleys & Half-Volleys", duration: 18, xp: 95, isPremium: true, difficulty: "advanced", players: "Solo", category: "Shooting", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Volleys & Half-Volleys") },
-  
-  // Tricks category
-  { id: "fb-3", title: "Juggling Introduction", duration: 12, xp: 60, isPremium: false, difficulty: "beginner", players: "Solo", category: "Tricks", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: ["Start with the ball in your hands", "Drop the ball and kick it back up to your hands", "Practice with both feet alternately", "Once comfortable, try two touches before catching", "Progress to continuous juggling without catching", "Set a goal: start with 10, work up to 50+ touches"] },
-  
-  // Boss levels
-  { id: "fb-10", title: "⚽ Skill Showdown", duration: 25, xp: 150, isPremium: false, difficulty: "intermediate", players: "Solo", isBoss: true, category: "Boss Challenge", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: ["This is a BOSS level - combine all skills learned!", "Complete 20 cone dribbles with direction changes", "Execute 30 successful wall passes", "Maintain 50 ball juggles", "Perform 5 different turns with the ball", "Complete the full circuit in under 15 minutes"] },
-  { id: "fb-15", title: "🏆 Championship Challenge", duration: 30, xp: 200, isPremium: true, difficulty: "advanced", players: "Solo", isBoss: true, category: "Boss Challenge", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: ["FINAL BOSS - Master all football skills!", "Score 10 goals from different positions", "Complete 100 successful passes", "Dribble through a complex obstacle course", "Demonstrate 10 different skill moves", "Complete within 30 minutes for max XP"] },
+  return drills;
+};
+
+// Football - 100 drills per category (500+ total)
+const footballDribblingDrills = generateDrillsForCategory(
+  "Football", "Dribbling", "fb-drib",
+  100,
+  ["Cone Slalom", "Figure 8", "Speed", "Inside-Outside", "La Croqueta", "Drag Back", "Stepover", "Scissors", "Elastico", "Roulette", "Maradona Turn", "Cruyff Turn"]
+);
+
+const footballControlDrills = generateDrillsForCategory(
+  "Football", "Control", "fb-ctrl",
+  100,
+  ["First Touch", "Ball Mastery", "Juggling", "Chest Control", "Thigh Control", "Sole Roll", "Inside Touch", "Outside Touch", "Aerial Control", "Bounce Control", "Spin Control", "Cushion Touch"]
+);
+
+const footballPassingDrills = generateDrillsForCategory(
+  "Football", "Passing", "fb-pass",
+  100,
+  ["Wall Pass", "Long Pass", "Through Ball", "Chip Pass", "One-Touch", "Driven Pass", "Cross Field", "Triangle Passing", "Give and Go", "Switch Play", "Back Pass", "Lobbed Pass"]
+);
+
+const footballShootingDrills = generateDrillsForCategory(
+  "Football", "Shooting", "fb-shot",
+  100,
+  ["Power Shot", "Finesse Shot", "Volley", "Half-Volley", "Chip Shot", "Driven Shot", "Curling Shot", "Placed Shot", "One-Touch Finish", "Header", "Outside Foot", "Acrobatic Finish"]
+);
+
+const footballTricksDrills = generateDrillsForCategory(
+  "Football", "Tricks", "fb-trick",
+  50,
+  ["Rainbow Flick", "Heel Flick", "Sombrero", "Rabona", "Around the World", "Scorpion Kick", "Bicycle Kick", "Hocus Pocus"]
+);
+
+const allFootballDrills = [
+  ...footballDribblingDrills,
+  ...footballControlDrills,
+  ...footballPassingDrills,
+  ...footballShootingDrills,
+  ...footballTricksDrills,
 ];
 
-// Football categories
 const footballCategories: DrillCategory[] = [
-  { name: "Dribbling", description: "Master ball control while moving", drills: footballDrills.filter(d => d.category === "Dribbling") },
-  { name: "Control", description: "Perfect your first touch and ball mastery", drills: footballDrills.filter(d => d.category === "Control") },
-  { name: "Passing", description: "Improve accuracy and passing technique", drills: footballDrills.filter(d => d.category === "Passing") },
-  { name: "Shooting", description: "Score goals with power and precision", drills: footballDrills.filter(d => d.category === "Shooting") },
-  { name: "Tricks", description: "Learn flashy skills and juggling", drills: footballDrills.filter(d => d.category === "Tricks") },
+  { name: "Dribbling", description: "Master ball control while moving at speed", drills: footballDribblingDrills },
+  { name: "Control", description: "Perfect your first touch and ball mastery", drills: footballControlDrills },
+  { name: "Passing", description: "Improve accuracy and passing technique", drills: footballPassingDrills },
+  { name: "Shooting", description: "Score goals with power and precision", drills: footballShootingDrills },
+  { name: "Tricks", description: "Learn flashy skills and showboat moves", drills: footballTricksDrills },
 ];
 
-// Basketball drills with categories
-const basketballDrills: DrillInfo[] = [
-  // Ball Handling
-  { id: "bb-1", title: "Dribbling Basics", duration: 10, xp: 50, isPremium: false, difficulty: "beginner", players: "Solo", category: "Ball Handling", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Dribbling Basics") },
-  { id: "bb-6", title: "Crossover Moves", duration: 15, xp: 75, isPremium: false, difficulty: "intermediate", players: "Solo", category: "Ball Handling", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Crossover Moves") },
-  { id: "bb-11", title: "Advanced Ball Handling", duration: 20, xp: 100, isPremium: true, difficulty: "advanced", players: "Solo", category: "Ball Handling", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: ["Start with basic stationary dribbles", "Practice crossovers: right to left, left to right", "Add between-the-legs dribbles", "Include behind-the-back moves", "Combine moves into combos", "Practice at game speed", "Do each combo for 2 minutes"] },
-  
-  // Shooting
-  { id: "bb-2", title: "Free Throw Introduction", duration: 12, xp: 55, isPremium: false, difficulty: "beginner", players: "Solo", category: "Shooting", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: ["Stand at the free-throw line with proper stance", "Bend knees slightly, feet shoulder-width apart", "Hold the ball with shooting hand under, guide hand on side", "Focus on the front of the rim", "Extend your arm and snap your wrist on release", "Follow through pointing at the basket", "Shoot 50 free throws and track percentage"] },
-  { id: "bb-5", title: "Layup Practice", duration: 15, xp: 70, isPremium: false, difficulty: "beginner", players: "Solo", category: "Shooting", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Layup Practice") },
-  { id: "bb-12", title: "Three-Point Shooting", duration: 18, xp: 95, isPremium: true, difficulty: "advanced", players: "Solo", category: "Shooting", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Three-Point Shooting") },
-  { id: "bb-13", title: "Fadeaway Jumper", duration: 15, xp: 90, isPremium: true, difficulty: "advanced", players: "Solo", category: "Shooting", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Fadeaway Jumper") },
-  
-  // Passing
-  { id: "bb-3", title: "Passing Fundamentals", duration: 10, xp: 50, isPremium: false, difficulty: "beginner", players: "2 Players", category: "Passing", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Passing Fundamentals") },
-  
-  // Defense
-  { id: "bb-4", title: "Defensive Stance", duration: 8, xp: 45, isPremium: false, difficulty: "beginner", players: "Solo", category: "Defense", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Defensive Stance") },
-  
-  // Team Play
-  { id: "bb-7", title: "Pick & Roll Basics", duration: 18, xp: 80, isPremium: false, difficulty: "intermediate", players: "2 Players", category: "Team Play", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Pick & Roll Basics") },
-  { id: "bb-8", title: "Post Moves", duration: 20, xp: 85, isPremium: false, difficulty: "intermediate", players: "Solo", category: "Team Play", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Post Moves") },
-  { id: "bb-9", title: "Shooting off Screens", duration: 15, xp: 75, isPremium: false, difficulty: "intermediate", players: "2 Players", category: "Team Play", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Shooting off Screens") },
-  { id: "bb-14", title: "Fast Break Drills", duration: 20, xp: 100, isPremium: true, difficulty: "advanced", players: "3+ Players", category: "Team Play", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Fast Break Drills") },
-  
-  // Boss levels
-  { id: "bb-10", title: "🏀 Court Commander", duration: 25, xp: 150, isPremium: false, difficulty: "intermediate", players: "Solo", isBoss: true, category: "Boss Challenge", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: ["BOSS LEVEL - Show your court mastery!", "Make 20 layups in a row", "Hit 15 free throws", "Complete 50 crossover dribbles", "Execute 10 successful pick & roll plays", "Finish within time limit for bonus XP"] },
-  { id: "bb-15", title: "🏆 All-Star Challenge", duration: 30, xp: 200, isPremium: true, difficulty: "advanced", players: "Solo", isBoss: true, category: "Boss Challenge", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: ["FINAL BOSS - Become an All-Star!", "Score from all positions on the court", "Complete full-court dribbling course", "Make 25 three-pointers", "Execute 15 different moves", "Finish the ultimate basketball challenge"] },
+// Basketball - 100 drills per category
+const basketballBallHandlingDrills = generateDrillsForCategory(
+  "Basketball", "Ball Handling", "bb-handle",
+  100,
+  ["Stationary Dribble", "Crossover", "Between Legs", "Behind Back", "Spider", "Pound Dribble", "Hesitation", "In-and-Out", "Killer Crossover", "Shamgod", "Double Cross", "Combo Moves"]
+);
+
+const basketballShootingDrills = generateDrillsForCategory(
+  "Basketball", "Shooting", "bb-shoot",
+  100,
+  ["Free Throw", "Mid-Range", "Three-Point", "Floater", "Fadeaway", "Step-Back", "Pull-Up", "Catch & Shoot", "Off-Screen", "Corner Three", "Bank Shot", "Post Fadeaway"]
+);
+
+const basketballPassingDrills = generateDrillsForCategory(
+  "Basketball", "Passing", "bb-pass",
+  50,
+  ["Chest Pass", "Bounce Pass", "Overhead Pass", "No-Look", "Behind Back Pass", "Skip Pass", "Entry Pass", "Baseball Pass"]
+);
+
+const basketballDefenseDrills = generateDrillsForCategory(
+  "Basketball", "Defense", "bb-def",
+  50,
+  ["Defensive Stance", "Closeout", "Box Out", "Help Defense", "On-Ball Defense", "Rotation", "Steal Technique", "Shot Block"]
+);
+
+const basketballTeamPlayDrills = generateDrillsForCategory(
+  "Basketball", "Team Play", "bb-team",
+  100,
+  ["Pick and Roll", "Pick and Pop", "Give and Go", "Fast Break", "Post Play", "Screen Setting", "Cutting", "Spacing", "Motion Offense", "Transition", "Out of Bounds", "Press Break"]
+);
+
+const allBasketballDrills = [
+  ...basketballBallHandlingDrills,
+  ...basketballShootingDrills,
+  ...basketballPassingDrills,
+  ...basketballDefenseDrills,
+  ...basketballTeamPlayDrills,
 ];
 
 const basketballCategories: DrillCategory[] = [
-  { name: "Ball Handling", description: "Improve dribbling and ball control", drills: basketballDrills.filter(d => d.category === "Ball Handling") },
-  { name: "Shooting", description: "Perfect your shooting technique", drills: basketballDrills.filter(d => d.category === "Shooting") },
-  { name: "Passing", description: "Master different pass types", drills: basketballDrills.filter(d => d.category === "Passing") },
-  { name: "Defense", description: "Become a lockdown defender", drills: basketballDrills.filter(d => d.category === "Defense") },
-  { name: "Team Play", description: "Learn plays and teamwork", drills: basketballDrills.filter(d => d.category === "Team Play") },
+  { name: "Ball Handling", description: "Master dribbling and ball control", drills: basketballBallHandlingDrills },
+  { name: "Shooting", description: "Perfect your shooting technique", drills: basketballShootingDrills },
+  { name: "Passing", description: "Master different pass types", drills: basketballPassingDrills },
+  { name: "Defense", description: "Become a lockdown defender", drills: basketballDefenseDrills },
+  { name: "Team Play", description: "Learn plays and teamwork", drills: basketballTeamPlayDrills },
 ];
 
-// Tennis drills with categories
-const tennisDrills: DrillInfo[] = [
-  // Groundstrokes
-  { id: "tn-2", title: "Forehand Introduction", duration: 10, xp: 50, isPremium: false, difficulty: "beginner", players: "Solo", category: "Groundstrokes", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Forehand Introduction") },
-  { id: "tn-3", title: "Backhand Basics", duration: 10, xp: 50, isPremium: false, difficulty: "beginner", players: "Solo", category: "Groundstrokes", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Backhand Basics") },
-  { id: "tn-6", title: "Backhand Practice", duration: 15, xp: 70, isPremium: false, difficulty: "intermediate", players: "2 Players", category: "Groundstrokes", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Backhand Practice") },
-  
-  // Serve
-  { id: "tn-1", title: "Serve Basics", duration: 12, xp: 55, isPremium: false, difficulty: "beginner", players: "Solo", category: "Serve", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Serve Basics") },
-  { id: "tn-7", title: "Serve & Return", duration: 15, xp: 80, isPremium: false, difficulty: "intermediate", players: "2 Players", category: "Serve", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: ["One player serves from the baseline", "Partner stands in ready position to return", "Server varies placement: wide, body, T", "Returner focuses on getting racket back early", "Switch roles every 10 serves", "Track successful returns vs errors"] },
-  { id: "tn-12", title: "Power Serve", duration: 20, xp: 95, isPremium: true, difficulty: "advanced", players: "Solo", category: "Serve", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Power Serve") },
-  
-  // Net Play
-  { id: "tn-8", title: "Approach Shots", duration: 15, xp: 75, isPremium: false, difficulty: "intermediate", players: "Solo", category: "Net Play", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Approach Shots") },
-  { id: "tn-11", title: "Volley Drills", duration: 18, xp: 90, isPremium: true, difficulty: "advanced", players: "2 Players", category: "Net Play", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Volley Drills") },
-  { id: "tn-14", title: "Overhead Smash", duration: 15, xp: 90, isPremium: true, difficulty: "advanced", players: "2 Players", category: "Net Play", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Overhead Smash") },
-  
-  // Footwork
-  { id: "tn-4", title: "Court Movement", duration: 12, xp: 55, isPremium: false, difficulty: "beginner", players: "Solo", category: "Footwork", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Court Movement") },
-  { id: "tn-5", title: "Ready Position", duration: 8, xp: 45, isPremium: false, difficulty: "beginner", players: "Solo", category: "Footwork", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Ready Position") },
-  
-  // Touch Shots
-  { id: "tn-9", title: "Slice Shots", duration: 12, xp: 70, isPremium: false, difficulty: "intermediate", players: "Solo", category: "Touch Shots", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Slice Shots") },
-  { id: "tn-13", title: "Drop Shot Mastery", duration: 15, xp: 85, isPremium: true, difficulty: "advanced", players: "2 Players", category: "Touch Shots", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Drop Shot Mastery") },
-  
-  // Boss levels
-  { id: "tn-10", title: "🎾 Rally Royale", duration: 25, xp: 150, isPremium: false, difficulty: "intermediate", players: "2 Players", isBoss: true, category: "Boss Challenge", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: ["BOSS LEVEL - Dominate the rally!", "Complete 50 consecutive forehand rallies", "Complete 50 consecutive backhand rallies", "Win 10 serve games", "Execute 20 approach shot winners", "Prove your intermediate mastery"] },
-  { id: "tn-15", title: "🏆 Grand Slam Glory", duration: 30, xp: 200, isPremium: true, difficulty: "advanced", players: "2 Players", isBoss: true, category: "Boss Challenge", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: ["FINAL BOSS - Win the Grand Slam!", "Ace 10 serves in a row", "Win 3 tiebreak sets", "Execute every shot type successfully", "Complete the ultimate tennis challenge", "Claim your championship"] },
+// Tennis - 100 drills per category
+const tennisGroundstrokesDrills = generateDrillsForCategory(
+  "Tennis", "Groundstrokes", "tn-ground",
+  100,
+  ["Forehand Cross", "Forehand Line", "Backhand Cross", "Backhand Line", "Inside-Out", "Inside-In", "Heavy Topspin", "Flat Drive", "Loop Ball", "Counter Punch", "Approach Shot", "Passing Shot"]
+);
+
+const tennisServeDrills = generateDrillsForCategory(
+  "Tennis", "Serve", "tn-serve",
+  100,
+  ["Flat Serve", "Slice Serve", "Kick Serve", "Body Serve", "Wide Serve", "T Serve", "Power Serve", "Placement Serve", "Second Serve", "Serve and Volley", "Ace Training", "Toss Drill"]
+);
+
+const tennisNetPlayDrills = generateDrillsForCategory(
+  "Tennis", "Net Play", "tn-net",
+  50,
+  ["Forehand Volley", "Backhand Volley", "Drop Volley", "Swinging Volley", "Overhead Smash", "Half Volley", "Approach Volley", "Poach"]
+);
+
+const tennisFootworkDrills = generateDrillsForCategory(
+  "Tennis", "Footwork", "tn-foot",
+  50,
+  ["Split Step", "Side Shuffle", "Cross Step", "Recovery Steps", "Approach Run", "Drop Shot Recovery", "Baseline Movement", "Net Rush"]
+);
+
+const tennisTouchShotsDrills = generateDrillsForCategory(
+  "Tennis", "Touch Shots", "tn-touch",
+  50,
+  ["Drop Shot", "Lob", "Slice", "Angle Shot", "Moonball", "Defensive Slice", "Offensive Lob", "Touch Volley"]
+);
+
+const allTennisDrills = [
+  ...tennisGroundstrokesDrills,
+  ...tennisServeDrills,
+  ...tennisNetPlayDrills,
+  ...tennisFootworkDrills,
+  ...tennisTouchShotsDrills,
 ];
 
 const tennisCategories: DrillCategory[] = [
-  { name: "Groundstrokes", description: "Master forehand and backhand", drills: tennisDrills.filter(d => d.category === "Groundstrokes") },
-  { name: "Serve", description: "Develop a powerful serve", drills: tennisDrills.filter(d => d.category === "Serve") },
-  { name: "Net Play", description: "Dominate at the net", drills: tennisDrills.filter(d => d.category === "Net Play") },
-  { name: "Footwork", description: "Move efficiently on court", drills: tennisDrills.filter(d => d.category === "Footwork") },
-  { name: "Touch Shots", description: "Learn finesse shots", drills: tennisDrills.filter(d => d.category === "Touch Shots") },
+  { name: "Groundstrokes", description: "Master forehand and backhand", drills: tennisGroundstrokesDrills },
+  { name: "Serve", description: "Develop a powerful serve", drills: tennisServeDrills },
+  { name: "Net Play", description: "Dominate at the net", drills: tennisNetPlayDrills },
+  { name: "Footwork", description: "Move efficiently on court", drills: tennisFootworkDrills },
+  { name: "Touch Shots", description: "Learn finesse shots", drills: tennisTouchShotsDrills },
+];
+
+// American Football drills
+const americanFootballThrowingDrills = generateDrillsForCategory(
+  "American Football", "Throwing", "af-throw",
+  100,
+  ["Short Pass", "Medium Pass", "Deep Ball", "Spiral", "Touch Pass", "Bullet Pass", "Back Shoulder", "Post Route", "Slant Route", "Out Route", "Fade Route", "Screen Pass"]
+);
+
+const americanFootballReceivingDrills = generateDrillsForCategory(
+  "American Football", "Receiving", "af-recv",
+  100,
+  ["Route Running", "Catching", "One-Hand Catch", "Sideline Catch", "Jump Ball", "RAC Drill", "Release Move", "Break Route", "Double Move", "Option Route", "Comeback", "Curl Route"]
+);
+
+const americanFootballRushingDrills = generateDrillsForCategory(
+  "American Football", "Rushing", "af-rush",
+  50,
+  ["Power Run", "Zone Run", "Cut Back", "Vision Drill", "Ball Security", "Stiff Arm", "Spin Move", "Hurdle"]
+);
+
+const americanFootballBlockingDrills = generateDrillsForCategory(
+  "American Football", "Blocking", "af-block",
+  50,
+  ["Pass Block", "Run Block", "Pull Block", "Combo Block", "Reach Block", "Down Block", "Kick Slide", "Punch Drill"]
+);
+
+const allAmericanFootballDrills = [
+  ...americanFootballThrowingDrills,
+  ...americanFootballReceivingDrills,
+  ...americanFootballRushingDrills,
+  ...americanFootballBlockingDrills,
+];
+
+const americanFootballCategories: DrillCategory[] = [
+  { name: "Throwing", description: "Master QB throwing mechanics", drills: americanFootballThrowingDrills },
+  { name: "Receiving", description: "Perfect route running and catching", drills: americanFootballReceivingDrills },
+  { name: "Rushing", description: "Improve running back skills", drills: americanFootballRushingDrills },
+  { name: "Blocking", description: "Dominate the line of scrimmage", drills: americanFootballBlockingDrills },
 ];
 
 // Default drills for other sports
-const createDefaultDrills = (sportName: string): DrillInfo[] => [
-  { id: "def-1", title: "Basic Fundamentals", duration: 10, xp: 50, isPremium: false, difficulty: "beginner", players: "Solo", category: "Basics", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions(`${sportName} Basic Fundamentals`) },
-  { id: "def-2", title: "Coordination Training", duration: 12, xp: 55, isPremium: false, difficulty: "beginner", players: "Solo", category: "Basics", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Coordination Training") },
-  { id: "def-3", title: "Movement Basics", duration: 10, xp: 50, isPremium: false, difficulty: "beginner", players: "Solo", category: "Basics", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Movement Basics") },
-  { id: "def-4", title: "Stamina Building", duration: 15, xp: 60, isPremium: false, difficulty: "beginner", players: "Solo", category: "Fitness", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Stamina Building") },
-  { id: "def-5", title: "Core Techniques", duration: 12, xp: 55, isPremium: false, difficulty: "beginner", players: "Solo", category: "Technique", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Core Techniques") },
-  { id: "def-6", title: "Skill Development", duration: 15, xp: 75, isPremium: false, difficulty: "intermediate", players: "Solo", category: "Technique", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Skill Development") },
-  { id: "def-7", title: "Advanced Movement", duration: 18, xp: 80, isPremium: false, difficulty: "intermediate", players: "Solo", category: "Fitness", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Advanced Movement") },
-  { id: "def-8", title: "Speed Training", duration: 15, xp: 75, isPremium: false, difficulty: "intermediate", players: "Solo", category: "Fitness", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Speed Training") },
-  { id: "def-9", title: "Technique Refinement", duration: 20, xp: 85, isPremium: false, difficulty: "intermediate", players: "Solo", category: "Technique", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Technique Refinement") },
-  { id: "def-10", title: "⭐ Skill Checkpoint", duration: 25, xp: 150, isPremium: false, difficulty: "intermediate", players: "Solo", isBoss: true, category: "Boss Challenge", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: ["BOSS LEVEL - Prove your skills!", "Demonstrate all beginner techniques", "Complete the intermediate challenges", "Show consistency in your movements", "Finish within the time limit"] },
-  { id: "def-11", title: "Advanced Techniques", duration: 20, xp: 100, isPremium: true, difficulty: "advanced", players: "Solo", category: "Advanced", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Advanced Techniques") },
-  { id: "def-12", title: "Competition Prep", duration: 25, xp: 110, isPremium: true, difficulty: "advanced", players: "Solo", category: "Advanced", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Competition Prep") },
-  { id: "def-13", title: "Elite Performance", duration: 20, xp: 100, isPremium: true, difficulty: "advanced", players: "Solo", category: "Advanced", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Elite Performance") },
-  { id: "def-14", title: "Peak Training", duration: 25, xp: 115, isPremium: true, difficulty: "advanced", players: "Solo", category: "Advanced", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: createDefaultInstructions("Peak Training") },
-  { id: "def-15", title: "🏆 Master Challenge", duration: 30, xp: 200, isPremium: true, difficulty: "advanced", players: "Solo", isBoss: true, category: "Boss Challenge", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", instructions: ["FINAL BOSS - Become a Master!", "Complete all previous challenges", "Demonstrate elite-level techniques", "Push your limits to the max", "Claim your mastery title"] },
-];
+const createDefaultDrills = (sportName: string): DrillInfo[] => {
+  return generateDrillsForCategory(sportName, "Basics", "def", 50, [
+    "Fundamental", "Core", "Essential", "Primary", "Foundation", "Standard", "Basic", "Introduction"
+  ]);
+};
 
 const createDefaultCategories = (sportName: string): DrillCategory[] => {
-  const drills = createDefaultDrills(sportName);
   return [
-    { name: "Basics", description: "Learn the fundamentals", drills: drills.filter(d => d.category === "Basics") },
-    { name: "Technique", description: "Develop core skills", drills: drills.filter(d => d.category === "Technique") },
-    { name: "Fitness", description: "Build strength and speed", drills: drills.filter(d => d.category === "Fitness") },
-    { name: "Advanced", description: "Master advanced skills", drills: drills.filter(d => d.category === "Advanced") },
+    { name: "Basics", description: "Learn the fundamentals", drills: generateDrillsForCategory(sportName, "Basics", "def-basic", 50, ["Fundamental", "Core", "Essential", "Primary"]) },
+    { name: "Technique", description: "Develop core skills", drills: generateDrillsForCategory(sportName, "Technique", "def-tech", 50, ["Form", "Movement", "Precision", "Accuracy"]) },
+    { name: "Fitness", description: "Build strength and speed", drills: generateDrillsForCategory(sportName, "Fitness", "def-fit", 50, ["Strength", "Speed", "Agility", "Endurance"]) },
+    { name: "Advanced", description: "Master advanced skills", drills: generateDrillsForCategory(sportName, "Advanced", "def-adv", 50, ["Elite", "Pro", "Championship", "Expert"]) },
   ];
 };
 
 // Sport data registry
 export const sportsData: Record<string, SportDrills> = {
-  football: { name: "Football", color: "#22c55e", drills: footballDrills, categories: footballCategories },
-  basketball: { name: "Basketball", color: "#f97316", drills: basketballDrills, categories: basketballCategories },
-  tennis: { name: "Tennis", color: "#eab308", drills: tennisDrills, categories: tennisCategories },
+  football: { name: "Football", color: "#22c55e", drills: allFootballDrills, categories: footballCategories },
+  basketball: { name: "Basketball", color: "#f97316", drills: allBasketballDrills, categories: basketballCategories },
+  tennis: { name: "Tennis", color: "#eab308", drills: allTennisDrills, categories: tennisCategories },
+  "american-football": { name: "American Football", color: "#8b4513", drills: allAmericanFootballDrills, categories: americanFootballCategories },
 };
 
 // Get sport data with fallback for unknown sports
@@ -200,11 +295,14 @@ export const getSportData = (sportSlug: string): SportDrills => {
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
   
+  const categories = createDefaultCategories(sportName);
+  const allDrills = categories.flatMap(c => c.drills);
+  
   return {
     name: sportName,
     color: "#6366f1",
-    drills: createDefaultDrills(sportName),
-    categories: createDefaultCategories(sportName),
+    drills: allDrills,
+    categories,
   };
 };
 
