@@ -1,5 +1,6 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Play, Lock, Star, Crown, Flame } from "lucide-react";
+import { toast } from "sonner";
 
 const popularDrills = [
   { id: "fb-1", sportSlug: "football", title: "Dribbling Cone Slalom", sport: "Football", duration: 10, xp: 50, level: 1, unlocked: true, color: "#22c55e" },
@@ -9,6 +10,15 @@ const popularDrills = [
   { id: "tn-7", sportSlug: "tennis", title: "Serve & Return", sport: "Tennis", duration: 15, xp: 80, level: 7, unlocked: true, color: "#eab308" },
   { id: "tn-15", sportSlug: "tennis", title: "Grand Slam Glory", sport: "Tennis", duration: 30, xp: 200, level: 15, unlocked: false, isBoss: true, color: "#eab308" },
 ];
+
+const handleLockedDrillClick = (e: React.MouseEvent, drill: typeof popularDrills[0]) => {
+  if (!drill.unlocked) {
+    e.preventDefault();
+    toast.error(`🔒 "${drill.title}" is locked!`, {
+      description: `Complete earlier drills in ${drill.sport} to unlock this level.`,
+    });
+  }
+};
 
 export const DrillsSection = () => {
   return (
@@ -45,7 +55,8 @@ export const DrillsSection = () => {
                 >
                   {/* Mobile: Stack vertically */}
                   <Link
-                    to={`/sport/${drill.sportSlug}`}
+                    to={drill.unlocked ? `/sport/${drill.sportSlug}` : "#"}
+                    onClick={(e) => handleLockedDrillClick(e, drill)}
                     className="md:hidden block"
                   >
                     <div className={`
@@ -107,7 +118,8 @@ export const DrillsSection = () => {
                     {/* Card */}
                     <div className="flex-1">
                       <Link
-                        to={`/sport/${drill.sportSlug}`}
+                        to={drill.unlocked ? `/sport/${drill.sportSlug}` : "#"}
+                        onClick={(e) => handleLockedDrillClick(e, drill)}
                         className={`
                           block p-4 rounded-2xl border-2 transition-all duration-300 ${isLeft ? "mr-8" : "ml-8"}
                           ${drill.isBoss 
