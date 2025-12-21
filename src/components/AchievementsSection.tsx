@@ -1,107 +1,19 @@
 import { Trophy, Target, Flame, Star, Medal, Crown, Zap, Award } from "lucide-react";
+import { useAchievements, ComputedAchievement } from "@/hooks/useAchievements";
+import { useAuth } from "@/contexts/AuthContext";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
-interface Achievement {
-  id: string;
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  progress: number;
-  total: number;
-  unlocked: boolean;
-  rarity: "common" | "rare" | "epic" | "legendary";
-  xpReward: number;
-}
-
-const achievements: Achievement[] = [
-  {
-    id: "first-drill",
-    title: "First Steps",
-    description: "Complete your first drill",
-    icon: <Star className="w-6 h-6" />,
-    progress: 1,
-    total: 1,
-    unlocked: true,
-    rarity: "common",
-    xpReward: 50,
-  },
-  {
-    id: "streak-7",
-    title: "On Fire",
-    description: "Maintain a 7-day streak",
-    icon: <Flame className="w-6 h-6" />,
-    progress: 7,
-    total: 7,
-    unlocked: true,
-    rarity: "common",
-    xpReward: 100,
-  },
-  {
-    id: "drills-10",
-    title: "Getting Started",
-    description: "Complete 10 drills",
-    icon: <Target className="w-6 h-6" />,
-    progress: 10,
-    total: 10,
-    unlocked: true,
-    rarity: "common",
-    xpReward: 150,
-  },
-  {
-    id: "streak-30",
-    title: "Dedicated Athlete",
-    description: "Maintain a 30-day streak",
-    icon: <Flame className="w-6 h-6" />,
-    progress: 14,
-    total: 30,
-    unlocked: false,
-    rarity: "rare",
-    xpReward: 300,
-  },
-  {
-    id: "drills-50",
-    title: "Drill Sergeant",
-    description: "Complete 50 drills",
-    icon: <Medal className="w-6 h-6" />,
-    progress: 23,
-    total: 50,
-    unlocked: false,
-    rarity: "rare",
-    xpReward: 500,
-  },
-  {
-    id: "boss-5",
-    title: "Boss Slayer",
-    description: "Defeat 5 boss levels",
-    icon: <Crown className="w-6 h-6" />,
-    progress: 2,
-    total: 5,
-    unlocked: false,
-    rarity: "epic",
-    xpReward: 750,
-  },
-  {
-    id: "xp-10000",
-    title: "XP Hunter",
-    description: "Earn 10,000 XP",
-    icon: <Zap className="w-6 h-6" />,
-    progress: 4200,
-    total: 10000,
-    unlocked: false,
-    rarity: "epic",
-    xpReward: 1000,
-  },
-  {
-    id: "legend",
-    title: "Living Legend",
-    description: "Reach Diamond League",
-    icon: <Trophy className="w-6 h-6" />,
-    progress: 0,
-    total: 1,
-    unlocked: false,
-    rarity: "legendary",
-    xpReward: 2000,
-  },
-];
+const iconMap = {
+  star: Star,
+  flame: Flame,
+  target: Target,
+  medal: Medal,
+  crown: Crown,
+  zap: Zap,
+  trophy: Trophy,
+  award: Award,
+};
 
 const rarityColors = {
   common: { bg: "bg-secondary", border: "border-border", text: "text-muted-foreground", glow: "" },
@@ -111,7 +23,51 @@ const rarityColors = {
 };
 
 export const AchievementsSection = () => {
+  const { user } = useAuth();
+  const { achievements, loading } = useAchievements();
+  
   const unlockedCount = achievements.filter(a => a.unlocked).length;
+  
+  if (!user) {
+    return (
+      <section id="achievements" className="py-16 md:py-24 bg-secondary/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-extrabold text-foreground mb-4">
+              Achievements
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Sign in to track your achievements and unlock rewards!
+            </p>
+            <Link to="/auth" className="inline-block mt-6">
+              <Button variant="hero" size="lg">
+                Sign In to Start
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (loading) {
+    return (
+      <section id="achievements" className="py-16 md:py-24 bg-secondary/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-extrabold text-foreground mb-4">
+              Achievements
+            </h2>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="h-40 bg-secondary animate-pulse rounded-2xl" />
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
   
   return (
     <section id="achievements" className="py-16 md:py-24 bg-secondary/30">
@@ -132,7 +88,8 @@ export const AchievementsSection = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
           {achievements.map((achievement) => {
             const colors = rarityColors[achievement.rarity];
-            const progressPercent = Math.min((achievement.progress / achievement.total) * 100, 100);
+            const progressPercent = Math.min((achievement.progress / achievement.requirement) * 100, 100);
+            const IconComponent = iconMap[achievement.iconType];
             
             return (
               <div
@@ -154,7 +111,7 @@ export const AchievementsSection = () => {
                   w-12 h-12 rounded-xl flex items-center justify-center mb-3
                   ${achievement.unlocked ? `${colors.bg} ${colors.text}` : "bg-muted text-muted-foreground"}
                 `}>
-                  {achievement.icon}
+                  <IconComponent className="w-6 h-6" />
                 </div>
                 
                 {/* Content */}
@@ -169,7 +126,7 @@ export const AchievementsSection = () => {
                 <div className="mt-3">
                   <div className="flex justify-between text-xs mb-1">
                     <span className="text-muted-foreground">
-                      {achievement.progress} / {achievement.total}
+                      {achievement.progress} / {achievement.requirement}
                     </span>
                     <span className={`font-bold ${colors.text}`}>
                       +{achievement.xpReward} XP
