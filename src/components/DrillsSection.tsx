@@ -93,7 +93,7 @@ export const DrillsSection = () => {
                 >
                   {/* Mobile: Stack vertically */}
                   <Link
-                    to={drill.unlocked ? `/sport/${drill.sportSlug}/drill/${drill.id}` : "#"}
+                    to={drill.unlocked ? `/drill/${drill.sportSlug}/${drill.id}` : "#"}
                     onClick={(e) => handleLockedDrillClick(e, drill)}
                     className="md:hidden block"
                   >
@@ -156,7 +156,7 @@ export const DrillsSection = () => {
                     {/* Card */}
                     <div className="flex-1">
                       <Link
-                        to={drill.unlocked ? `/sport/${drill.sportSlug}/drill/${drill.id}` : "#"}
+                        to={drill.unlocked ? `/drill/${drill.sportSlug}/${drill.id}` : "#"}
                         onClick={(e) => handleLockedDrillClick(e, drill)}
                         className={`
                           block p-4 rounded-2xl border-2 transition-all duration-300 ${isLeft ? "mr-8" : "ml-8"}

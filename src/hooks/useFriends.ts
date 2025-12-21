@@ -11,11 +11,19 @@ interface Friend {
   status: string;
 }
 
+interface SentRequest {
+  id: string;
+  friendId: string;
+  username: string | null;
+  avatar_id: string;
+}
+
 export const useFriends = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [friends, setFriends] = useState<Friend[]>([]);
   const [pendingRequests, setPendingRequests] = useState<Friend[]>([]);
+  const [sentRequests, setSentRequests] = useState<SentRequest[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchFriends = async () => {
@@ -71,6 +79,41 @@ export const useFriends = () => {
       if (senderProfiles) {
         setPendingRequests(senderProfiles.map(p => ({ ...p, status: "pending" })));
       }
+    } else {
+      setPendingRequests([]);
+    }
+
+    // Fetch sent requests (where user is the sender and still pending)
+    const { data: sent } = await supabase
+      .from("friendships")
+      .select(`
+        id,
+        friend_id,
+        status
+      `)
+      .eq("user_id", user.id)
+      .eq("status", "pending");
+
+    if (sent && sent.length > 0) {
+      const recipientIds = sent.map(s => s.friend_id);
+      const { data: recipientProfiles } = await supabase
+        .from("profiles")
+        .select("id, username, avatar_id")
+        .in("id", recipientIds);
+
+      if (recipientProfiles) {
+        setSentRequests(sent.map(s => {
+          const profile = recipientProfiles.find(p => p.id === s.friend_id);
+          return {
+            id: s.id,
+            friendId: s.friend_id,
+            username: profile?.username || null,
+            avatar_id: profile?.avatar_id || "⚽",
+          };
+        }));
+      }
+    } else {
+      setSentRequests([]);
     }
 
     setLoading(false);
@@ -167,6 +210,7 @@ export const useFriends = () => {
   return {
     friends,
     pendingRequests,
+    sentRequests,
     loading,
     sendFriendRequest,
     acceptFriendRequest,
