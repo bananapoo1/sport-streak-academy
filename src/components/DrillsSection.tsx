@@ -1,15 +1,53 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Play, Lock, Star, Crown, Flame } from "lucide-react";
 import { toast } from "sonner";
+import { getSportData } from "@/data/drillsData";
 
-const popularDrills = [
-  { id: "fb-1", sportSlug: "football", title: "Dribbling Cone Slalom", sport: "Football", duration: 10, xp: 50, level: 1, unlocked: true, color: "#22c55e" },
-  { id: "fb-6", sportSlug: "football", title: "Wall Pass Accuracy", sport: "Football", duration: 15, xp: 75, level: 6, unlocked: true, color: "#22c55e" },
-  { id: "bb-1", sportSlug: "basketball", title: "Dribbling Basics", sport: "Basketball", duration: 10, xp: 50, level: 1, unlocked: true, color: "#f97316" },
-  { id: "bb-10", sportSlug: "basketball", title: "Court Commander", sport: "Basketball", duration: 25, xp: 150, level: 10, unlocked: false, isBoss: true, color: "#f97316" },
-  { id: "tn-7", sportSlug: "tennis", title: "Serve & Return", sport: "Tennis", duration: 15, xp: 80, level: 7, unlocked: true, color: "#eab308" },
-  { id: "tn-15", sportSlug: "tennis", title: "Grand Slam Glory", sport: "Tennis", duration: 30, xp: 200, level: 15, unlocked: false, isBoss: true, color: "#eab308" },
-];
+// Get actual first few drills from each sport
+const getPopularDrills = () => {
+  const sports = [
+    { slug: "football", color: "#22c55e" },
+    { slug: "basketball", color: "#f97316" },
+    { slug: "tennis", color: "#eab308" },
+  ];
+  
+  const drills: {
+    id: string;
+    sportSlug: string;
+    title: string;
+    sport: string;
+    duration: number;
+    xp: number;
+    level: number;
+    unlocked: boolean;
+    isBoss?: boolean;
+    color: string;
+  }[] = [];
+  
+  sports.forEach(({ slug, color }) => {
+    const sportData = getSportData(slug);
+    const sportDrills = sportData.drills.slice(0, 2); // Get first 2 drills from each sport
+    
+    sportDrills.forEach((drill, index) => {
+      drills.push({
+        id: drill.id,
+        sportSlug: slug,
+        title: drill.title,
+        sport: sportData.name,
+        duration: drill.duration,
+        xp: drill.xp,
+        level: index + 1,
+        unlocked: index === 0, // Only first drill of each sport is unlocked by default
+        isBoss: drill.isBoss,
+        color,
+      });
+    });
+  });
+  
+  return drills;
+};
+
+const popularDrills = getPopularDrills();
 
 const handleLockedDrillClick = (e: React.MouseEvent, drill: typeof popularDrills[0]) => {
   if (!drill.unlocked) {
@@ -55,7 +93,7 @@ export const DrillsSection = () => {
                 >
                   {/* Mobile: Stack vertically */}
                   <Link
-                    to={drill.unlocked ? `/sport/${drill.sportSlug}` : "#"}
+                    to={drill.unlocked ? `/sport/${drill.sportSlug}/drill/${drill.id}` : "#"}
                     onClick={(e) => handleLockedDrillClick(e, drill)}
                     className="md:hidden block"
                   >
@@ -118,7 +156,7 @@ export const DrillsSection = () => {
                     {/* Card */}
                     <div className="flex-1">
                       <Link
-                        to={drill.unlocked ? `/sport/${drill.sportSlug}` : "#"}
+                        to={drill.unlocked ? `/sport/${drill.sportSlug}/drill/${drill.id}` : "#"}
                         onClick={(e) => handleLockedDrillClick(e, drill)}
                         className={`
                           block p-4 rounded-2xl border-2 transition-all duration-300 ${isLeft ? "mr-8" : "ml-8"}
