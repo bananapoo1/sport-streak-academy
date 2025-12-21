@@ -235,7 +235,7 @@ const Profile = () => {
                   {pendingRequests.map((request) => (
                     <div key={request.id} className="flex items-center justify-between bg-secondary/50 p-3 rounded-xl">
                       <div className="flex items-center gap-3">
-                        <span className="text-2xl">{request.avatar_id || "🎯"}</span>
+                        <span className="text-2xl">{request.avatar_id && request.avatar_id !== "default" ? request.avatar_id : "⚽"}</span>
                         <span className="font-medium">{request.username || "Unknown"}</span>
                       </div>
                       <Button size="sm" onClick={() => acceptFriendRequest(request.id)}>
@@ -274,7 +274,7 @@ const Profile = () => {
                 {friends.map((friend) => (
                   <div key={friend.id} className="flex items-center justify-between bg-secondary/30 p-3 rounded-xl">
                     <div className="flex items-center gap-3">
-                      <span className="text-2xl">{friend.avatar_id || "🎯"}</span>
+                      <span className="text-2xl">{friend.avatar_id && friend.avatar_id !== "default" ? friend.avatar_id : "⚽"}</span>
                       <div>
                         <span className="font-medium block">{friend.username || "Unknown"}</span>
                         <span className="text-xs text-streak flex items-center gap-1">
