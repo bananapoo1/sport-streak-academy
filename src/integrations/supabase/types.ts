@@ -14,6 +14,76 @@ export type Database = {
   }
   public: {
     Tables: {
+      challenges: {
+        Row: {
+          challenged_id: string
+          challenged_score: number | null
+          challenger_id: string
+          challenger_score: number | null
+          completed_at: string | null
+          created_at: string
+          drill_id: string
+          expires_at: string
+          id: string
+          sport: string
+          status: string
+          winner_id: string | null
+          xp_bonus: number
+        }
+        Insert: {
+          challenged_id: string
+          challenged_score?: number | null
+          challenger_id: string
+          challenger_score?: number | null
+          completed_at?: string | null
+          created_at?: string
+          drill_id: string
+          expires_at?: string
+          id?: string
+          sport: string
+          status?: string
+          winner_id?: string | null
+          xp_bonus?: number
+        }
+        Update: {
+          challenged_id?: string
+          challenged_score?: number | null
+          challenger_id?: string
+          challenger_score?: number | null
+          completed_at?: string | null
+          created_at?: string
+          drill_id?: string
+          expires_at?: string
+          id?: string
+          sport?: string
+          status?: string
+          winner_id?: string | null
+          xp_bonus?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenges_challenged_id_fkey"
+            columns: ["challenged_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challenges_challenger_id_fkey"
+            columns: ["challenger_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challenges_winner_id_fkey"
+            columns: ["winner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       completed_drills: {
         Row: {
           completed_at: string | null
@@ -210,6 +280,38 @@ export type Database = {
             foreignKeyName: "reminder_settings_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          id: string
+          progress: number | null
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          id?: string
+          progress?: number | null
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          id?: string
+          progress?: number | null
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },

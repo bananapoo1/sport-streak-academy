@@ -1,14 +1,15 @@
 import { Link } from "react-router-dom";
-import { Trophy, TrendingUp, Users, Flame, Medal, Crown, Target, Swords, ChevronRight } from "lucide-react";
+import { Trophy, TrendingUp, Users, Flame, Medal, Crown, Target, Swords } from "lucide-react";
 import LeagueBadge from "@/components/LeagueBadge";
 import StreakCounter from "@/components/StreakCounter";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProgress } from "@/hooks/useProgress";
 import { useAchievements } from "@/hooks/useAchievements";
+import { useChallenges } from "@/hooks/useChallenges";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getTopSimulatedUsers, SimulatedUser } from "@/data/simulatedUsers";
 
 interface LeaderboardPlayer {
   id: string;
@@ -17,9 +18,9 @@ interface LeaderboardPlayer {
   streak: number;
   avatar: string;
   isUser?: boolean;
+  isSimulated?: boolean;
   rank: number;
   league: "bronze" | "silver" | "gold" | "diamond";
-  drillsCompleted: number;
 }
 
 const leagueThresholds = [
@@ -37,42 +38,60 @@ const getLeague = (xp: number): "bronze" | "silver" | "gold" | "diamond" => {
 export const LeaguesSection = () => {
   const { user } = useAuth();
   const { streak } = useProgress();
-  const { userStats, loading: statsLoading } = useAchievements();
+  const { userStats } = useAchievements();
+  const { pendingChallenges, activeChallenges, acceptChallenge, declineChallenge } = useChallenges();
   const [leaderboard, setLeaderboard] = useState<LeaderboardPlayer[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        // Fetch top players from profiles
+        // Fetch real players from profiles
         const { data: profiles } = await supabase
           .from("profiles")
           .select("id, username, display_name, avatar_id, total_xp, current_streak")
           .order("total_xp", { ascending: false })
-          .limit(10);
+          .limit(50);
 
-        if (profiles) {
-          const avatarEmojis = ["🏀", "⚽", "🎾", "🏈", "🏐", "🎯", "🏓", "⭐", "🔥", "💪"];
+        const realPlayers: LeaderboardPlayer[] = (profiles || []).map((profile) => {
+          const isCurrentUser = user?.id === profile.id;
+          const avatarId = profile.avatar_id;
+          const isEmoji = avatarId && avatarId !== "default" && !avatarId.startsWith("http");
+          const avatar = isEmoji ? avatarId : "⚽";
           
-          const leaderboardData: LeaderboardPlayer[] = profiles.map((profile, index) => {
-            // Get drill count for each user
-            const isCurrentUser = user?.id === profile.id;
-            
-            return {
-              id: profile.id,
-              name: isCurrentUser ? "You" : (profile.display_name || profile.username || `Player ${index + 1}`),
-              xp: profile.total_xp || 0,
-              streak: profile.current_streak || 0,
-              avatar: avatarEmojis[index % avatarEmojis.length],
-              isUser: isCurrentUser,
-              rank: index + 1,
-              league: getLeague(profile.total_xp || 0),
-              drillsCompleted: 0, // Would need additional query
-            };
-          });
-          
-          setLeaderboard(leaderboardData);
-        }
+          return {
+            id: profile.id,
+            name: isCurrentUser ? "You" : (profile.display_name || profile.username || "Player"),
+            xp: profile.total_xp || 0,
+            streak: profile.current_streak || 0,
+            avatar,
+            isUser: isCurrentUser,
+            isSimulated: false,
+            rank: 0,
+            league: getLeague(profile.total_xp || 0),
+          };
+        });
+
+        // Get simulated users to fill leaderboard
+        const simulatedPlayers: LeaderboardPlayer[] = getTopSimulatedUsers(200).map((sim: SimulatedUser) => ({
+          id: sim.id,
+          name: sim.name,
+          xp: sim.xp,
+          streak: sim.streak,
+          avatar: sim.avatar,
+          isUser: false,
+          isSimulated: true,
+          rank: 0,
+          league: sim.league,
+        }));
+
+        // Merge and sort by XP
+        const allPlayers = [...realPlayers, ...simulatedPlayers]
+          .sort((a, b) => b.xp - a.xp)
+          .slice(0, 50)
+          .map((player, index) => ({ ...player, rank: index + 1 }));
+
+        setLeaderboard(allPlayers);
       } catch (error) {
         console.error("Error fetching leaderboard:", error);
       } finally {
@@ -88,12 +107,6 @@ export const LeaguesSection = () => {
   const nextLeague = leagueThresholds[leagueThresholds.indexOf(currentLeague) + 1];
   const progressToNext = nextLeague ? ((userXp - currentLeague.minXp) / (nextLeague.minXp - currentLeague.minXp)) * 100 : 100;
   const userRank = leaderboard.findIndex(p => p.isUser) + 1 || leaderboard.length + 1;
-
-  const handleChallenge = (playerName: string) => {
-    toast.info(`Challenge feature coming soon!`, {
-      description: `You'll be able to challenge ${playerName} in future updates.`,
-    });
-  };
 
   if (!user) {
     return (
@@ -128,6 +141,60 @@ export const LeaguesSection = () => {
             Earn XP from completing drills, challenge other players, and climb through the leagues!
           </p>
         </div>
+
+        {/* Pending Challenges Alert */}
+        {pendingChallenges.length > 0 && (
+          <div className="mb-6 bg-gradient-to-r from-primary/20 to-accent/20 border-2 border-primary/40 rounded-2xl p-4">
+            <h4 className="font-bold text-foreground flex items-center gap-2 mb-3">
+              <Swords className="w-5 h-5 text-primary" />
+              You have {pendingChallenges.length} pending challenge{pendingChallenges.length > 1 ? 's' : ''}!
+            </h4>
+            <div className="space-y-2">
+              {pendingChallenges.slice(0, 3).map((challenge) => (
+                <div key={challenge.id} className="flex items-center justify-between bg-card p-3 rounded-xl">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{challenge.challenger_avatar}</span>
+                    <div>
+                      <span className="font-medium">{challenge.challenger_name}</span>
+                      <span className="text-xs text-muted-foreground block">challenged you!</span>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={() => acceptChallenge(challenge.id)}>Accept</Button>
+                    <Button size="sm" variant="ghost" onClick={() => declineChallenge(challenge.id)}>Decline</Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Active Challenges */}
+        {activeChallenges.length > 0 && (
+          <div className="mb-6 bg-gradient-to-r from-success/10 to-primary/10 border-2 border-success/30 rounded-2xl p-4">
+            <h4 className="font-bold text-foreground flex items-center gap-2 mb-3">
+              <Swords className="w-5 h-5 text-success" />
+              Active Challenges ({activeChallenges.length})
+            </h4>
+            <div className="space-y-2">
+              {activeChallenges.slice(0, 3).map((challenge) => (
+                <div key={challenge.id} className="flex items-center justify-between bg-card p-3 rounded-xl">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{challenge.challenger_avatar}</span>
+                    <span className="font-medium">vs</span>
+                    <span className="text-2xl">{challenge.challenged_avatar}</span>
+                    <span className="text-sm text-muted-foreground">
+                      +{challenge.xp_bonus} XP bonus
+                    </span>
+                  </div>
+                  <Link to={`/drill/${challenge.sport}/${challenge.drill_id}`}>
+                    <Button size="sm" variant="outline">Go to Drill</Button>
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="grid lg:grid-cols-3 gap-6">
           {/* League Progress */}
@@ -181,7 +248,7 @@ export const LeaguesSection = () => {
                 <div className="h-4 bg-secondary rounded-full overflow-hidden">
                   <div
                     className="h-full gradient-primary rounded-full transition-all duration-500"
-                    style={{ width: `${progressToNext}%` }}
+                    style={{ width: `${Math.min(progressToNext, 100)}%` }}
                   />
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -199,6 +266,7 @@ export const LeaguesSection = () => {
                 <Users className="w-6 h-6 text-primary" />
                 Global Leaderboard
               </h3>
+              <span className="text-xs text-muted-foreground">Top 50</span>
             </div>
 
             {loading ? (
@@ -207,12 +275,8 @@ export const LeaguesSection = () => {
                   <div key={i} className="h-16 bg-secondary animate-pulse rounded-xl" />
                 ))}
               </div>
-            ) : leaderboard.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <p>No players yet. Be the first to complete a drill!</p>
-              </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-2 max-h-96 overflow-y-auto pr-2">
                 {leaderboard.map((player) => (
                   <div
                     key={player.id}
@@ -249,6 +313,8 @@ export const LeaguesSection = () => {
                       <div className="flex items-center gap-2">
                         {player.isUser ? (
                           <span className="font-bold text-foreground truncate">{player.name}</span>
+                        ) : player.isSimulated ? (
+                          <span className="font-bold text-foreground truncate">{player.name}</span>
                         ) : (
                           <Link 
                             to={`/profile/${player.id}`}
@@ -266,7 +332,6 @@ export const LeaguesSection = () => {
                     
                     {/* Stats */}
                     <div className="hidden sm:flex items-center gap-4">
-                      {/* Daily Streak */}
                       <div className="text-center">
                         <div className="flex items-center gap-1 text-streak">
                           <Flame className="w-4 h-4 fill-current" />
@@ -275,35 +340,11 @@ export const LeaguesSection = () => {
                         <div className="text-[10px] text-muted-foreground">Streak</div>
                       </div>
                     </div>
-                    
-                    {/* Challenge button */}
-                    {!player.isUser && (
-                      <button
-                        onClick={() => handleChallenge(player.name)}
-                        className="text-xs font-bold text-primary hover:text-primary/80 px-2 py-1 rounded-lg hover:bg-primary/10 transition-colors"
-                      >
-                        <Swords className="w-4 h-4" />
-                      </button>
-                    )}
                   </div>
                 ))}
               </div>
             )}
           </div>
-        </div>
-
-        {/* Weekly Challenges - Placeholder for future */}
-        <div className="mt-8 bg-gradient-to-r from-primary/10 to-accent/10 border-2 border-primary/20 rounded-3xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
-              <Swords className="w-6 h-6 text-primary" />
-              Weekly Challenges
-            </h3>
-            <span className="text-sm text-muted-foreground">Coming Soon!</span>
-          </div>
-          <p className="text-muted-foreground">
-            Challenge other players to weekly competitions and earn bonus XP. Stay tuned for updates!
-          </p>
         </div>
       </div>
     </section>
