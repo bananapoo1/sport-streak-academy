@@ -9,36 +9,41 @@ export const FREE_DRILL_LIMIT = 1;
 export const useFreeDrillLimit = () => {
   const { user } = useAuth();
   const { subscribed, loading: subLoading } = useSubscription();
-  const [totalCompletedDrills, setTotalCompletedDrills] = useState(0);
+  const [todayCompletedDrills, setTodayCompletedDrills] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  const fetchTotalCompleted = async () => {
+  const fetchTodayCompleted = async () => {
     if (!user) {
-      setTotalCompletedDrills(0);
+      setTodayCompletedDrills(0);
       setLoading(false);
       return;
     }
 
+    // Get today's date in ISO format (YYYY-MM-DD)
+    const today = new Date().toISOString().split('T')[0];
+
     const { count, error } = await supabase
       .from("completed_drills")
       .select("*", { count: "exact", head: true })
-      .eq("user_id", user.id);
+      .eq("user_id", user.id)
+      .gte("completed_at", `${today}T00:00:00`)
+      .lte("completed_at", `${today}T23:59:59`);
 
     if (!error && count !== null) {
-      setTotalCompletedDrills(count);
+      setTodayCompletedDrills(count);
     }
     setLoading(false);
   };
 
   useEffect(() => {
-    fetchTotalCompleted();
+    fetchTodayCompleted();
   }, [user]);
 
-  // User can do more drills if they're subscribed or haven't hit the limit
-  const canDoMoreDrills = subscribed || totalCompletedDrills < FREE_DRILL_LIMIT;
+  // User can do more drills if they're subscribed or haven't hit the daily limit
+  const canDoMoreDrills = subscribed || todayCompletedDrills < FREE_DRILL_LIMIT;
   
-  // Remaining free drills
-  const remainingFreeDrills = Math.max(0, FREE_DRILL_LIMIT - totalCompletedDrills);
+  // Remaining free drills for today
+  const remainingFreeDrills = Math.max(0, FREE_DRILL_LIMIT - todayCompletedDrills);
 
   // Check if a specific drill at index is accessible for free users
   const isDrillAccessible = (drillIndex: number, isCompleted: boolean): boolean => {
@@ -49,8 +54,8 @@ export const useFreeDrillLimit = () => {
     if (isCompleted) return true;
     
     // For free users, only the first unlocked drill (index 0) is accessible
-    // and only if they haven't used their free drill yet
-    if (drillIndex === 0 && totalCompletedDrills < FREE_DRILL_LIMIT) {
+    // and only if they haven't used their daily free drill yet
+    if (drillIndex === 0 && todayCompletedDrills < FREE_DRILL_LIMIT) {
       return true;
     }
     
@@ -58,12 +63,12 @@ export const useFreeDrillLimit = () => {
   };
 
   return {
-    totalCompletedDrills,
+    todayCompletedDrills,
     canDoMoreDrills,
     remainingFreeDrills,
     isDrillAccessible,
     hasSubscription: subscribed,
     loading: loading || subLoading,
-    refetch: fetchTotalCompleted,
+    refetch: fetchTodayCompleted,
   };
 };

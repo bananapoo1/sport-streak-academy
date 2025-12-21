@@ -1,109 +1,147 @@
 import { useParams, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Trophy, Flame, Target, Calendar, TrendingUp, Zap } from "lucide-react";
+import { ArrowLeft, Trophy, Flame, Target, TrendingUp, Zap, UserPlus, Check } from "lucide-react";
 import LeagueBadge from "@/components/LeagueBadge";
 import StreakCounter from "@/components/StreakCounter";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useFriends } from "@/hooks/useFriends";
+import { toast } from "sonner";
 
-// Mock user data
-const usersData: Record<string, {
-  name: string;
-  avatar: string;
-  league: "bronze" | "silver" | "gold" | "diamond";
-  rank: number;
-  xp: number;
-  streak: number;
-  drillsCompleted: number;
-  joinDate: string;
-  favoriteSport: string;
-  weeklyXp: number;
-  longestStreak: number;
-  achievements: string[];
-}> = {
-  "alex-m": {
-    name: "Alex M.",
-    avatar: "🏀",
-    league: "gold",
-    rank: 1,
-    xp: 2450,
-    streak: 32,
-    drillsCompleted: 156,
-    joinDate: "2024-09-15",
-    favoriteSport: "Basketball",
-    weeklyXp: 450,
-    longestStreak: 45,
-    achievements: ["First Drill", "Week Warrior", "Streak Master", "Gold League"],
-  },
-  "sarah-k": {
-    name: "Sarah K.",
-    avatar: "⚽",
-    league: "gold",
-    rank: 2,
-    xp: 2380,
-    streak: 28,
-    drillsCompleted: 142,
-    joinDate: "2024-08-20",
-    favoriteSport: "Football",
-    weeklyXp: 420,
-    longestStreak: 35,
-    achievements: ["First Drill", "Week Warrior", "Streak Master"],
-  },
-  "james-l": {
-    name: "James L.",
-    avatar: "🎾",
-    league: "gold",
-    rank: 3,
-    xp: 2290,
-    streak: 25,
-    drillsCompleted: 128,
-    joinDate: "2024-10-01",
-    favoriteSport: "Tennis",
-    weeklyXp: 380,
-    longestStreak: 28,
-    achievements: ["First Drill", "Week Warrior"],
-  },
-  "emma-r": {
-    name: "Emma R.",
-    avatar: "🏈",
-    league: "gold",
-    rank: 4,
-    xp: 2150,
-    streak: 21,
-    drillsCompleted: 115,
-    joinDate: "2024-10-15",
-    favoriteSport: "American Football",
-    weeklyXp: 350,
-    longestStreak: 24,
-    achievements: ["First Drill", "Week Warrior"],
-  },
-};
+interface UserData {
+  id: string;
+  username: string | null;
+  display_name: string | null;
+  avatar_id: string | null;
+  total_xp: number;
+  current_streak: number;
+  longest_streak: number;
+  created_at: string | null;
+}
 
-const achievementIcons: Record<string, string> = {
-  "First Drill": "🎯",
-  "Week Warrior": "⚡",
-  "Streak Master": "🔥",
-  "Gold League": "🥇",
-  "Diamond League": "💎",
-  "Century Club": "💯",
+const getLeague = (xp: number): "bronze" | "silver" | "gold" | "diamond" => {
+  if (xp >= 50000) return "diamond";
+  if (xp >= 15000) return "gold";
+  if (xp >= 5000) return "silver";
+  return "bronze";
 };
 
 const UserProfile = () => {
   const { userId } = useParams();
-  const user = usersData[userId || ""] || {
-    name: "Unknown User",
-    avatar: "❓",
-    league: "bronze" as const,
-    rank: 0,
-    xp: 0,
-    streak: 0,
-    drillsCompleted: 0,
-    joinDate: "N/A",
-    favoriteSport: "Unknown",
-    weeklyXp: 0,
-    longestStreak: 0,
-    achievements: [],
+  const { user } = useAuth();
+  const { friends, sentRequests, sendFriendRequest } = useFriends();
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [drillCount, setDrillCount] = useState(0);
+  const [weeklyXp, setWeeklyXp] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [sendingRequest, setSendingRequest] = useState(false);
+
+  const isFriend = friends.some(f => f.id === userId);
+  const hasSentRequest = sentRequests.some(r => r.friendId === userId);
+  const isOwnProfile = user?.id === userId;
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!userId) return;
+
+      // Fetch profile
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .single();
+
+      if (profile) {
+        setUserData({
+          id: profile.id,
+          username: profile.username,
+          display_name: profile.display_name,
+          avatar_id: profile.avatar_id,
+          total_xp: profile.total_xp || 0,
+          current_streak: profile.current_streak || 0,
+          longest_streak: profile.longest_streak || 0,
+          created_at: profile.created_at,
+        });
+      }
+
+      // Fetch drill count
+      const { count } = await supabase
+        .from("completed_drills")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", userId);
+
+      if (count !== null) {
+        setDrillCount(count);
+      }
+
+      // Fetch weekly XP
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      
+      const { data: weeklyData } = await supabase
+        .from("completed_drills")
+        .select("xp_earned")
+        .eq("user_id", userId)
+        .gte("completed_at", weekAgo.toISOString());
+
+      if (weeklyData) {
+        setWeeklyXp(weeklyData.reduce((sum, d) => sum + (d.xp_earned || 0), 0));
+      }
+
+      setLoading(false);
+    };
+
+    fetchUserData();
+  }, [userId]);
+
+  const handleAddFriend = async () => {
+    if (!userData?.username) {
+      toast.error("Cannot add this user as a friend");
+      return;
+    }
+    
+    setSendingRequest(true);
+    const result = await sendFriendRequest(userData.username);
+    setSendingRequest(false);
+    
+    if (!result.success) {
+      toast.error(result.error);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="pt-24 pb-16 flex items-center justify-center">
+          <div className="animate-pulse text-muted-foreground">Loading...</div>
+        </main>
+      </div>
+    );
+  }
+
+  if (!userData) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="pt-24 pb-16">
+          <div className="container mx-auto px-4 max-w-3xl text-center">
+            <h1 className="text-2xl font-bold text-foreground mb-4">User Not Found</h1>
+            <p className="text-muted-foreground mb-6">This user doesn't exist or their profile is private.</p>
+            <Link to="/#leagues">
+              <Button>Back to Leagues</Button>
+            </Link>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  const league = getLeague(userData.total_xp);
 
   return (
     <div className="min-h-screen bg-background">
@@ -122,16 +160,44 @@ const UserProfile = () => {
           <div className="bg-card border-2 border-border rounded-3xl p-8 shadow-card mb-6">
             <div className="flex flex-col sm:flex-row items-center gap-6">
               <div className="w-24 h-24 bg-secondary rounded-full flex items-center justify-center text-5xl">
-                {user.avatar}
+                {userData.avatar_id || "⚽"}
               </div>
               <div className="text-center sm:text-left flex-1">
-                <h1 className="text-3xl font-extrabold text-foreground mb-2">{user.name}</h1>
-                <p className="text-muted-foreground mb-4">Joined {new Date(user.joinDate).toLocaleDateString("en-GB", { month: "long", year: "numeric" })}</p>
+                <h1 className="text-3xl font-extrabold text-foreground mb-2">
+                  {userData.display_name || userData.username || "Athlete"}
+                </h1>
+                <p className="text-muted-foreground mb-4">
+                  Joined {userData.created_at 
+                    ? new Date(userData.created_at).toLocaleDateString("en-GB", { month: "long", year: "numeric" })
+                    : "Recently"
+                  }
+                </p>
                 <div className="flex flex-wrap gap-3 justify-center sm:justify-start">
-                  <LeagueBadge league={user.league} rank={user.rank} />
-                  <StreakCounter days={user.streak} />
+                  <LeagueBadge league={league} />
+                  <StreakCounter days={userData.current_streak} />
                 </div>
               </div>
+              
+              {/* Add Friend Button */}
+              {!isOwnProfile && user && (
+                <div>
+                  {isFriend ? (
+                    <Button variant="outline" disabled>
+                      <Check className="w-4 h-4 mr-2" />
+                      Friends
+                    </Button>
+                  ) : hasSentRequest ? (
+                    <Button variant="outline" disabled>
+                      Request Sent
+                    </Button>
+                  ) : (
+                    <Button onClick={handleAddFriend} disabled={sendingRequest}>
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      {sendingRequest ? "Sending..." : "Add Friend"}
+                    </Button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -139,53 +205,36 @@ const UserProfile = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div className="bg-card border-2 border-border rounded-2xl p-4 text-center shadow-soft">
               <Trophy className="w-8 h-8 text-league-gold mx-auto mb-2" />
-              <div className="text-2xl font-extrabold text-foreground">{user.xp.toLocaleString()}</div>
+              <div className="text-2xl font-extrabold text-foreground">{userData.total_xp.toLocaleString()}</div>
               <div className="text-sm text-muted-foreground">Total XP</div>
             </div>
             <div className="bg-card border-2 border-border rounded-2xl p-4 text-center shadow-soft">
               <Target className="w-8 h-8 text-primary mx-auto mb-2" />
-              <div className="text-2xl font-extrabold text-foreground">{user.drillsCompleted}</div>
+              <div className="text-2xl font-extrabold text-foreground">{drillCount}</div>
               <div className="text-sm text-muted-foreground">Drills Done</div>
             </div>
             <div className="bg-card border-2 border-border rounded-2xl p-4 text-center shadow-soft">
               <Flame className="w-8 h-8 text-streak mx-auto mb-2" />
-              <div className="text-2xl font-extrabold text-foreground">{user.longestStreak}</div>
+              <div className="text-2xl font-extrabold text-foreground">{userData.longest_streak}</div>
               <div className="text-sm text-muted-foreground">Best Streak</div>
             </div>
             <div className="bg-card border-2 border-border rounded-2xl p-4 text-center shadow-soft">
               <TrendingUp className="w-8 h-8 text-success mx-auto mb-2" />
-              <div className="text-2xl font-extrabold text-foreground">{user.weeklyXp}</div>
+              <div className="text-2xl font-extrabold text-foreground">{weeklyXp}</div>
               <div className="text-sm text-muted-foreground">This Week</div>
             </div>
           </div>
 
-          {/* Favorite Sport & Achievements */}
-          <div className="grid md:grid-cols-2 gap-6">
+          {/* Username */}
+          {userData.username && (
             <div className="bg-card border-2 border-border rounded-2xl p-6 shadow-soft">
               <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
                 <Zap className="w-5 h-5 text-primary" />
-                Favorite Sport
+                Username
               </h2>
-              <p className="text-lg text-muted-foreground">{user.favoriteSport}</p>
+              <p className="text-lg text-muted-foreground">@{userData.username}</p>
             </div>
-
-            <div className="bg-card border-2 border-border rounded-2xl p-6 shadow-soft">
-              <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-                <Trophy className="w-5 h-5 text-league-gold" />
-                Achievements
-              </h2>
-              <div className="flex flex-wrap gap-2">
-                {user.achievements.map((achievement) => (
-                  <span
-                    key={achievement}
-                    className="inline-flex items-center gap-1 bg-secondary px-3 py-1 rounded-full text-sm font-medium text-foreground"
-                  >
-                    {achievementIcons[achievement] || "🏆"} {achievement}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </main>
       <Footer />

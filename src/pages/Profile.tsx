@@ -15,7 +15,7 @@ import { useProgress } from "@/hooks/useProgress";
 import { useFriends } from "@/hooks/useFriends";
 import { supabase } from "@/integrations/supabase/client";
 
-const avatarOptions = ["🎯", "⚽", "🏀", "🎾", "🏈", "⛳", "🏐", "🏑", "🏓", "🏏", "🏉", "⚾"];
+const avatarOptions = ["⚽", "🏀", "🎾", "🏈", "⛳", "🏐", "🏑", "🏓", "🏏", "🏉", "⚾", "🎯"];
 
 const frameOptions = [
   { id: "default", name: "Default", unlocked: true },
@@ -42,9 +42,9 @@ const Profile = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { streak, todayProgress } = useProgress();
-  const { friends, pendingRequests, sendFriendRequest, acceptFriendRequest, removeFriend } = useFriends();
+  const { friends, pendingRequests, sentRequests, sendFriendRequest, acceptFriendRequest, removeFriend } = useFriends();
   
-  const [selectedAvatar, setSelectedAvatar] = useState("🎯");
+  const [selectedAvatar, setSelectedAvatar] = useState("⚽");
   const [selectedFrame, setSelectedFrame] = useState("default");
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -67,7 +67,7 @@ const Profile = () => {
 
       if (data) {
         setProfile(data);
-        setSelectedAvatar(data.avatar_id || "🎯");
+        setSelectedAvatar(data.avatar_id || "⚽");
         setSelectedFrame(data.frame_id || "default");
       }
 
@@ -241,6 +241,27 @@ const Profile = () => {
                       <Button size="sm" onClick={() => acceptFriendRequest(request.id)}>
                         Accept
                       </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Sent Requests (Awaiting acceptance) */}
+            {sentRequests.length > 0 && (
+              <div className="mb-4">
+                <h4 className="text-sm font-semibold text-muted-foreground mb-2">Sent Requests (Awaiting)</h4>
+                <div className="space-y-2">
+                  {sentRequests.map((request) => (
+                    <div key={request.id} className="flex items-center justify-between bg-primary/5 p-3 rounded-xl border border-primary/20">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">{request.avatar_id || "⚽"}</span>
+                        <div>
+                          <span className="font-medium block">{request.username || "Unknown"}</span>
+                          <span className="text-xs text-muted-foreground">Waiting for response...</span>
+                        </div>
+                      </div>
+                      <span className="text-xs text-primary font-medium px-2 py-1 bg-primary/10 rounded-full">Pending</span>
                     </div>
                   ))}
                 </div>

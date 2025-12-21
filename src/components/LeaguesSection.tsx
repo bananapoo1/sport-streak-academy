@@ -23,10 +23,10 @@ interface LeaderboardPlayer {
 }
 
 const leagueThresholds = [
-  { name: "Bronze", minXp: 0, maxXp: 1000, color: "text-amber-700", bg: "bg-amber-700/20", league: "bronze" as const },
-  { name: "Silver", minXp: 1000, maxXp: 3000, color: "text-slate-400", bg: "bg-slate-400/20", league: "silver" as const },
-  { name: "Gold", minXp: 3000, maxXp: 7500, color: "text-amber-500", bg: "bg-amber-500/20", league: "gold" as const },
-  { name: "Diamond", minXp: 7500, maxXp: Infinity, color: "text-cyan-400", bg: "bg-cyan-400/20", league: "diamond" as const },
+  { name: "Bronze", minXp: 0, maxXp: 5000, color: "text-amber-700", bg: "bg-amber-700/20", league: "bronze" as const },
+  { name: "Silver", minXp: 5000, maxXp: 15000, color: "text-slate-400", bg: "bg-slate-400/20", league: "silver" as const },
+  { name: "Gold", minXp: 15000, maxXp: 50000, color: "text-amber-500", bg: "bg-amber-500/20", league: "gold" as const },
+  { name: "Diamond", minXp: 50000, maxXp: Infinity, color: "text-cyan-400", bg: "bg-cyan-400/20", league: "diamond" as const },
 ];
 
 const getLeague = (xp: number): "bronze" | "silver" | "gold" | "diamond" => {
@@ -247,7 +247,16 @@ export const LeaguesSection = () => {
                     {/* Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-foreground truncate">{player.name}</span>
+                        {player.isUser ? (
+                          <span className="font-bold text-foreground truncate">{player.name}</span>
+                        ) : (
+                          <Link 
+                            to={`/profile/${player.id}`}
+                            className="font-bold text-foreground truncate hover:text-primary transition-colors"
+                          >
+                            {player.name}
+                          </Link>
+                        )}
                         {player.isUser && <span className="text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded font-bold">YOU</span>}
                       </div>
                       <div className="flex items-center gap-3 text-xs text-muted-foreground">
