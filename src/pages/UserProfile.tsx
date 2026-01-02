@@ -1,15 +1,23 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Trophy, Flame, Target, TrendingUp, Zap, UserPlus, Check } from "lucide-react";
+import { ArrowLeft, Trophy, Flame, Target, TrendingUp, Zap, UserPlus, Check, Swords } from "lucide-react";
 import LeagueBadge from "@/components/LeagueBadge";
 import StreakCounter from "@/components/StreakCounter";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useFriends } from "@/hooks/useFriends";
+import { useChallenges } from "@/hooks/useChallenges";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface UserData {
   id: string;
@@ -29,15 +37,28 @@ const getLeague = (xp: number): "bronze" | "silver" | "gold" | "diamond" => {
   return "bronze";
 };
 
+const drillOptions = [
+  { id: "dribbling-basics", name: "Dribbling Basics", sport: "football" },
+  { id: "shooting-drills", name: "Shooting Drills", sport: "football" },
+  { id: "passing-accuracy", name: "Passing Accuracy", sport: "football" },
+  { id: "layup-practice", name: "Layup Practice", sport: "basketball" },
+  { id: "free-throws", name: "Free Throws", sport: "basketball" },
+  { id: "serve-practice", name: "Serve Practice", sport: "tennis" },
+];
+
 const UserProfile = () => {
   const { userId } = useParams();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { friends, sentRequests, sendFriendRequest } = useFriends();
+  const { sendChallenge } = useChallenges();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [drillCount, setDrillCount] = useState(0);
   const [weeklyXp, setWeeklyXp] = useState(0);
   const [loading, setLoading] = useState(true);
   const [sendingRequest, setSendingRequest] = useState(false);
+  const [challengeDialogOpen, setChallengeDialogOpen] = useState(false);
+  const [sendingChallenge, setSendingChallenge] = useState(false);
 
   const isFriend = friends.some(f => f.id === userId);
   const hasSentRequest = sentRequests.some(r => r.friendId === userId);
@@ -47,7 +68,6 @@ const UserProfile = () => {
     const fetchUserData = async () => {
       if (!userId) return;
 
-      // Fetch profile
       const { data: profile } = await supabase
         .from("profiles")
         .select("*")
@@ -67,7 +87,6 @@ const UserProfile = () => {
         });
       }
 
-      // Fetch drill count
       const { count } = await supabase
         .from("completed_drills")
         .select("*", { count: "exact", head: true })
@@ -77,7 +96,6 @@ const UserProfile = () => {
         setDrillCount(count);
       }
 
-      // Fetch weekly XP
       const weekAgo = new Date();
       weekAgo.setDate(weekAgo.getDate() - 7);
       
@@ -109,6 +127,21 @@ const UserProfile = () => {
     
     if (!result.success) {
       toast.error(result.error);
+    }
+  };
+
+  const handleSendChallenge = async (drillId: string, sport: string) => {
+    if (!userId) return;
+    
+    setSendingChallenge(true);
+    const result = await sendChallenge(userId, drillId, sport);
+    setSendingChallenge(false);
+    
+    if (result.success) {
+      toast.success("Challenge sent!");
+      setChallengeDialogOpen(false);
+    } else {
+      toast.error(result.error || "Failed to send challenge");
     }
   };
 
@@ -157,10 +190,10 @@ const UserProfile = () => {
           </Link>
 
           {/* Profile Header */}
-          <div className="bg-card border-2 border-border rounded-3xl p-8 shadow-card mb-6">
+          <div className="bg-card border border-border rounded-2xl p-8 shadow-card mb-6">
             <div className="flex flex-col sm:flex-row items-center gap-6">
               <div className="w-24 h-24 bg-secondary rounded-full flex items-center justify-center text-5xl">
-                {userData.avatar_id || "⚽"}
+                {userData.avatar_id && userData.avatar_id !== "default" ? userData.avatar_id : "⚽"}
               </div>
               <div className="text-center sm:text-left flex-1">
                 <h1 className="text-3xl font-extrabold text-foreground mb-2">
@@ -178,9 +211,9 @@ const UserProfile = () => {
                 </div>
               </div>
               
-              {/* Add Friend Button */}
+              {/* Action Buttons */}
               {!isOwnProfile && user && (
-                <div>
+                <div className="flex flex-col gap-2">
                   {isFriend ? (
                     <Button variant="outline" disabled>
                       <Check className="w-4 h-4 mr-2" />
@@ -196,6 +229,36 @@ const UserProfile = () => {
                       {sendingRequest ? "Sending..." : "Add Friend"}
                     </Button>
                   )}
+                  
+                  <Dialog open={challengeDialogOpen} onOpenChange={setChallengeDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline">
+                        <Swords className="w-4 h-4 mr-2" />
+                        Challenge
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Challenge {userData.display_name || userData.username}</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-3 mt-4">
+                        <p className="text-sm text-muted-foreground">Select a drill to challenge them on:</p>
+                        {drillOptions.map((drill) => (
+                          <Button
+                            key={drill.id}
+                            variant="outline"
+                            className="w-full justify-start"
+                            onClick={() => handleSendChallenge(drill.id, drill.sport)}
+                            disabled={sendingChallenge}
+                          >
+                            <span className="capitalize">{drill.sport}</span>
+                            <span className="mx-2">•</span>
+                            {drill.name}
+                          </Button>
+                        ))}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               )}
             </div>
@@ -203,22 +266,22 @@ const UserProfile = () => {
 
           {/* Stats Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-card border-2 border-border rounded-2xl p-4 text-center shadow-soft">
+            <div className="bg-card border border-border rounded-2xl p-4 text-center shadow-soft">
               <Trophy className="w-8 h-8 text-league-gold mx-auto mb-2" />
               <div className="text-2xl font-extrabold text-foreground">{userData.total_xp.toLocaleString()}</div>
               <div className="text-sm text-muted-foreground">Total XP</div>
             </div>
-            <div className="bg-card border-2 border-border rounded-2xl p-4 text-center shadow-soft">
+            <div className="bg-card border border-border rounded-2xl p-4 text-center shadow-soft">
               <Target className="w-8 h-8 text-primary mx-auto mb-2" />
               <div className="text-2xl font-extrabold text-foreground">{drillCount}</div>
               <div className="text-sm text-muted-foreground">Drills Done</div>
             </div>
-            <div className="bg-card border-2 border-border rounded-2xl p-4 text-center shadow-soft">
+            <div className="bg-card border border-border rounded-2xl p-4 text-center shadow-soft">
               <Flame className="w-8 h-8 text-streak mx-auto mb-2" />
               <div className="text-2xl font-extrabold text-foreground">{userData.longest_streak}</div>
               <div className="text-sm text-muted-foreground">Best Streak</div>
             </div>
-            <div className="bg-card border-2 border-border rounded-2xl p-4 text-center shadow-soft">
+            <div className="bg-card border border-border rounded-2xl p-4 text-center shadow-soft">
               <TrendingUp className="w-8 h-8 text-success mx-auto mb-2" />
               <div className="text-2xl font-extrabold text-foreground">{weeklyXp}</div>
               <div className="text-sm text-muted-foreground">This Week</div>
@@ -227,7 +290,7 @@ const UserProfile = () => {
 
           {/* Username */}
           {userData.username && (
-            <div className="bg-card border-2 border-border rounded-2xl p-6 shadow-soft">
+            <div className="bg-card border border-border rounded-2xl p-6 shadow-soft">
               <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
                 <Zap className="w-5 h-5 text-primary" />
                 Username
