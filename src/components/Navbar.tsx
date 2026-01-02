@@ -1,24 +1,37 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Flame, Trophy, Menu, X, User, LogIn, LogOut } from "lucide-react";
+import { Flame, Trophy, Menu, X, User, LogIn, LogOut, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProgress } from "@/hooks/useProgress";
-import logoSports from "@/assets/logo-sports.png";
 
 export const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { streak } = useProgress();
 
+  useEffect(() => {
+    const isDark = localStorage.getItem("darkMode") === "true";
+    setDarkMode(isDark);
+    if (isDark) {
+      document.documentElement.classList.add("dark");
+    }
+  }, []);
+
+  const toggleDarkMode = () => {
+    const newMode = !darkMode;
+    setDarkMode(newMode);
+    localStorage.setItem("darkMode", String(newMode));
+    document.documentElement.classList.toggle("dark", newMode);
+  };
+
   const handleNavClick = (hash: string) => {
     setMobileMenuOpen(false);
     if (location.pathname !== "/") {
-      // Navigate to homepage with hash, then scroll after navigation
       navigate("/" + hash);
-      // Use setTimeout to allow navigation to complete, then scroll
       setTimeout(() => {
         const element = document.querySelector(hash);
         element?.scrollIntoView({ behavior: "smooth" });
@@ -37,31 +50,36 @@ export const Navbar = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <img src={logoSports} alt="DrillZone" className="w-10 h-10 object-contain" />
+            <span className="text-2xl">⚽</span>
             <span className="font-extrabold text-xl text-foreground">DrillZone</span>
           </Link>
 
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-6">
-            <button onClick={() => handleNavClick("#sports")} className="font-medium text-muted-foreground hover:text-primary transition-colors">
-              Sports
-            </button>
-            <button onClick={() => handleNavClick("#drills")} className="font-medium text-muted-foreground hover:text-primary transition-colors">
-              Drills
-            </button>
-            <button onClick={() => handleNavClick("#leagues")} className="font-medium text-muted-foreground hover:text-primary transition-colors">
-              Leagues
-            </button>
-            <button onClick={() => handleNavClick("#pricing")} className="font-medium text-muted-foreground hover:text-primary transition-colors">
-              Pricing
-            </button>
+          {/* Desktop Nav - Centered */}
+          <div className="hidden md:flex items-center justify-center flex-1">
+            <div className="flex items-center gap-8">
+              <button onClick={() => handleNavClick("#sports")} className="font-medium text-muted-foreground hover:text-primary transition-colors">
+                Sports
+              </button>
+              <button onClick={() => handleNavClick("#drills")} className="font-medium text-muted-foreground hover:text-primary transition-colors">
+                Drills
+              </button>
+              <button onClick={() => handleNavClick("#leagues")} className="font-medium text-muted-foreground hover:text-primary transition-colors">
+                Leagues
+              </button>
+              <button onClick={() => handleNavClick("#pricing")} className="font-medium text-muted-foreground hover:text-primary transition-colors">
+                Pricing
+              </button>
+            </div>
           </div>
 
           {/* Stats & CTA */}
           <div className="hidden md:flex items-center gap-4">
+            <Button size="icon" variant="ghost" onClick={toggleDarkMode} className="w-9 h-9">
+              {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </Button>
             {user && (
               <>
                 <div className="flex items-center gap-1 text-streak">
@@ -99,12 +117,17 @@ export const Navbar = () => {
           </div>
 
           {/* Mobile Menu Button */}
-          <button
-            className="md:hidden p-2 text-foreground"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          <div className="md:hidden flex items-center gap-2 ml-auto">
+            <Button size="icon" variant="ghost" onClick={toggleDarkMode} className="w-9 h-9">
+              {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </Button>
+            <button
+              className="p-2 text-foreground"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
 
         {/* Mobile Menu */}
