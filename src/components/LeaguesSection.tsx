@@ -9,7 +9,6 @@ import { useChallenges } from "@/hooks/useChallenges";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { getTopSimulatedUsers, SimulatedUser } from "@/data/simulatedUsers";
 
 interface LeaderboardPlayer {
   id: string;
@@ -72,17 +71,23 @@ export const LeaguesSection = () => {
           };
         });
 
-        // Get simulated users to fill leaderboard
-        const simulatedPlayers: LeaderboardPlayer[] = getTopSimulatedUsers(200).map((sim: SimulatedUser) => ({
+        // Fetch simulated profiles from database
+        const { data: simulated } = await supabase
+          .from("simulated_profiles")
+          .select("*")
+          .order("total_xp", { ascending: false })
+          .limit(200);
+
+        const simulatedPlayers: LeaderboardPlayer[] = (simulated || []).map((sim) => ({
           id: sim.id,
-          name: sim.name,
-          xp: sim.xp,
-          streak: sim.streak,
-          avatar: sim.avatar,
+          name: sim.display_name,
+          xp: sim.total_xp,
+          streak: sim.current_streak,
+          avatar: sim.avatar_emoji,
           isUser: false,
           isSimulated: true,
           rank: 0,
-          league: sim.league,
+          league: sim.league as "bronze" | "silver" | "gold" | "diamond",
         }));
 
         // Merge and sort by XP
@@ -313,11 +318,9 @@ export const LeaguesSection = () => {
                       <div className="flex items-center gap-2">
                         {player.isUser ? (
                           <span className="font-bold text-foreground truncate">{player.name}</span>
-                        ) : player.isSimulated ? (
-                          <span className="font-bold text-foreground truncate">{player.name}</span>
                         ) : (
                           <Link 
-                            to={`/profile/${player.id}`}
+                            to={player.isSimulated ? `/simulated-profile/${player.id}` : `/profile/${player.id}`}
                             className="font-bold text-foreground truncate hover:text-primary transition-colors"
                           >
                             {player.name}

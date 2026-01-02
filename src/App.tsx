@@ -9,6 +9,7 @@ import Sports from "./pages/Sports";
 import SportDetail from "./pages/SportDetail";
 import DrillDetail from "./pages/DrillDetail";
 import UserProfile from "./pages/UserProfile";
+import SimulatedUserProfile from "./pages/SimulatedUserProfile";
 import Profile from "./pages/Profile";
 import Checkout from "./pages/Checkout";
 import Auth from "./pages/Auth";
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/sports/:sportSlug" element={<SportDetail />} />
             <Route path="/drill/:sportSlug/:drillId" element={<DrillDetail />} />
             <Route path="/profile/:userId" element={<UserProfile />} />
+            <Route path="/simulated-profile/:userId" element={<SimulatedUserProfile />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/checkout" element={<Checkout />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

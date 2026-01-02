@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          rarity: string
+          requirement: number
+          title: string
+          type: string
+          xp_reward: number
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          icon?: string
+          id: string
+          rarity?: string
+          requirement: number
+          title: string
+          type: string
+          xp_reward?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          rarity?: string
+          requirement?: number
+          title?: string
+          type?: string
+          xp_reward?: number
+        }
+        Relationships: []
+      }
       challenges: {
         Row: {
           challenged_id: string
@@ -284,6 +320,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      simulated_profiles: {
+        Row: {
+          avatar_emoji: string
+          created_at: string
+          current_streak: number
+          display_name: string
+          drills_completed: number
+          id: string
+          league: string
+          longest_streak: number
+          total_xp: number
+        }
+        Insert: {
+          avatar_emoji?: string
+          created_at?: string
+          current_streak?: number
+          display_name: string
+          drills_completed?: number
+          id?: string
+          league?: string
+          longest_streak?: number
+          total_xp?: number
+        }
+        Update: {
+          avatar_emoji?: string
+          created_at?: string
+          current_streak?: number
+          display_name?: string
+          drills_completed?: number
+          id?: string
+          league?: string
+          longest_streak?: number
+          total_xp?: number
+        }
+        Relationships: []
       }
       user_achievements: {
         Row: {

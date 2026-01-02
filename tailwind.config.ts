@@ -14,7 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        nunito: ['Nunito', 'sans-serif'],
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
