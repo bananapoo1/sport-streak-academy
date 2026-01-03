@@ -15,15 +15,36 @@ import { useProgress } from "@/hooks/useProgress";
 import { useFriends } from "@/hooks/useFriends";
 import { supabase } from "@/integrations/supabase/client";
 
-const avatarOptions = ["⚽", "🏀", "🎾", "🏈", "⛳", "🏐", "🏑", "🏓", "🏏", "🏉", "⚾", "🎯"];
+const avatarOptions = [
+  { emoji: "⚽", name: "Football", unlocked: true },
+  { emoji: "🏀", name: "Basketball", unlocked: true },
+  { emoji: "🎾", name: "Tennis", unlocked: true },
+  { emoji: "🏈", name: "American Football", unlocked: true },
+  { emoji: "⛳", name: "Golf", unlocked: true },
+  { emoji: "🏐", name: "Volleyball", unlocked: true },
+  { emoji: "🏑", name: "Hockey", unlocked: true },
+  { emoji: "🏓", name: "Table Tennis", unlocked: true },
+  { emoji: "🏏", name: "Cricket", unlocked: true },
+  { emoji: "🏉", name: "Rugby", unlocked: true },
+  { emoji: "⚾", name: "Baseball", unlocked: true },
+  { emoji: "🎯", name: "Target", unlocked: true },
+  { emoji: "🔥", name: "Fire", unlocked: false, requirement: "7-Day Streak" },
+  { emoji: "⭐", name: "Star", unlocked: false, requirement: "Reach 1,000 XP" },
+  { emoji: "💎", name: "Diamond", unlocked: false, requirement: "Reach Diamond League" },
+  { emoji: "👑", name: "Crown", unlocked: false, requirement: "Win 5 Challenges" },
+  { emoji: "🦁", name: "Lion", unlocked: false, requirement: "Complete 100 Drills" },
+  { emoji: "🐉", name: "Dragon", unlocked: false, requirement: "30-Day Streak" },
+];
 
 const frameOptions = [
-  { id: "default", name: "Default", unlocked: true },
-  { id: "bronze", name: "Bronze Ring", unlocked: true },
-  { id: "silver", name: "Silver Ring", unlocked: true },
+  { id: "default", name: "Default", unlocked: true, requirement: "" },
+  { id: "bronze", name: "Bronze Ring", unlocked: true, requirement: "" },
+  { id: "silver", name: "Silver Ring", unlocked: true, requirement: "" },
   { id: "gold", name: "Gold Ring", unlocked: false, requirement: "Reach Gold League" },
   { id: "diamond", name: "Diamond Ring", unlocked: false, requirement: "Reach Diamond League" },
   { id: "fire", name: "Fire Aura", unlocked: false, requirement: "30-Day Streak" },
+  { id: "champion", name: "Champion Crown", unlocked: false, requirement: "Win 10 Challenges" },
+  { id: "legendary", name: "Legendary Aura", unlocked: false, requirement: "Unlock 5 Legendary Achievements" },
 ];
 
 const trophies = [
@@ -67,7 +88,9 @@ const Profile = () => {
 
       if (data) {
         setProfile(data);
-        setSelectedAvatar(data.avatar_id || "⚽");
+        // Always default to football emoji if no avatar or "default" avatar
+        const avatarValue = data.avatar_id && data.avatar_id !== "default" ? data.avatar_id : "⚽";
+        setSelectedAvatar(avatarValue);
         setSelectedFrame(data.frame_id || "default");
       }
 
@@ -337,18 +360,27 @@ const Profile = () => {
             <div className="flex flex-wrap gap-3">
               {avatarOptions.map((avatar) => (
                 <button
-                  key={avatar}
-                  onClick={() => handleAvatarChange(avatar)}
-                  className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl border-2 transition-all hover:scale-110 ${
-                    selectedAvatar === avatar
+                  key={avatar.emoji}
+                  onClick={() => avatar.unlocked && handleAvatarChange(avatar.emoji)}
+                  className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl border-2 transition-all relative ${
+                    avatar.unlocked ? "hover:scale-110 cursor-pointer" : "opacity-50 cursor-not-allowed"
+                  } ${
+                    selectedAvatar === avatar.emoji
                       ? "border-primary bg-primary/10"
                       : "border-border bg-secondary hover:border-primary/50"
                   }`}
+                  title={avatar.unlocked ? avatar.name : `🔒 ${avatar.requirement}`}
                 >
-                  {avatar}
+                  {avatar.emoji}
+                  {!avatar.unlocked && (
+                    <Lock className="w-4 h-4 absolute -bottom-1 -right-1 text-muted-foreground bg-card rounded-full p-0.5" />
+                  )}
                 </button>
               ))}
             </div>
+            <p className="text-xs text-muted-foreground mt-3">
+              Unlock more avatars by completing achievements!
+            </p>
           </div>
 
           {/* Profile Frames */}

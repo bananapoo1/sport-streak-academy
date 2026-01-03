@@ -1,9 +1,11 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Flame, Trophy, Menu, X, User, LogIn, LogOut, Moon, Sun } from "lucide-react";
+import { Flame, Trophy, Menu, X, User, LogIn, LogOut, Moon, Sun, Swords, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProgress } from "@/hooks/useProgress";
+import { useFriends } from "@/hooks/useFriends";
+import { useChallenges } from "@/hooks/useChallenges";
 
 export const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -12,6 +14,8 @@ export const Navbar = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { streak } = useProgress();
+  const { pendingRequests } = useFriends();
+  const { pendingChallenges } = useChallenges();
 
   useEffect(() => {
     const isDark = localStorage.getItem("darkMode") === "true";
@@ -82,6 +86,27 @@ export const Navbar = () => {
             </Button>
             {user && (
               <>
+                {/* Notifications */}
+                <Link to="/challenges" className="relative">
+                  <Button size="icon" variant="ghost" className="w-9 h-9">
+                    <Swords className="w-4 h-4" />
+                    {pendingChallenges.length > 0 && (
+                      <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center font-bold">
+                        {pendingChallenges.length}
+                      </span>
+                    )}
+                  </Button>
+                </Link>
+                <Link to="/profile" className="relative">
+                  <Button size="icon" variant="ghost" className="w-9 h-9">
+                    <Bell className="w-4 h-4" />
+                    {pendingRequests.length > 0 && (
+                      <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center font-bold">
+                        {pendingRequests.length}
+                      </span>
+                    )}
+                  </Button>
+                </Link>
                 <div className="flex items-center gap-1 text-streak">
                   <Flame className="w-5 h-5 fill-current" />
                   <span className="font-bold">{streak}</span>
