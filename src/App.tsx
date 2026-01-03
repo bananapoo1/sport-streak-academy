@@ -13,6 +13,7 @@ import SimulatedUserProfile from "./pages/SimulatedUserProfile";
 import Profile from "./pages/Profile";
 import Checkout from "./pages/Checkout";
 import Auth from "./pages/Auth";
+import Challenges from "./pages/Challenges";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/simulated-profile/:userId" element={<SimulatedUserProfile />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/challenges" element={<Challenges />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
