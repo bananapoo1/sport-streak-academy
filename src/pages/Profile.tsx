@@ -2,19 +2,20 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Trophy, Flame, Target, Zap, Edit2, Lock, Check, Users, UserPlus, Bell, Mail, X } from "lucide-react";
+import { Trophy, Flame, Target, Zap, Edit2, Lock, Check, Users, UserPlus, Bell, Mail, X, Swords } from "lucide-react";
 import LeagueBadge from "@/components/LeagueBadge";
 import StreakCounter from "@/components/StreakCounter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProgress } from "@/hooks/useProgress";
 import { useFriends } from "@/hooks/useFriends";
+import { useChallenges } from "@/hooks/useChallenges";
 import { supabase } from "@/integrations/supabase/client";
-
 const avatarOptions = [
   { emoji: "⚽", name: "Football", unlocked: true },
   { emoji: "🏀", name: "Basketball", unlocked: true },
@@ -58,12 +59,21 @@ const trophies = [
   { id: "pro-member", name: "Pro Athlete", icon: "👑", description: "Subscribe to Pro", unlocked: false },
 ];
 
+const drillOptions = [
+  { id: "dribbling-basics", name: "Dribbling Basics", sport: "football", xp: 50 },
+  { id: "passing-drills", name: "Passing Drills", sport: "football", xp: 60 },
+  { id: "shooting-practice", name: "Shooting Practice", sport: "football", xp: 75 },
+  { id: "ball-handling", name: "Ball Handling", sport: "basketball", xp: 50 },
+  { id: "free-throws", name: "Free Throws", sport: "basketball", xp: 60 },
+];
+
 const Profile = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { streak, todayProgress } = useProgress();
   const { friends, pendingRequests, sentRequests, sendFriendRequest, acceptFriendRequest, removeFriend } = useFriends();
+  const { sendChallenge } = useChallenges();
   
   const [selectedAvatar, setSelectedAvatar] = useState("⚽");
   const [selectedFrame, setSelectedFrame] = useState("default");
@@ -72,6 +82,8 @@ const Profile = () => {
   const [friendUsername, setFriendUsername] = useState("");
   const [inAppReminders, setInAppReminders] = useState(true);
   const [emailReminders, setEmailReminders] = useState(false);
+  const [challengeDialogOpen, setChallengeDialogOpen] = useState(false);
+  const [selectedFriend, setSelectedFriend] = useState<{ id: string; username: string } | null>(null);
 
   useEffect(() => {
     if (!user) {
@@ -305,9 +317,21 @@ const Profile = () => {
                         </span>
                       </div>
                     </div>
-                    <Button size="sm" variant="ghost" onClick={() => removeFriend(friend.id)}>
-                      <X className="w-4 h-4" />
-                    </Button>
+                    <div className="flex gap-1">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => {
+                          setSelectedFriend({ id: friend.id, username: friend.username || "Friend" });
+                          setChallengeDialogOpen(true);
+                        }}
+                      >
+                        <Swords className="w-4 h-4" />
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => removeFriend(friend.id)}>
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -315,6 +339,37 @@ const Profile = () => {
               <p className="text-muted-foreground text-center py-4">No friends yet. Add someone above!</p>
             )}
           </div>
+
+          {/* Challenge Friend Dialog */}
+          <Dialog open={challengeDialogOpen} onOpenChange={setChallengeDialogOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Challenge {selectedFriend?.username}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-3 mt-4">
+                <p className="text-sm text-muted-foreground">Select a drill to challenge your friend:</p>
+                {drillOptions.map((drill) => (
+                  <button
+                    key={drill.id}
+                    onClick={async () => {
+                      if (selectedFriend) {
+                        await sendChallenge(selectedFriend.id, drill.id, drill.sport);
+                        setChallengeDialogOpen(false);
+                        setSelectedFriend(null);
+                      }
+                    }}
+                    className="w-full flex items-center justify-between p-3 rounded-xl bg-secondary/50 hover:bg-primary/10 border border-border hover:border-primary transition-all"
+                  >
+                    <div className="text-left">
+                      <span className="font-medium block">{drill.name}</span>
+                      <span className="text-xs text-muted-foreground capitalize">{drill.sport}</span>
+                    </div>
+                    <span className="text-sm text-primary font-bold">+{drill.xp} XP</span>
+                  </button>
+                ))}
+              </div>
+            </DialogContent>
+          </Dialog>
 
           {/* Streak Reminders */}
           <div className="bg-card border-2 border-border rounded-3xl p-6 mb-6 shadow-soft">
