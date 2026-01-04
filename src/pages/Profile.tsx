@@ -60,11 +60,11 @@ const trophies = [
 ];
 
 const drillOptions = [
-  { id: "dribbling-basics", name: "Dribbling Basics", sport: "football", xp: 50 },
-  { id: "passing-drills", name: "Passing Drills", sport: "football", xp: 60 },
-  { id: "shooting-practice", name: "Shooting Practice", sport: "football", xp: 75 },
-  { id: "ball-handling", name: "Ball Handling", sport: "basketball", xp: 50 },
-  { id: "free-throws", name: "Free Throws", sport: "basketball", xp: 60 },
+  { id: "football-ball-control-1-level-1", name: "First Touch", sport: "football", xp: 30 },
+  { id: "football-passing-1-level-1", name: "Short Passing", sport: "football", xp: 30 },
+  { id: "football-shooting-1-level-1", name: "Power Shots", sport: "football", xp: 30 },
+  { id: "basketball-ball-handling-1-level-1", name: "Stationary Dribbling", sport: "basketball", xp: 30 },
+  { id: "basketball-shooting-1-level-1", name: "Form Shooting", sport: "basketball", xp: 30 },
 ];
 
 const Profile = () => {

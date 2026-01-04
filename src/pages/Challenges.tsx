@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useChallenges } from "@/hooks/useChallenges";
 import { useAuth } from "@/contexts/AuthContext";
-import { getDrillById } from "@/data/drillsData";
+import { findDrillById } from "@/data/drillsData";
 
 const Challenges = () => {
   const { user } = useAuth();
@@ -23,9 +23,9 @@ const Challenges = () => {
   const completedChallenges = challenges.filter(c => c.status === "completed");
   const declinedChallenges = challenges.filter(c => c.status === "declined");
 
-  const getDrillName = (drillId: string, sport: string) => {
-    const drill = getDrillById(sport, drillId);
-    return drill?.title || "Unknown Drill";
+  const getDrillName = (drillId: string) => {
+    const result = findDrillById(drillId);
+    return result?.drill.title || drillId;
   };
 
   const formatDate = (dateString: string) => {
@@ -90,7 +90,7 @@ const Challenges = () => {
               ) : (
                 <div className="space-y-4">
                   {pendingChallenges.map((challenge) => (
-                    <div key={challenge.id} className="bg-card border-2 border-border rounded-2xl p-6 shadow-soft">
+                    <div key={challenge.id} className="bg-card border-2 border-border rounded-2xl p-6">
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
                           <span className="text-3xl">{challenge.challenger_avatar || "⚽"}</span>
@@ -106,13 +106,10 @@ const Challenges = () => {
                       </div>
                       <div className="bg-secondary/50 rounded-xl p-4 mb-4">
                         <p className="text-sm text-muted-foreground mb-1">Drill</p>
-                        <p className="font-semibold text-foreground">{getDrillName(challenge.drill_id, challenge.sport)}</p>
-                        <p className="text-xs text-muted-foreground mt-1">Sport: {challenge.sport}</p>
+                        <p className="font-semibold text-foreground">{getDrillName(challenge.drill_id)}</p>
                       </div>
                       <div className="flex items-center justify-between">
-                        <p className="text-xs text-muted-foreground">
-                          Expires: {formatDate(challenge.expires_at)}
-                        </p>
+                        <p className="text-xs text-muted-foreground">Expires: {formatDate(challenge.expires_at)}</p>
                         <div className="flex gap-2">
                           <Button variant="outline" size="sm" onClick={() => declineChallenge(challenge.id)}>
                             <XCircle className="w-4 h-4 mr-1" /> Decline
@@ -129,9 +126,7 @@ const Challenges = () => {
             </TabsContent>
 
             <TabsContent value="active">
-              {loading ? (
-                <div className="text-center py-12 text-muted-foreground">Loading...</div>
-              ) : activeChallenges.length === 0 ? (
+              {activeChallenges.length === 0 ? (
                 <div className="text-center py-12">
                   <Swords className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                   <p className="text-muted-foreground">No active challenges</p>
@@ -141,43 +136,14 @@ const Challenges = () => {
                   {activeChallenges.map((challenge) => {
                     const isChallenger = challenge.challenger_id === user.id;
                     const opponentName = isChallenger ? challenge.challenged_name : challenge.challenger_name;
-                    const opponentAvatar = isChallenger ? challenge.challenged_avatar : challenge.challenger_avatar;
-                    const myScore = isChallenger ? challenge.challenger_score : challenge.challenged_score;
-                    const opponentScore = isChallenger ? challenge.challenged_score : challenge.challenger_score;
-
                     return (
-                      <div key={challenge.id} className="bg-card border-2 border-primary/30 rounded-2xl p-6 shadow-soft">
+                      <div key={challenge.id} className="bg-card border-2 border-primary/30 rounded-2xl p-6">
                         <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-3">
-                            <span className="text-3xl">{opponentAvatar || "⚽"}</span>
-                            <div>
-                              <p className="font-bold text-foreground">vs {opponentName}</p>
-                              <p className="text-sm text-primary">Challenge Active!</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2 text-xp">
-                            <Zap className="w-5 h-5" />
-                            <span className="font-bold">+{challenge.xp_bonus} XP</span>
-                          </div>
+                          <p className="font-bold text-foreground">vs {opponentName}</p>
+                          <span className="text-xp font-bold">+{challenge.xp_bonus} XP</span>
                         </div>
-                        <div className="bg-secondary/50 rounded-xl p-4 mb-4">
-                          <p className="text-sm text-muted-foreground mb-1">Drill</p>
-                          <p className="font-semibold text-foreground">{getDrillName(challenge.drill_id, challenge.sport)}</p>
-                          <div className="flex gap-4 mt-3">
-                            <div>
-                              <p className="text-xs text-muted-foreground">Your Score</p>
-                              <p className="font-bold text-foreground">{myScore ?? "—"}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-muted-foreground">Opponent</p>
-                              <p className="font-bold text-foreground">{opponentScore ?? "—"}</p>
-                            </div>
-                          </div>
-                        </div>
-                        <Button 
-                          className="w-full" 
-                          onClick={() => navigate(`/drill/${challenge.sport}/${challenge.drill_id}`)}
-                        >
+                        <p className="font-semibold mb-4">{getDrillName(challenge.drill_id)}</p>
+                        <Button className="w-full" onClick={() => navigate(`/drill/${challenge.sport}/${challenge.drill_id}`)}>
                           Go to Drill <ChevronRight className="w-4 h-4 ml-1" />
                         </Button>
                       </div>
@@ -188,9 +154,7 @@ const Challenges = () => {
             </TabsContent>
 
             <TabsContent value="completed">
-              {loading ? (
-                <div className="text-center py-12 text-muted-foreground">Loading...</div>
-              ) : completedChallenges.length === 0 ? (
+              {completedChallenges.length === 0 ? (
                 <div className="text-center py-12">
                   <Trophy className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                   <p className="text-muted-foreground">No completed challenges yet</p>
@@ -198,56 +162,13 @@ const Challenges = () => {
               ) : (
                 <div className="space-y-4">
                   {completedChallenges.map((challenge) => {
-                    const isChallenger = challenge.challenger_id === user.id;
-                    const opponentName = isChallenger ? challenge.challenged_name : challenge.challenger_name;
-                    const opponentAvatar = isChallenger ? challenge.challenged_avatar : challenge.challenger_avatar;
-                    const myScore = isChallenger ? challenge.challenger_score : challenge.challenged_score;
-                    const opponentScore = isChallenger ? challenge.challenged_score : challenge.challenger_score;
                     const isWinner = challenge.winner_id === user.id;
-                    const isTie = challenge.winner_id === null && myScore === opponentScore;
-
                     return (
-                      <div 
-                        key={challenge.id} 
-                        className={`bg-card border-2 rounded-2xl p-6 shadow-soft ${
-                          isWinner ? "border-success/50" : isTie ? "border-border" : "border-destructive/30"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-3">
-                            <span className="text-3xl">{opponentAvatar || "⚽"}</span>
-                            <div>
-                              <p className="font-bold text-foreground">vs {opponentName}</p>
-                              <p className={`text-sm font-semibold ${
-                                isWinner ? "text-success" : isTie ? "text-muted-foreground" : "text-destructive"
-                              }`}>
-                                {isWinner ? "🏆 You Won!" : isTie ? "🤝 Tie" : "Better luck next time"}
-                              </p>
-                            </div>
-                          </div>
-                          {isWinner && (
-                            <div className="flex items-center gap-2 text-xp">
-                              <Zap className="w-5 h-5" />
-                              <span className="font-bold">+{challenge.xp_bonus} XP</span>
-                            </div>
-                          )}
-                        </div>
-                        <div className="bg-secondary/50 rounded-xl p-4">
-                          <p className="font-semibold text-foreground mb-2">{getDrillName(challenge.drill_id, challenge.sport)}</p>
-                          <div className="flex gap-4">
-                            <div>
-                              <p className="text-xs text-muted-foreground">Your Score</p>
-                              <p className="font-bold text-foreground">{myScore ?? 0}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-muted-foreground">Opponent</p>
-                              <p className="font-bold text-foreground">{opponentScore ?? 0}</p>
-                            </div>
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-2">
-                            Completed: {formatDate(challenge.completed_at || challenge.created_at)}
-                          </p>
-                        </div>
+                      <div key={challenge.id} className={`bg-card border-2 rounded-2xl p-6 ${isWinner ? "border-success/50" : "border-border"}`}>
+                        <p className={`font-bold ${isWinner ? "text-success" : "text-muted-foreground"}`}>
+                          {isWinner ? "🏆 You Won!" : "Better luck next time"}
+                        </p>
+                        <p className="text-foreground">{getDrillName(challenge.drill_id)}</p>
                       </div>
                     );
                   })}
@@ -256,33 +177,18 @@ const Challenges = () => {
             </TabsContent>
 
             <TabsContent value="declined">
-              {loading ? (
-                <div className="text-center py-12 text-muted-foreground">Loading...</div>
-              ) : declinedChallenges.length === 0 ? (
+              {declinedChallenges.length === 0 ? (
                 <div className="text-center py-12">
                   <XCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                   <p className="text-muted-foreground">No declined challenges</p>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {declinedChallenges.map((challenge) => {
-                    const isChallenger = challenge.challenger_id === user.id;
-                    const opponentName = isChallenger ? challenge.challenged_name : challenge.challenger_name;
-
-                    return (
-                      <div key={challenge.id} className="bg-card border border-border rounded-2xl p-4 opacity-60">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium text-foreground">
-                              {isChallenger ? `${opponentName} declined` : `You declined ${opponentName}'s challenge`}
-                            </p>
-                            <p className="text-sm text-muted-foreground">{getDrillName(challenge.drill_id, challenge.sport)}</p>
-                          </div>
-                          <p className="text-xs text-muted-foreground">{formatDate(challenge.created_at)}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
+                  {declinedChallenges.map((challenge) => (
+                    <div key={challenge.id} className="bg-card border border-border rounded-2xl p-4 opacity-60">
+                      <p className="text-muted-foreground">{getDrillName(challenge.drill_id)}</p>
+                    </div>
+                  ))}
                 </div>
               )}
             </TabsContent>
