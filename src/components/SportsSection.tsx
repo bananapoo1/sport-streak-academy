@@ -1,67 +1,103 @@
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Trophy, Zap, Target } from "lucide-react";
+import { sportsData } from "@/data/drillsData";
 
-const sports = [
-  { slug: "football", name: "Football", emoji: "⚽", drillCount: 85, color: "22 163 74" },
-  { slug: "basketball", name: "Basketball", emoji: "🏀", drillCount: 72, color: "249 115 22" },
-  { slug: "tennis", name: "Tennis", emoji: "🎾", drillCount: 54, color: "234 179 8" },
-  { slug: "golf", name: "Golf", emoji: "⛳", drillCount: 48, color: "22 163 74" },
-  { slug: "cricket", name: "Cricket", emoji: "🏏", drillCount: 62, color: "59 130 246" },
-  { slug: "padel", name: "Padel", emoji: "🎾", drillCount: 38, color: "139 92 246" },
-  { slug: "rugby", name: "Rugby", emoji: "🏉", drillCount: 56, color: "220 38 38" },
-  { slug: "table-tennis", name: "Table Tennis", emoji: "🏓", drillCount: 42, color: "14 165 233" },
-  { slug: "baseball", name: "Baseball", emoji: "⚾", drillCount: 64, color: "239 68 68" },
-  { slug: "american-football", name: "American Football", emoji: "🏈", drillCount: 58, color: "133 77 14" },
-  { slug: "field-hockey", name: "Field Hockey", emoji: "🏑", drillCount: 44, color: "13 148 136" },
-  { slug: "volleyball", name: "Volleyball", emoji: "🏐", drillCount: 52, color: "217 70 239" },
-];
+const SportsSection = () => {
+  const sports = Object.values(sportsData);
 
-export const SportsSection = () => {
   return (
-    <section id="sports" className="py-20 md:py-28 bg-background relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
-      </div>
-
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center mb-16">
-          <span className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-4">
-            12 Sports Available
-          </span>
-          <h2 className="text-4xl md:text-5xl font-extrabold text-foreground mb-4">
-            Choose Your Sport
+    <section id="sports" className="py-24 relative overflow-hidden">
+      {/* Background glow */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.08)_0%,transparent_60%)]" />
+      
+      <div className="container relative">
+        {/* Header */}
+        <div className="text-center mb-16 space-y-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium">
+            <Trophy className="h-4 w-4" />
+            <span>Train Like a Pro</span>
+          </div>
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
+            Choose Your <span className="gradient-text">Sport</span>
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Master any sport with structured drills designed by coaches. New content added weekly.
+          <p className="text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto">
+            Unlock your potential with progressive training paths designed by elite coaches
           </p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+        {/* Sports grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
           {sports.map((sport, index) => (
             <Link
               key={sport.slug}
               to={`/sports/${sport.slug}`}
-              className="animate-fade-in group relative bg-card hover:bg-card/80 border border-border rounded-2xl p-6 shadow-soft hover:shadow-card transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden"
-              style={{ animationDelay: `${index * 0.05}s` }}
+              className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-8 transition-all duration-500 hover:border-primary/50 hover:bg-card/80 hover:shadow-[0_0_40px_hsl(var(--primary)/0.15)] animate-in opacity-0"
+              style={{ animationDelay: `${index * 0.1}s` }}
             >
-              {/* Hover gradient */}
-              <div 
-                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                style={{ background: `linear-gradient(135deg, rgb(${sport.color} / 0.1), transparent)` }}
-              />
+              {/* Glow effect on hover */}
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-primary/0 group-hover:from-primary/5 group-hover:to-transparent transition-all duration-500" />
               
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-4xl group-hover:scale-110 transition-transform duration-300">{sport.emoji}</span>
-                  <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all duration-300" />
+              {/* Content */}
+              <div className="relative flex items-start justify-between">
+                <div className="space-y-4">
+                  {/* Emoji and name */}
+                  <div className="flex items-center gap-4">
+                    <div className="text-5xl group-hover:scale-110 transition-transform duration-300">
+                      {sport.emoji}
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold group-hover:text-primary transition-colors">
+                        {sport.name}
+                      </h3>
+                      <p className="text-muted-foreground text-sm">
+                        {sport.categories.length} training paths
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Categories preview */}
+                  <div className="flex flex-wrap gap-2">
+                    {sport.categories.slice(0, 3).map((cat) => (
+                      <span
+                        key={cat.name}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/50 text-xs text-muted-foreground"
+                      >
+                        <span>{cat.icon}</span>
+                        <span>{cat.name}</span>
+                      </span>
+                    ))}
+                  </div>
+                  
+                  {/* Stats */}
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1.5">
+                      <Target className="h-4 w-4 text-primary" />
+                      <span>Progressive levels</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Zap className="h-4 w-4 text-streak" />
+                      <span>XP rewards</span>
+                    </div>
+                  </div>
                 </div>
-                <h3 className="font-bold text-foreground text-lg mb-1">{sport.name}</h3>
-                <p className="text-sm text-muted-foreground">{sport.drillCount} drills</p>
+                
+                {/* Arrow */}
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-secondary/50 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
+                  <ArrowRight className="h-5 w-5 group-hover:translate-x-0.5 transition-transform" />
+                </div>
               </div>
             </Link>
           ))}
+        </div>
+
+        {/* Bottom CTA */}
+        <div className="text-center mt-12">
+          <p className="text-muted-foreground">
+            More sports coming soon •{" "}
+            <span className="text-primary font-medium">
+              Infinite progression system
+            </span>
+          </p>
         </div>
       </div>
     </section>

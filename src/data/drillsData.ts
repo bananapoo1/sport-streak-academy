@@ -1,313 +1,313 @@
-// Unified drill data source - single source of truth for all drill information
+// Drill difficulty levels
+export type DrillDifficulty = 'beginner' | 'intermediate' | 'advanced' | 'elite';
+export type DrillLevel = 1 | 2 | 3 | 4 | 5;
 
 export interface DrillInfo {
   id: string;
   title: string;
-  duration: number; // in minutes
+  duration: number;
   xp: number;
-  isPremium: boolean;
-  difficulty: "beginner" | "intermediate" | "advanced";
-  players: string;
-  isBoss?: boolean; // Boss level drill
-  videoUrl: string;
+  difficulty: DrillDifficulty;
+  level: DrillLevel;
+  description: string;
   instructions: string[];
-  category?: string; // Category for paid users
+  category: string;
+  sport: string;
 }
 
 export interface DrillCategory {
   name: string;
   description: string;
+  icon: string;
   drills: DrillInfo[];
 }
 
 export interface SportDrills {
   name: string;
+  slug: string;
   color: string;
-  drills: DrillInfo[];
-  categories?: DrillCategory[]; // Categories for paid users
+  emoji: string;
+  categories: DrillCategory[];
 }
 
-const createDefaultInstructions = (title: string): string[] => [
-  "Warm up for 2-3 minutes with light movement",
-  `Begin practicing ${title.toLowerCase()} at a slow pace`,
-  "Focus on proper form and technique",
-  "Gradually increase speed as you get comfortable",
-  "Take short breaks if needed",
-  "Push yourself but maintain control",
-  "Cool down and stretch after completing",
-];
-
-// Helper to generate drills for a category
-const generateDrillsForCategory = (
+// Generate progressive drill levels for a category
+const generateDrillLevels = (
   sport: string,
   category: string,
-  baseId: string,
-  count: number,
-  variations: string[]
+  categoryName: string,
+  baseDrills: { title: string; description: string }[]
 ): DrillInfo[] => {
+  const difficulties: DrillDifficulty[] = ['beginner', 'intermediate', 'advanced', 'elite'];
   const drills: DrillInfo[] = [];
-  const difficulties: Array<"beginner" | "intermediate" | "advanced"> = ["beginner", "intermediate", "advanced"];
-  
-  for (let i = 0; i < count; i++) {
-    const difficultyIndex = Math.floor(i / (count / 3));
-    const difficulty = difficulties[Math.min(difficultyIndex, 2)];
-    const variationIndex = i % variations.length;
-    const isBoss = (i + 1) % 10 === 0;
-    const isPremium = difficulty === "advanced" || i > count * 0.6;
-    
-    const baseXp = difficulty === "beginner" ? 50 : difficulty === "intermediate" ? 75 : 100;
-    const xp = isBoss ? 150 + (Math.floor(i / 10) * 50) : baseXp + (i * 2);
-    const duration = isBoss ? 25 : 8 + Math.floor(i / 10) * 2;
-    
-    drills.push({
-      id: `${baseId}-${i + 1}`,
-      title: isBoss 
-        ? `🏆 ${category} Master Level ${Math.floor((i + 1) / 10)}`
-        : `${variations[variationIndex]} ${category} ${difficulty === "beginner" ? "Basics" : difficulty === "intermediate" ? "Training" : "Mastery"} ${Math.floor(i / variations.length) + 1}`,
-      duration,
-      xp,
-      isPremium,
-      difficulty,
-      players: "Solo",
-      isBoss,
-      category,
-      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-      instructions: createDefaultInstructions(`${category} ${variations[variationIndex]}`),
-    });
-  }
-  
+
+  baseDrills.forEach((baseDrill, drillIndex) => {
+    for (let level = 1; level <= 5; level++) {
+      const difficultyIndex = Math.min(Math.floor((level - 1) / 1.5), 3);
+      const difficulty = difficulties[difficultyIndex];
+      const xpMultiplier = level * 1.5;
+      
+      drills.push({
+        id: `${sport}-${category}-${drillIndex + 1}-level-${level}`,
+        title: level === 1 ? baseDrill.title : `${baseDrill.title} Level ${level}`,
+        duration: 5 + (level * 2),
+        xp: Math.round(20 * xpMultiplier),
+        difficulty,
+        level: level as DrillLevel,
+        description: baseDrill.description,
+        instructions: generateInstructions(baseDrill.title, level),
+        category: categoryName,
+        sport,
+      });
+    }
+  });
+
   return drills;
 };
 
-// Football - 100 drills per category (500+ total)
-const footballDribblingDrills = generateDrillsForCategory(
-  "Football", "Dribbling", "fb-drib",
-  100,
-  ["Cone Slalom", "Figure 8", "Speed", "Inside-Outside", "La Croqueta", "Drag Back", "Stepover", "Scissors", "Elastico", "Roulette", "Maradona Turn", "Cruyff Turn"]
-);
-
-const footballControlDrills = generateDrillsForCategory(
-  "Football", "Control", "fb-ctrl",
-  100,
-  ["First Touch", "Ball Mastery", "Juggling", "Chest Control", "Thigh Control", "Sole Roll", "Inside Touch", "Outside Touch", "Aerial Control", "Bounce Control", "Spin Control", "Cushion Touch"]
-);
-
-const footballPassingDrills = generateDrillsForCategory(
-  "Football", "Passing", "fb-pass",
-  100,
-  ["Wall Pass", "Long Pass", "Through Ball", "Chip Pass", "One-Touch", "Driven Pass", "Cross Field", "Triangle Passing", "Give and Go", "Switch Play", "Back Pass", "Lobbed Pass"]
-);
-
-const footballShootingDrills = generateDrillsForCategory(
-  "Football", "Shooting", "fb-shot",
-  100,
-  ["Power Shot", "Finesse Shot", "Volley", "Half-Volley", "Chip Shot", "Driven Shot", "Curling Shot", "Placed Shot", "One-Touch Finish", "Header", "Outside Foot", "Acrobatic Finish"]
-);
-
-const footballTricksDrills = generateDrillsForCategory(
-  "Football", "Tricks", "fb-trick",
-  50,
-  ["Rainbow Flick", "Heel Flick", "Sombrero", "Rabona", "Around the World", "Scorpion Kick", "Bicycle Kick", "Hocus Pocus"]
-);
-
-const allFootballDrills = [
-  ...footballDribblingDrills,
-  ...footballControlDrills,
-  ...footballPassingDrills,
-  ...footballShootingDrills,
-  ...footballTricksDrills,
-];
-
-const footballCategories: DrillCategory[] = [
-  { name: "Dribbling", description: "Master ball control while moving at speed", drills: footballDribblingDrills },
-  { name: "Control", description: "Perfect your first touch and ball mastery", drills: footballControlDrills },
-  { name: "Passing", description: "Improve accuracy and passing technique", drills: footballPassingDrills },
-  { name: "Shooting", description: "Score goals with power and precision", drills: footballShootingDrills },
-  { name: "Tricks", description: "Learn flashy skills and showboat moves", drills: footballTricksDrills },
-];
-
-// Basketball - 100 drills per category
-const basketballBallHandlingDrills = generateDrillsForCategory(
-  "Basketball", "Ball Handling", "bb-handle",
-  100,
-  ["Stationary Dribble", "Crossover", "Between Legs", "Behind Back", "Spider", "Pound Dribble", "Hesitation", "In-and-Out", "Killer Crossover", "Shamgod", "Double Cross", "Combo Moves"]
-);
-
-const basketballShootingDrills = generateDrillsForCategory(
-  "Basketball", "Shooting", "bb-shoot",
-  100,
-  ["Free Throw", "Mid-Range", "Three-Point", "Floater", "Fadeaway", "Step-Back", "Pull-Up", "Catch & Shoot", "Off-Screen", "Corner Three", "Bank Shot", "Post Fadeaway"]
-);
-
-const basketballPassingDrills = generateDrillsForCategory(
-  "Basketball", "Passing", "bb-pass",
-  50,
-  ["Chest Pass", "Bounce Pass", "Overhead Pass", "No-Look", "Behind Back Pass", "Skip Pass", "Entry Pass", "Baseball Pass"]
-);
-
-const basketballDefenseDrills = generateDrillsForCategory(
-  "Basketball", "Defense", "bb-def",
-  50,
-  ["Defensive Stance", "Closeout", "Box Out", "Help Defense", "On-Ball Defense", "Rotation", "Steal Technique", "Shot Block"]
-);
-
-const basketballTeamPlayDrills = generateDrillsForCategory(
-  "Basketball", "Team Play", "bb-team",
-  100,
-  ["Pick and Roll", "Pick and Pop", "Give and Go", "Fast Break", "Post Play", "Screen Setting", "Cutting", "Spacing", "Motion Offense", "Transition", "Out of Bounds", "Press Break"]
-);
-
-const allBasketballDrills = [
-  ...basketballBallHandlingDrills,
-  ...basketballShootingDrills,
-  ...basketballPassingDrills,
-  ...basketballDefenseDrills,
-  ...basketballTeamPlayDrills,
-];
-
-const basketballCategories: DrillCategory[] = [
-  { name: "Ball Handling", description: "Master dribbling and ball control", drills: basketballBallHandlingDrills },
-  { name: "Shooting", description: "Perfect your shooting technique", drills: basketballShootingDrills },
-  { name: "Passing", description: "Master different pass types", drills: basketballPassingDrills },
-  { name: "Defense", description: "Become a lockdown defender", drills: basketballDefenseDrills },
-  { name: "Team Play", description: "Learn plays and teamwork", drills: basketballTeamPlayDrills },
-];
-
-// Tennis - 100 drills per category
-const tennisGroundstrokesDrills = generateDrillsForCategory(
-  "Tennis", "Groundstrokes", "tn-ground",
-  100,
-  ["Forehand Cross", "Forehand Line", "Backhand Cross", "Backhand Line", "Inside-Out", "Inside-In", "Heavy Topspin", "Flat Drive", "Loop Ball", "Counter Punch", "Approach Shot", "Passing Shot"]
-);
-
-const tennisServeDrills = generateDrillsForCategory(
-  "Tennis", "Serve", "tn-serve",
-  100,
-  ["Flat Serve", "Slice Serve", "Kick Serve", "Body Serve", "Wide Serve", "T Serve", "Power Serve", "Placement Serve", "Second Serve", "Serve and Volley", "Ace Training", "Toss Drill"]
-);
-
-const tennisNetPlayDrills = generateDrillsForCategory(
-  "Tennis", "Net Play", "tn-net",
-  50,
-  ["Forehand Volley", "Backhand Volley", "Drop Volley", "Swinging Volley", "Overhead Smash", "Half Volley", "Approach Volley", "Poach"]
-);
-
-const tennisFootworkDrills = generateDrillsForCategory(
-  "Tennis", "Footwork", "tn-foot",
-  50,
-  ["Split Step", "Side Shuffle", "Cross Step", "Recovery Steps", "Approach Run", "Drop Shot Recovery", "Baseline Movement", "Net Rush"]
-);
-
-const tennisTouchShotsDrills = generateDrillsForCategory(
-  "Tennis", "Touch Shots", "tn-touch",
-  50,
-  ["Drop Shot", "Lob", "Slice", "Angle Shot", "Moonball", "Defensive Slice", "Offensive Lob", "Touch Volley"]
-);
-
-const allTennisDrills = [
-  ...tennisGroundstrokesDrills,
-  ...tennisServeDrills,
-  ...tennisNetPlayDrills,
-  ...tennisFootworkDrills,
-  ...tennisTouchShotsDrills,
-];
-
-const tennisCategories: DrillCategory[] = [
-  { name: "Groundstrokes", description: "Master forehand and backhand", drills: tennisGroundstrokesDrills },
-  { name: "Serve", description: "Develop a powerful serve", drills: tennisServeDrills },
-  { name: "Net Play", description: "Dominate at the net", drills: tennisNetPlayDrills },
-  { name: "Footwork", description: "Move efficiently on court", drills: tennisFootworkDrills },
-  { name: "Touch Shots", description: "Learn finesse shots", drills: tennisTouchShotsDrills },
-];
-
-// American Football drills
-const americanFootballThrowingDrills = generateDrillsForCategory(
-  "American Football", "Throwing", "af-throw",
-  100,
-  ["Short Pass", "Medium Pass", "Deep Ball", "Spiral", "Touch Pass", "Bullet Pass", "Back Shoulder", "Post Route", "Slant Route", "Out Route", "Fade Route", "Screen Pass"]
-);
-
-const americanFootballReceivingDrills = generateDrillsForCategory(
-  "American Football", "Receiving", "af-recv",
-  100,
-  ["Route Running", "Catching", "One-Hand Catch", "Sideline Catch", "Jump Ball", "RAC Drill", "Release Move", "Break Route", "Double Move", "Option Route", "Comeback", "Curl Route"]
-);
-
-const americanFootballRushingDrills = generateDrillsForCategory(
-  "American Football", "Rushing", "af-rush",
-  50,
-  ["Power Run", "Zone Run", "Cut Back", "Vision Drill", "Ball Security", "Stiff Arm", "Spin Move", "Hurdle"]
-);
-
-const americanFootballBlockingDrills = generateDrillsForCategory(
-  "American Football", "Blocking", "af-block",
-  50,
-  ["Pass Block", "Run Block", "Pull Block", "Combo Block", "Reach Block", "Down Block", "Kick Slide", "Punch Drill"]
-);
-
-const allAmericanFootballDrills = [
-  ...americanFootballThrowingDrills,
-  ...americanFootballReceivingDrills,
-  ...americanFootballRushingDrills,
-  ...americanFootballBlockingDrills,
-];
-
-const americanFootballCategories: DrillCategory[] = [
-  { name: "Throwing", description: "Master QB throwing mechanics", drills: americanFootballThrowingDrills },
-  { name: "Receiving", description: "Perfect route running and catching", drills: americanFootballReceivingDrills },
-  { name: "Rushing", description: "Improve running back skills", drills: americanFootballRushingDrills },
-  { name: "Blocking", description: "Dominate the line of scrimmage", drills: americanFootballBlockingDrills },
-];
-
-// Default drills for other sports
-const createDefaultDrills = (sportName: string): DrillInfo[] => {
-  return generateDrillsForCategory(sportName, "Basics", "def", 50, [
-    "Fundamental", "Core", "Essential", "Primary", "Foundation", "Standard", "Basic", "Introduction"
-  ]);
-};
-
-const createDefaultCategories = (sportName: string): DrillCategory[] => {
-  return [
-    { name: "Basics", description: "Learn the fundamentals", drills: generateDrillsForCategory(sportName, "Basics", "def-basic", 50, ["Fundamental", "Core", "Essential", "Primary"]) },
-    { name: "Technique", description: "Develop core skills", drills: generateDrillsForCategory(sportName, "Technique", "def-tech", 50, ["Form", "Movement", "Precision", "Accuracy"]) },
-    { name: "Fitness", description: "Build strength and speed", drills: generateDrillsForCategory(sportName, "Fitness", "def-fit", 50, ["Strength", "Speed", "Agility", "Endurance"]) },
-    { name: "Advanced", description: "Master advanced skills", drills: generateDrillsForCategory(sportName, "Advanced", "def-adv", 50, ["Elite", "Pro", "Championship", "Expert"]) },
+const generateInstructions = (drillTitle: string, level: number): string[] => {
+  const baseInstructions = [
+    `Set up your training area with appropriate equipment`,
+    `Warm up for 5 minutes before starting`,
+    `Focus on proper form and technique throughout`,
+    `Complete all reps with full range of motion`,
+    `Rest 30-60 seconds between sets as needed`,
   ];
-};
-
-// Sport data registry
-export const sportsData: Record<string, SportDrills> = {
-  football: { name: "Football", color: "#22c55e", drills: allFootballDrills, categories: footballCategories },
-  basketball: { name: "Basketball", color: "#f97316", drills: allBasketballDrills, categories: basketballCategories },
-  tennis: { name: "Tennis", color: "#eab308", drills: allTennisDrills, categories: tennisCategories },
-  "american-football": { name: "American Football", color: "#8b4513", drills: allAmericanFootballDrills, categories: americanFootballCategories },
-};
-
-// Get sport data with fallback for unknown sports
-export const getSportData = (sportSlug: string): SportDrills => {
-  if (sportsData[sportSlug]) {
-    return sportsData[sportSlug];
+  
+  if (level >= 3) {
+    baseInstructions.push(`Increase speed while maintaining accuracy`);
+  }
+  if (level >= 4) {
+    baseInstructions.push(`Add variations to challenge yourself`);
+  }
+  if (level === 5) {
+    baseInstructions.push(`Push to your limits - this is elite level training`);
   }
   
-  // Generate default data for unknown sports
-  const sportName = sportSlug
-    .split("-")
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-  
-  const categories = createDefaultCategories(sportName);
-  const allDrills = categories.flatMap(c => c.drills);
-  
-  return {
-    name: sportName,
-    color: "#6366f1",
-    drills: allDrills,
-    categories,
-  };
+  return baseInstructions;
 };
 
-// Get drill by sport and drill ID
+// Football drills data
+const footballDrills: SportDrills = {
+  name: 'Football',
+  slug: 'football',
+  color: 'hsl(142 76% 36%)',
+  emoji: '⚽',
+  categories: [
+    {
+      name: 'Ball Control',
+      description: 'Master the fundamentals of ball manipulation',
+      icon: '🎯',
+      drills: generateDrillLevels('football', 'ball-control', 'Ball Control', [
+        { title: 'First Touch', description: 'Perfect your initial ball reception from various angles and speeds' },
+        { title: 'Juggling Mastery', description: 'Keep the ball airborne using feet, thighs, and head' },
+        { title: 'Tight Space Control', description: 'Maintain possession in confined areas under pressure' },
+      ]),
+    },
+    {
+      name: 'Passing',
+      description: 'Develop precise and powerful distribution',
+      icon: '🔄',
+      drills: generateDrillLevels('football', 'passing', 'Passing', [
+        { title: 'Short Passing', description: 'Accurate ground passes over short distances' },
+        { title: 'Long Balls', description: 'Driven passes and lofted balls across the pitch' },
+        { title: 'Through Balls', description: 'Weight and timing for penetrating passes' },
+      ]),
+    },
+    {
+      name: 'Shooting',
+      description: 'Become clinical in front of goal',
+      icon: '🥅',
+      drills: generateDrillLevels('football', 'shooting', 'Shooting', [
+        { title: 'Power Shots', description: 'Generate maximum power with proper technique' },
+        { title: 'Finesse Finishing', description: 'Curl and place shots into corners' },
+        { title: 'One-Touch Finishing', description: 'Quick reactions and instinctive finishing' },
+      ]),
+    },
+    {
+      name: 'Dribbling',
+      description: 'Beat defenders with skill and speed',
+      icon: '💨',
+      drills: generateDrillLevels('football', 'dribbling', 'Dribbling', [
+        { title: 'Speed Dribbling', description: 'Maintain control at high speeds' },
+        { title: 'Skill Moves', description: 'Stepovers, feints, and advanced tricks' },
+        { title: '1v1 Situations', description: 'Take on defenders in isolated scenarios' },
+      ]),
+    },
+  ],
+};
+
+// Basketball drills data
+const basketballDrills: SportDrills = {
+  name: 'Basketball',
+  slug: 'basketball',
+  color: 'hsl(25 95% 53%)',
+  emoji: '🏀',
+  categories: [
+    {
+      name: 'Ball Handling',
+      description: 'Control the ball like a point guard',
+      icon: '🤲',
+      drills: generateDrillLevels('basketball', 'ball-handling', 'Ball Handling', [
+        { title: 'Stationary Dribbling', description: 'Low and high dribbles with both hands' },
+        { title: 'Crossover Moves', description: 'Quick direction changes to beat defenders' },
+        { title: 'Two-Ball Drills', description: 'Simultaneous ball control for coordination' },
+      ]),
+    },
+    {
+      name: 'Shooting',
+      description: 'Develop a pure shooting stroke',
+      icon: '🎯',
+      drills: generateDrillLevels('basketball', 'shooting', 'Shooting', [
+        { title: 'Form Shooting', description: 'Perfect your shooting mechanics close to the basket' },
+        { title: 'Mid-Range Game', description: 'Pull-up jumpers and fadeaways' },
+        { title: 'Three-Point Shooting', description: 'Consistent long-range accuracy' },
+      ]),
+    },
+    {
+      name: 'Defense',
+      description: 'Lock down any opponent',
+      icon: '🛡️',
+      drills: generateDrillLevels('basketball', 'defense', 'Defense', [
+        { title: 'Defensive Slides', description: 'Lateral quickness and positioning' },
+        { title: 'Close-Out Drills', description: 'Contest shots without fouling' },
+        { title: 'Help Defense', description: 'Rotations and team defensive concepts' },
+      ]),
+    },
+  ],
+};
+
+// Tennis drills data
+const tennisDrills: SportDrills = {
+  name: 'Tennis',
+  slug: 'tennis',
+  color: 'hsl(45 93% 47%)',
+  emoji: '🎾',
+  categories: [
+    {
+      name: 'Groundstrokes',
+      description: 'Build powerful baseline weapons',
+      icon: '💪',
+      drills: generateDrillLevels('tennis', 'groundstrokes', 'Groundstrokes', [
+        { title: 'Forehand Drive', description: 'Generate topspin and power from the forehand side' },
+        { title: 'Backhand Mastery', description: 'One-hand or two-hand backhand technique' },
+        { title: 'Rally Consistency', description: 'Maintain depth and accuracy in long rallies' },
+      ]),
+    },
+    {
+      name: 'Serve',
+      description: 'Develop a dominant service game',
+      icon: '🚀',
+      drills: generateDrillLevels('tennis', 'serve', 'Serve', [
+        { title: 'Flat Serve', description: 'Maximum power on first serves' },
+        { title: 'Kick Serve', description: 'High bouncing second serves' },
+        { title: 'Placement Drills', description: 'Target specific zones with accuracy' },
+      ]),
+    },
+    {
+      name: 'Net Play',
+      description: 'Finish points at the net',
+      icon: '🏐',
+      drills: generateDrillLevels('tennis', 'net-play', 'Net Play', [
+        { title: 'Volleys', description: 'Clean technique on forehand and backhand volleys' },
+        { title: 'Overhead Smash', description: 'Put away high balls with authority' },
+        { title: 'Approach Shots', description: 'Transition from baseline to net effectively' },
+      ]),
+    },
+  ],
+};
+
+// American Football drills data
+const americanFootballDrills: SportDrills = {
+  name: 'American Football',
+  slug: 'american-football',
+  color: 'hsl(30 41% 35%)',
+  emoji: '🏈',
+  categories: [
+    {
+      name: 'Throwing',
+      description: 'Quarterback precision training',
+      icon: '🎯',
+      drills: generateDrillLevels('american-football', 'throwing', 'Throwing', [
+        { title: 'Short Routes', description: 'Quick timing patterns and slants' },
+        { title: 'Deep Balls', description: 'Long passes with touch and accuracy' },
+        { title: 'Pocket Movement', description: 'Throw while evading pressure' },
+      ]),
+    },
+    {
+      name: 'Receiving',
+      description: 'Become a reliable target',
+      icon: '🤲',
+      drills: generateDrillLevels('american-football', 'receiving', 'Receiving', [
+        { title: 'Route Running', description: 'Crisp cuts and precise routes' },
+        { title: 'Catching Drills', description: 'Secure the ball in all situations' },
+        { title: 'YAC Training', description: 'Yards after catch techniques' },
+      ]),
+    },
+    {
+      name: 'Agility',
+      description: 'Explosive athletic movement',
+      icon: '⚡',
+      drills: generateDrillLevels('american-football', 'agility', 'Agility', [
+        { title: 'Cone Drills', description: 'Quick feet and direction changes' },
+        { title: 'Ladder Work', description: 'Foot speed and coordination' },
+        { title: 'Explosion Training', description: 'First-step quickness and power' },
+      ]),
+    },
+  ],
+};
+
+// All sports data
+export const sportsData: Record<string, SportDrills> = {
+  football: footballDrills,
+  basketball: basketballDrills,
+  tennis: tennisDrills,
+  'american-football': americanFootballDrills,
+};
+
+// Get sport data by slug
+export const getSportData = (sportSlug: string): SportDrills | null => {
+  return sportsData[sportSlug] || null;
+};
+
+// Get a specific drill by sport and drill ID
 export const getDrillById = (sportSlug: string, drillId: string): DrillInfo | null => {
-  const sportData = getSportData(sportSlug);
-  return sportData.drills.find(d => d.id === drillId) || null;
+  const sport = sportsData[sportSlug];
+  if (!sport) return null;
+
+  for (const category of sport.categories) {
+    const drill = category.drills.find(d => d.id === drillId);
+    if (drill) return drill;
+  }
+  return null;
+};
+
+// Search drill by ID across all sports
+export const findDrillById = (drillId: string): { drill: DrillInfo; sport: SportDrills } | null => {
+  for (const sport of Object.values(sportsData)) {
+    for (const category of sport.categories) {
+      const drill = category.drills.find(d => d.id === drillId);
+      if (drill) return { drill, sport };
+    }
+  }
+  return null;
+};
+
+// Get all drills for a sport
+export const getAllDrillsForSport = (sportSlug: string): DrillInfo[] => {
+  const sport = sportsData[sportSlug];
+  if (!sport) return [];
+
+  return sport.categories.flatMap(cat => cat.drills);
+};
+
+// Get all available drills for challenges (only level 1 drills)
+export const getChallengeDrills = (): { sport: string; sportName: string; emoji: string; drills: { id: string; title: string; category: string }[] }[] => {
+  return Object.values(sportsData).map(sport => ({
+    sport: sport.slug,
+    sportName: sport.name,
+    emoji: sport.emoji,
+    drills: sport.categories.flatMap(cat => 
+      cat.drills.filter(d => d.level === 1).map(d => ({ id: d.id, title: d.title, category: d.category }))
+    ),
+  }));
 };
