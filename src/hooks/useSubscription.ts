@@ -33,15 +33,23 @@ export const useSubscription = () => {
   });
 
   const checkSubscription = useCallback(async () => {
-    if (!user || !session) {
+    if (!user) {
       setSubscription(prev => ({ ...prev, subscribed: false, loading: false }));
       return;
     }
 
     try {
+      // Always get fresh session to avoid expired token issues
+      const { data: { session: freshSession } } = await supabase.auth.getSession();
+      
+      if (!freshSession) {
+        setSubscription(prev => ({ ...prev, subscribed: false, loading: false }));
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke("check-subscription", {
         headers: {
-          Authorization: `Bearer ${session.access_token}`,
+          Authorization: `Bearer ${freshSession.access_token}`,
         },
       });
 
@@ -62,7 +70,7 @@ export const useSubscription = () => {
       console.error("Error checking subscription:", error);
       setSubscription(prev => ({ ...prev, loading: false }));
     }
-  }, [user, session]);
+  }, [user]);
 
   const createCheckout = async (priceId: string) => {
     try {
