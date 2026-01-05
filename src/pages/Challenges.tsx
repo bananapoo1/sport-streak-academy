@@ -25,7 +25,10 @@ const Challenges = () => {
 
   const getDrillName = (drillId: string) => {
     const result = findDrillById(drillId);
-    return result?.drill.title || drillId;
+    if (result) return result.drill.title;
+    // Handle legacy drill IDs gracefully
+    const formatted = drillId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    return `${formatted} (Legacy)`;
   };
 
   const formatDate = (dateString: string) => {

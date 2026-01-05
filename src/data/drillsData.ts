@@ -256,12 +256,340 @@ const americanFootballDrills: SportDrills = {
   ],
 };
 
+// Padel drills data
+const padelDrills: SportDrills = {
+  name: 'Padel',
+  slug: 'padel',
+  color: 'hsl(271 81% 56%)',
+  emoji: '🎾',
+  categories: [
+    {
+      name: 'Wall Play',
+      description: 'Master the unique wall dynamics',
+      icon: '🧱',
+      drills: generateDrillLevels('padel', 'wall-play', 'Wall Play', [
+        { title: 'Back Wall Returns', description: 'Read and return balls off the back glass' },
+        { title: 'Side Wall Shots', description: 'Use side walls to your advantage' },
+        { title: 'Double Bounce', description: 'Complex wall combinations' },
+      ]),
+    },
+    {
+      name: 'Volleys',
+      description: 'Dominate at the net',
+      icon: '🏐',
+      drills: generateDrillLevels('padel', 'volleys', 'Volleys', [
+        { title: 'Bandeja', description: 'The signature padel defensive overhead' },
+        { title: 'Vibora', description: 'Aggressive topspin smash technique' },
+        { title: 'Net Volleys', description: 'Quick reactions at the net' },
+      ]),
+    },
+    {
+      name: 'Positioning',
+      description: 'Court positioning and strategy',
+      icon: '📍',
+      drills: generateDrillLevels('padel', 'positioning', 'Positioning', [
+        { title: 'Net Transitions', description: 'When and how to approach the net' },
+        { title: 'Defensive Setup', description: 'Cover the court effectively' },
+        { title: 'Partner Coordination', description: 'Move as a unit with your partner' },
+      ]),
+    },
+  ],
+};
+
+// Golf drills data
+const golfDrills: SportDrills = {
+  name: 'Golf',
+  slug: 'golf',
+  color: 'hsl(142 76% 36%)',
+  emoji: '⛳',
+  categories: [
+    {
+      name: 'Driving',
+      description: 'Power and accuracy off the tee',
+      icon: '🏌️',
+      drills: generateDrillLevels('golf', 'driving', 'Driving', [
+        { title: 'Tee Shot Basics', description: 'Fundamentals of the driver swing' },
+        { title: 'Distance Control', description: 'Maximize yardage consistently' },
+        { title: 'Fairway Finder', description: 'Accuracy over distance training' },
+      ]),
+    },
+    {
+      name: 'Iron Play',
+      description: 'Precision approach shots',
+      icon: '🎯',
+      drills: generateDrillLevels('golf', 'irons', 'Iron Play', [
+        { title: 'Ball Striking', description: 'Clean contact with irons' },
+        { title: 'Distance Gaps', description: 'Know your yardages for each club' },
+        { title: 'Shot Shaping', description: 'Draws and fades on command' },
+      ]),
+    },
+    {
+      name: 'Short Game',
+      description: 'Scoring around the green',
+      icon: '🕳️',
+      drills: generateDrillLevels('golf', 'short-game', 'Short Game', [
+        { title: 'Chipping', description: 'Basic chip shots from around the green' },
+        { title: 'Pitching', description: 'Lofted shots with spin control' },
+        { title: 'Putting', description: 'Master the greens' },
+      ]),
+    },
+  ],
+};
+
+// Cricket drills data
+const cricketDrills: SportDrills = {
+  name: 'Cricket',
+  slug: 'cricket',
+  color: 'hsl(210 80% 50%)',
+  emoji: '🏏',
+  categories: [
+    {
+      name: 'Batting',
+      description: 'Score runs with confidence',
+      icon: '🏏',
+      drills: generateDrillLevels('cricket', 'batting', 'Batting', [
+        { title: 'Defensive Technique', description: 'Solid forward and back defense' },
+        { title: 'Drive Shots', description: 'Cover, straight, and on drives' },
+        { title: 'Power Hitting', description: 'Six hitting and boundary shots' },
+      ]),
+    },
+    {
+      name: 'Bowling',
+      description: 'Take wickets consistently',
+      icon: '🎳',
+      drills: generateDrillLevels('cricket', 'bowling', 'Bowling', [
+        { title: 'Line and Length', description: 'Consistent accurate bowling' },
+        { title: 'Swing Bowling', description: 'Move the ball in the air' },
+        { title: 'Spin Variations', description: 'Off-spin, leg-spin, and googlies' },
+      ]),
+    },
+    {
+      name: 'Fielding',
+      description: 'Save runs and take catches',
+      icon: '🧤',
+      drills: generateDrillLevels('cricket', 'fielding', 'Fielding', [
+        { title: 'Ground Fielding', description: 'Stop and return quickly' },
+        { title: 'Catching Practice', description: 'High catches and slip catching' },
+        { title: 'Throwing Accuracy', description: 'Direct hits and relay throws' },
+      ]),
+    },
+  ],
+};
+
+// Rugby drills data
+const rugbyDrills: SportDrills = {
+  name: 'Rugby',
+  slug: 'rugby',
+  color: 'hsl(0 72% 51%)',
+  emoji: '🏉',
+  categories: [
+    {
+      name: 'Passing',
+      description: 'Move the ball effectively',
+      icon: '🔄',
+      drills: generateDrillLevels('rugby', 'passing', 'Passing', [
+        { title: 'Spin Pass', description: 'Quick and accurate spiral passes' },
+        { title: 'Pop Pass', description: 'Short offloads in contact' },
+        { title: 'Skip Pass', description: 'Miss a man to create space' },
+      ]),
+    },
+    {
+      name: 'Tackling',
+      description: 'Defensive fundamentals',
+      icon: '🛡️',
+      drills: generateDrillLevels('rugby', 'tackling', 'Tackling', [
+        { title: 'Front Tackle', description: 'Head-on tackle technique' },
+        { title: 'Side Tackle', description: 'Chop tackles and ankle taps' },
+        { title: 'Dominant Tackle', description: 'Drive the opponent back' },
+      ]),
+    },
+    {
+      name: 'Running',
+      description: 'Evasion and ball carrying',
+      icon: '🏃',
+      drills: generateDrillLevels('rugby', 'running', 'Running', [
+        { title: 'Line Running', description: 'Straight and angled runs' },
+        { title: 'Footwork', description: 'Sidesteps and fends' },
+        { title: 'Support Play', description: 'Running effective support lines' },
+      ]),
+    },
+  ],
+};
+
+// Table Tennis drills data
+const tableTennisDrills: SportDrills = {
+  name: 'Table Tennis',
+  slug: 'table-tennis',
+  color: 'hsl(199 89% 48%)',
+  emoji: '🏓',
+  categories: [
+    {
+      name: 'Strokes',
+      description: 'Basic stroke production',
+      icon: '🏓',
+      drills: generateDrillLevels('table-tennis', 'strokes', 'Strokes', [
+        { title: 'Forehand Drive', description: 'Consistent forehand topspin' },
+        { title: 'Backhand Push', description: 'Control the pace with backspin' },
+        { title: 'Loop Attack', description: 'Heavy topspin for offensive play' },
+      ]),
+    },
+    {
+      name: 'Serve',
+      description: 'Start points with advantage',
+      icon: '🎯',
+      drills: generateDrillLevels('table-tennis', 'serve', 'Serve', [
+        { title: 'Backspin Serve', description: 'Keep the ball low and tricky' },
+        { title: 'Sidespin Serve', description: 'Curve the ball off the table' },
+        { title: 'Fast Serve', description: 'Quick serves to catch opponents off guard' },
+      ]),
+    },
+    {
+      name: 'Footwork',
+      description: 'Move efficiently around the table',
+      icon: '👟',
+      drills: generateDrillLevels('table-tennis', 'footwork', 'Footwork', [
+        { title: 'Side to Side', description: 'Lateral movement patterns' },
+        { title: 'In and Out', description: 'Moving toward and away from the table' },
+        { title: 'Pivot Footwork', description: 'Using your forehand from the backhand corner' },
+      ]),
+    },
+  ],
+};
+
+// Baseball drills data
+const baseballDrills: SportDrills = {
+  name: 'Baseball',
+  slug: 'baseball',
+  color: 'hsl(0 84% 60%)',
+  emoji: '⚾',
+  categories: [
+    {
+      name: 'Hitting',
+      description: 'Make solid contact',
+      icon: '🏏',
+      drills: generateDrillLevels('baseball', 'hitting', 'Hitting', [
+        { title: 'Tee Work', description: 'Develop consistent swing mechanics' },
+        { title: 'Soft Toss', description: 'Timing and hand-eye coordination' },
+        { title: 'Live Batting', description: 'Track and hit live pitching' },
+      ]),
+    },
+    {
+      name: 'Pitching',
+      description: 'Throw with control and movement',
+      icon: '💪',
+      drills: generateDrillLevels('baseball', 'pitching', 'Pitching', [
+        { title: 'Fastball Mechanics', description: 'Velocity and accuracy on the heater' },
+        { title: 'Off-Speed Pitches', description: 'Changeups and breaking balls' },
+        { title: 'Pitch Sequencing', description: 'Set up hitters strategically' },
+      ]),
+    },
+    {
+      name: 'Fielding',
+      description: 'Make every play',
+      icon: '🧤',
+      drills: generateDrillLevels('baseball', 'fielding', 'Fielding', [
+        { title: 'Ground Balls', description: 'Clean fielding fundamentals' },
+        { title: 'Fly Balls', description: 'Track and catch in the outfield' },
+        { title: 'Double Plays', description: 'Quick transfers and accurate throws' },
+      ]),
+    },
+  ],
+};
+
+// Field Hockey drills data
+const fieldHockeyDrills: SportDrills = {
+  name: 'Field Hockey',
+  slug: 'field-hockey',
+  color: 'hsl(173 80% 40%)',
+  emoji: '🏑',
+  categories: [
+    {
+      name: 'Stick Skills',
+      description: 'Control and manipulation',
+      icon: '🏑',
+      drills: generateDrillLevels('field-hockey', 'stick-skills', 'Stick Skills', [
+        { title: 'Dribbling', description: 'Close control at speed' },
+        { title: 'Receiving', description: 'Trap and control passes' },
+        { title: '3D Skills', description: 'Aerial lifts and tricks' },
+      ]),
+    },
+    {
+      name: 'Passing',
+      description: 'Distribute effectively',
+      icon: '🔄',
+      drills: generateDrillLevels('field-hockey', 'passing', 'Passing', [
+        { title: 'Push Pass', description: 'Accurate short-range passes' },
+        { title: 'Hit', description: 'Powerful long-range distribution' },
+        { title: 'Slap Pass', description: 'Quick release passing' },
+      ]),
+    },
+    {
+      name: 'Shooting',
+      description: 'Score from the circle',
+      icon: '🥅',
+      drills: generateDrillLevels('field-hockey', 'shooting', 'Shooting', [
+        { title: 'Drag Flick', description: 'Penalty corner specialization' },
+        { title: 'Deflections', description: 'Redirect passes into the goal' },
+        { title: 'Reverse Shot', description: 'Score from your backhand' },
+      ]),
+    },
+  ],
+};
+
+// Volleyball drills data
+const volleyballDrills: SportDrills = {
+  name: 'Volleyball',
+  slug: 'volleyball',
+  color: 'hsl(280 87% 60%)',
+  emoji: '🏐',
+  categories: [
+    {
+      name: 'Passing',
+      description: 'First touch fundamentals',
+      icon: '🤲',
+      drills: generateDrillLevels('volleyball', 'passing', 'Passing', [
+        { title: 'Forearm Pass', description: 'Receive serves and attacks' },
+        { title: 'Overhead Pass', description: 'Set the ball for attackers' },
+        { title: 'Defensive Dig', description: 'Save hard-hit balls' },
+      ]),
+    },
+    {
+      name: 'Attacking',
+      description: 'Terminate points',
+      icon: '💥',
+      drills: generateDrillLevels('volleyball', 'attacking', 'Attacking', [
+        { title: 'Approach Footwork', description: 'Generate power with your approach' },
+        { title: 'Arm Swing', description: 'Contact the ball at the highest point' },
+        { title: 'Shot Selection', description: 'Tips, rolls, and power swings' },
+      ]),
+    },
+    {
+      name: 'Blocking',
+      description: 'Stop attacks at the net',
+      icon: '🛡️',
+      drills: generateDrillLevels('volleyball', 'blocking', 'Blocking', [
+        { title: 'Solo Block', description: 'Timing and positioning basics' },
+        { title: 'Double Block', description: 'Coordinate with teammates' },
+        { title: 'Transition', description: 'Block and prepare to attack' },
+      ]),
+    },
+  ],
+};
+
 // All sports data
 export const sportsData: Record<string, SportDrills> = {
   football: footballDrills,
   basketball: basketballDrills,
   tennis: tennisDrills,
   'american-football': americanFootballDrills,
+  padel: padelDrills,
+  golf: golfDrills,
+  cricket: cricketDrills,
+  rugby: rugbyDrills,
+  'table-tennis': tableTennisDrills,
+  baseball: baseballDrills,
+  'field-hockey': fieldHockeyDrills,
+  volleyball: volleyballDrills,
 };
 
 // Get sport data by slug
@@ -281,14 +609,18 @@ export const getDrillById = (sportSlug: string, drillId: string): DrillInfo | nu
   return null;
 };
 
-// Search drill by ID across all sports
+// Search drill by ID across all sports - handles legacy IDs gracefully
 export const findDrillById = (drillId: string): { drill: DrillInfo; sport: SportDrills } | null => {
+  // First try exact match
   for (const sport of Object.values(sportsData)) {
     for (const category of sport.categories) {
       const drill = category.drills.find(d => d.id === drillId);
       if (drill) return { drill, sport };
     }
   }
+  
+  // If no exact match, this might be a legacy ID - return null gracefully
+  // The UI will handle showing "Unknown Drill" for legacy challenges
   return null;
 };
 

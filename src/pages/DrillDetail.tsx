@@ -150,15 +150,36 @@ const DrillDetail = () => {
             </div>
           </div>
 
-          {/* Drill visualization placeholder */}
-          <div className="relative border-2 rounded-2xl overflow-hidden mb-6 shadow-lg bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-            <div className="aspect-video flex items-center justify-center">
-              <div className="text-center p-8">
-                <div className="text-6xl mb-4">{sportData.emoji}</div>
-                <h3 className="text-xl font-bold text-foreground mb-2">{drill.title}</h3>
-                <p className="text-muted-foreground">
-                  Follow the instructions below to complete this drill
-                </p>
+          {/* Video Section */}
+          <div className="relative border-2 rounded-2xl overflow-hidden mb-6 shadow-lg bg-gradient-to-br from-card to-secondary/30 border-border">
+            <div className="aspect-video relative group cursor-pointer hover:bg-secondary/20 transition-colors">
+              {/* Video placeholder - ready for future video content */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mb-4 group-hover:bg-primary/30 transition-colors">
+                  <svg className="w-10 h-10 text-primary" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z"/>
+                  </svg>
+                </div>
+                <div className="text-center px-8">
+                  <h3 className="text-xl font-bold text-foreground mb-2">Video Coming Soon</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Follow the step-by-step instructions below to complete this drill
+                  </p>
+                </div>
+              </div>
+              {/* Sport badge */}
+              <div className="absolute top-4 left-4">
+                <span className="px-3 py-1.5 rounded-full bg-background/80 backdrop-blur-sm text-sm font-semibold flex items-center gap-2">
+                  <span>{sportData.emoji}</span>
+                  <span style={{ color: sportData.color }}>{sportData.name}</span>
+                </span>
+              </div>
+              {/* Duration badge */}
+              <div className="absolute top-4 right-4">
+                <span className="px-3 py-1.5 rounded-full bg-background/80 backdrop-blur-sm text-sm font-medium flex items-center gap-1.5">
+                  <Clock className="w-4 h-4 text-muted-foreground" />
+                  {drill.duration} min
+                </span>
               </div>
             </div>
           </div>
