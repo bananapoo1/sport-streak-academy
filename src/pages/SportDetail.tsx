@@ -1,17 +1,21 @@
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { ArrowLeft, Trophy, Target, Flame, Lock, Crown, Zap } from "lucide-react";
+import { ArrowLeft, Trophy, Target, Flame, Lock, Crown, Zap, TreeDeciduous, LayoutList } from "lucide-react";
 import LevelMap from "@/components/LevelMap";
 import CategoryMap from "@/components/CategoryMap";
+import SkillTree from "@/components/SkillTree";
 import { useCompletedDrills } from "@/hooks/useCompletedDrills";
 import { getSportData, getAllDrillsForSport } from "@/data/drillsData";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const SportDetail = () => {
   const { sportSlug } = useParams();
+  const [viewMode, setViewMode] = useState<"list" | "tree">("list");
   const { completedDrills, loading } = useCompletedDrills(sportSlug);
   const { isPro, isSingleSport, loading: subLoading } = useSubscription();
   const { user } = useAuth();
@@ -118,11 +122,32 @@ const SportDetail = () => {
             </div>
           </div>
 
+          {/* View Mode Toggle */}
+          <div className="flex justify-center mb-6">
+            <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "list" | "tree")} className="w-full max-w-xs">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="list" className="gap-2">
+                  <LayoutList className="w-4 h-4" />
+                  List
+                </TabsTrigger>
+                <TabsTrigger value="tree" className="gap-2">
+                  <TreeDeciduous className="w-4 h-4" />
+                  Skill Tree
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+
           {loading || subLoading ? (
             <div className="text-center py-12">
               <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
               <p className="text-muted-foreground">Loading your progress...</p>
             </div>
+          ) : viewMode === "tree" ? (
+            <SkillTree 
+              sportSlug={sportSlug || ""} 
+              completedDrillIds={Array.from(completedDrillIds)} 
+            />
           ) : hasPaidAccess && hasCategories ? (
             <div className="space-y-6">
               <div className="bg-gradient-to-r from-primary/10 to-primary/5 border-2 border-primary/30 rounded-2xl p-4 flex items-center gap-3">

@@ -105,8 +105,29 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "challenges_challenged_id_fkey"
+            columns: ["challenged_id"]
+            isOneToOne: false
+            referencedRelation: "weekly_leaderboard"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "challenges_challenger_id_fkey"
             columns: ["challenger_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challenges_challenger_id_fkey"
+            columns: ["challenger_id"]
+            isOneToOne: false
+            referencedRelation: "weekly_leaderboard"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challenges_winner_id_fkey"
+            columns: ["winner_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -115,7 +136,7 @@ export type Database = {
             foreignKeyName: "challenges_winner_id_fkey"
             columns: ["winner_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "weekly_leaderboard"
             referencedColumns: ["id"]
           },
         ]
@@ -156,6 +177,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "completed_drills_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "weekly_leaderboard"
+            referencedColumns: ["id"]
+          },
         ]
       }
       daily_progress: {
@@ -194,6 +222,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "daily_progress_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "weekly_leaderboard"
+            referencedColumns: ["id"]
+          },
         ]
       }
       friendships: {
@@ -227,10 +262,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "friendships_friend_id_fkey"
+            columns: ["friend_id"]
+            isOneToOne: false
+            referencedRelation: "weekly_leaderboard"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "friendships_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "friendships_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "weekly_leaderboard"
             referencedColumns: ["id"]
           },
         ]
@@ -248,6 +297,7 @@ export type Database = {
           location: string | null
           longest_streak: number | null
           social_links: Json | null
+          streak_freezes: number | null
           total_xp: number | null
           updated_at: string | null
           username: string | null
@@ -265,6 +315,7 @@ export type Database = {
           location?: string | null
           longest_streak?: number | null
           social_links?: Json | null
+          streak_freezes?: number | null
           total_xp?: number | null
           updated_at?: string | null
           username?: string | null
@@ -282,6 +333,7 @@ export type Database = {
           location?: string | null
           longest_streak?: number | null
           social_links?: Json | null
+          streak_freezes?: number | null
           total_xp?: number | null
           updated_at?: string | null
           username?: string | null
@@ -317,6 +369,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: true
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reminder_settings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "weekly_leaderboard"
             referencedColumns: ["id"]
           },
         ]
@@ -357,6 +416,42 @@ export type Database = {
         }
         Relationships: []
       }
+      streak_freeze_log: {
+        Row: {
+          date_protected: string
+          id: string
+          used_at: string
+          user_id: string
+        }
+        Insert: {
+          date_protected: string
+          id?: string
+          used_at?: string
+          user_id: string
+        }
+        Update: {
+          date_protected?: string
+          id?: string
+          used_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "streak_freeze_log_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "streak_freeze_log_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "weekly_leaderboard"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_achievements: {
         Row: {
           achievement_id: string
@@ -387,11 +482,29 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "user_achievements_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "weekly_leaderboard"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
     Views: {
-      [_ in never]: never
+      weekly_leaderboard: {
+        Row: {
+          avatar_id: string | null
+          current_streak: number | null
+          days_active: number | null
+          display_name: string | null
+          id: string | null
+          username: string | null
+          weekly_xp: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
