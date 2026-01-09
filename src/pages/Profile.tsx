@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Trophy, Flame, Target, Zap, Edit2, Lock, Check, Users, UserPlus, Bell, Mail, X, Swords } from "lucide-react";
+import { Trophy, Flame, Target, Zap, Edit2, Lock, Check, Users, UserPlus, Bell, Mail, X, Swords, Crown } from "lucide-react";
 import LeagueBadge from "@/components/LeagueBadge";
 import StreakCounter from "@/components/StreakCounter";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useProgress } from "@/hooks/useProgress";
 import { useFriends } from "@/hooks/useFriends";
 import { useChallenges } from "@/hooks/useChallenges";
+import { useStreakFreeze } from "@/hooks/useStreakFreeze";
+import { useDailyGoal } from "@/hooks/useDailyGoal";
+import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
+import DailyGoalSetter from "@/components/DailyGoalSetter";
+import StreakFreezeCard from "@/components/StreakFreezeCard";
+import WeeklyLeaderboard from "@/components/WeeklyLeaderboard";
 const avatarOptions = [
   { emoji: "⚽", name: "Football", unlocked: true },
   { emoji: "🏀", name: "Basketball", unlocked: true },
@@ -74,7 +80,9 @@ const Profile = () => {
   const { streak, todayProgress } = useProgress();
   const { friends, pendingRequests, sentRequests, sendFriendRequest, acceptFriendRequest, removeFriend } = useFriends();
   const { sendChallenge } = useChallenges();
-  
+  const { freezeCount, loading: freezeLoading } = useStreakFreeze();
+  const { goal, todayProgress: goalProgress, updateGoal } = useDailyGoal();
+  const { isPro } = useSubscription();
   const [selectedAvatar, setSelectedAvatar] = useState("⚽");
   const [selectedFrame, setSelectedFrame] = useState("default");
   const [profile, setProfile] = useState<any>(null);
@@ -240,6 +248,24 @@ const Profile = () => {
               <div className="text-2xl font-extrabold text-foreground">{todayProgress.xp_earned}</div>
               <div className="text-sm text-muted-foreground">Today's XP</div>
             </div>
+          </div>
+
+          {/* Daily Goal & Streak Freeze Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <DailyGoalSetter 
+              currentGoal={goal} 
+              onGoalChange={updateGoal} 
+            />
+            <StreakFreezeCard 
+              freezeCount={freezeCount}
+              hasSubscription={isPro}
+              onGetMore={() => navigate("/#pricing")}
+            />
+          </div>
+
+          {/* Weekly Leaderboard */}
+          <div className="mb-6">
+            <WeeklyLeaderboard />
           </div>
 
           {/* Friends Section */}
