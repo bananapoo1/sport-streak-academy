@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -7,21 +8,40 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useChallenges } from "@/hooks/useChallenges";
 import { useAuth } from "@/contexts/AuthContext";
 import { findDrillById } from "@/data/drillsData";
+import { useRealtimeChallenges } from "@/hooks/useRealtimeChallenges";
+import CelebrationOverlay from "@/components/CelebrationOverlay";
 
 const Challenges = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [celebrationType, setCelebrationType] = useState<"challenge_won" | "challenge_complete">("challenge_complete");
+  const [celebrationXp, setCelebrationXp] = useState(0);
+  
   const { 
     challenges, 
     pendingChallenges, 
     activeChallenges, 
     loading, 
     acceptChallenge, 
-    declineChallenge 
+    declineChallenge,
+    refetch
   } = useChallenges();
+
+  // Real-time challenge notifications
+  useRealtimeChallenges(() => {
+    refetch();
+  });
 
   const completedChallenges = challenges.filter(c => c.status === "completed");
   const declinedChallenges = challenges.filter(c => c.status === "declined");
+
+  const handleAcceptChallenge = async (challengeId: string, xpBonus: number) => {
+    await acceptChallenge(challengeId);
+    setCelebrationType("challenge_complete");
+    setCelebrationXp(xpBonus);
+    setShowCelebration(true);
+  };
 
   const getDrillName = (drillId: string) => {
     const result = findDrillById(drillId);
@@ -117,7 +137,7 @@ const Challenges = () => {
                           <Button variant="outline" size="sm" onClick={() => declineChallenge(challenge.id)}>
                             <XCircle className="w-4 h-4 mr-1" /> Decline
                           </Button>
-                          <Button size="sm" onClick={() => acceptChallenge(challenge.id)}>
+                          <Button size="sm" onClick={() => handleAcceptChallenge(challenge.id, challenge.xp_bonus)}>
                             <CheckCircle className="w-4 h-4 mr-1" /> Accept
                           </Button>
                         </div>
@@ -196,6 +216,13 @@ const Challenges = () => {
               )}
             </TabsContent>
           </Tabs>
+
+          <CelebrationOverlay
+            isOpen={showCelebration}
+            onClose={() => setShowCelebration(false)}
+            type={celebrationType}
+            xpEarned={celebrationXp}
+          />
         </div>
       </main>
       <Footer />

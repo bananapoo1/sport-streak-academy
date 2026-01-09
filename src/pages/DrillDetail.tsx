@@ -10,16 +10,21 @@ import { useProgress } from "@/hooks/useProgress";
 import { useCompletedDrills } from "@/hooks/useCompletedDrills";
 import { useFreeDrillLimit, FREE_DRILL_LIMIT } from "@/hooks/useFreeDrillLimit";
 import { getDrillById, getSportData } from "@/data/drillsData";
+import { useFriendActivity } from "@/hooks/useFriendActivity";
+import CelebrationOverlay from "@/components/CelebrationOverlay";
 
 const DrillDetail = () => {
   const { sportSlug, drillId } = useParams();
   const navigate = useNavigate();
   const [isCompleted, setIsCompleted] = useState(false);
   const [showInstructions, setShowInstructions] = useState(true);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [earnedXp, setEarnedXp] = useState(0);
   const { user } = useAuth();
   const { completeTraining } = useProgress();
   const { isDrillCompleted, loading: checkingCompletion } = useCompletedDrills(sportSlug);
   const { canDoMoreDrills, hasSubscription, loading: limitLoading } = useFreeDrillLimit();
+  const { notifyFriendsOfCompletion } = useFriendActivity();
 
   const drill = getDrillById(sportSlug || "", drillId || "");
   const sportData = getSportData(sportSlug || "");
@@ -62,9 +67,11 @@ const DrillDetail = () => {
 
     if (result.success) {
       setIsCompleted(true);
-      toast.success(`Drill completed! +${drill.xp} XP earned! 🎉`, {
-        description: "Keep up the great work to maintain your streak!",
-      });
+      setEarnedXp(drill.xp);
+      setShowCelebration(true);
+      
+      // Notify friends
+      notifyFriendsOfCompletion();
     } else {
       toast.error("Failed to save progress. Please try again.");
     }
@@ -260,6 +267,15 @@ const DrillDetail = () => {
               </Link>
             </div>
           )}
+
+          <CelebrationOverlay
+            isOpen={showCelebration}
+            onClose={() => setShowCelebration(false)}
+            type="training_complete"
+            xpEarned={earnedXp}
+            title="🎉 Drill Complete!"
+            subtitle="Great effort! Keep going to build your streak!"
+          />
         </div>
       </main>
       <Footer />

@@ -16,10 +16,12 @@ export const Navbar = () => {
   const { pendingChallenges } = useChallenges();
 
   useEffect(() => {
-    const isDark = localStorage.getItem("darkMode") === "true";
+    const isDark = localStorage.getItem("darkMode") !== "false";
     setDarkMode(isDark);
     if (isDark) {
       document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
     }
   }, []);
 
