@@ -31,6 +31,16 @@ export const useChallenges = () => {
   const [activeChallenges, setActiveChallenges] = useState<Challenge[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const updateChallengesState = (data: Challenge[]) => {
+    setChallenges(data);
+    setPendingChallenges(data.filter(c => 
+      c.status === "pending" && c.challenged_id === user?.id
+    ));
+    setActiveChallenges(data.filter(c => 
+      c.status === "accepted"
+    ));
+  };
+
   const fetchChallenges = async () => {
     if (!user) {
       setLoading(false);
@@ -68,13 +78,7 @@ export const useChallenges = () => {
           };
         });
 
-        setChallenges(enrichedChallenges);
-        setPendingChallenges(enrichedChallenges.filter(c => 
-          c.status === "pending" && c.challenged_id === user.id
-        ));
-        setActiveChallenges(enrichedChallenges.filter(c => 
-          c.status === "accepted"
-        ));
+        updateChallengesState(enrichedChallenges);
       }
     } catch (error) {
       console.error("Error fetching challenges:", error);
@@ -82,6 +86,32 @@ export const useChallenges = () => {
       setLoading(false);
     }
   };
+
+  // Real-time subscription for challenge updates
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('challenges-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'challenges',
+        },
+        async (payload) => {
+          console.log("Challenge update received:", payload);
+          // Refetch all challenges to get accurate state
+          await fetchChallenges();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
 
   const sendChallenge = async (friendId: string, drillId: string, sport: string) => {
     if (!user) return { success: false, error: "Not logged in" };

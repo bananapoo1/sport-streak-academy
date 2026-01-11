@@ -15,6 +15,7 @@ import Checkout from "./pages/Checkout";
 import Auth from "./pages/Auth";
 import Challenges from "./pages/Challenges";
 import NotFound from "./pages/NotFound";
+import DailySpinWheel from "./components/DailySpinWheel";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,7 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <DailySpinWheel />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
