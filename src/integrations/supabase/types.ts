@@ -291,7 +291,6 @@ export type Database = {
           created_at: string | null
           current_streak: number | null
           display_name: string | null
-          email: string | null
           frame_id: string | null
           id: string
           location: string | null
@@ -309,7 +308,6 @@ export type Database = {
           created_at?: string | null
           current_streak?: number | null
           display_name?: string | null
-          email?: string | null
           frame_id?: string | null
           id: string
           location?: string | null
@@ -327,7 +325,6 @@ export type Database = {
           created_at?: string | null
           current_streak?: number | null
           display_name?: string | null
-          email?: string | null
           frame_id?: string | null
           id?: string
           location?: string | null
