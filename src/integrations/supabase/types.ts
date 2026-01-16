@@ -231,6 +231,36 @@ export type Database = {
           },
         ]
       }
+      daily_spins: {
+        Row: {
+          created_at: string | null
+          id: string
+          reward_id: string
+          reward_type: string
+          reward_value: number
+          spin_date: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          reward_id: string
+          reward_type: string
+          reward_value: number
+          spin_date?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          reward_id?: string
+          reward_type?: string
+          reward_value?: number
+          spin_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       friendships: {
         Row: {
           created_at: string | null

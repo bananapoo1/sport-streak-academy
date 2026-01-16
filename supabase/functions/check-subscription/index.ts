@@ -7,10 +7,12 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Test accounts with paid access
-const TEST_ACCOUNTS_WITH_PAID_ACCESS = [
-  "jrwignall@hotmail.com",
-];
+// Test accounts are now loaded from environment variable
+const getTestAccounts = (): string[] => {
+  const envValue = Deno.env.get("TEST_ACCOUNTS_WITH_PAID_ACCESS");
+  if (!envValue) return [];
+  return envValue.split(",").map(email => email.trim().toLowerCase()).filter(Boolean);
+};
 
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
@@ -34,23 +36,50 @@ serve(async (req) => {
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
 
+    // Validate authorization header
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("No authorization header provided");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Authorization header required" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 }
+      );
+    }
 
     const token = authHeader.replace("Bearer ", "");
+    
+    // Basic token format validation
+    if (token.length === 0 || token.length > 5000) {
+      return new Response(
+        JSON.stringify({ error: "Invalid authorization token" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 }
+      );
+    }
+
     const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
-    if (userError) throw new Error(`Authentication error: ${userError.message}`);
+    if (userError) {
+      logStep("Authentication failed");
+      return new Response(
+        JSON.stringify({ error: "Authentication failed" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 }
+      );
+    }
     
     const user = userData.user;
-    if (!user?.email) throw new Error("User not authenticated or email not available");
-    logStep("User authenticated", { userId: user.id, email: user.email });
+    if (!user?.email) {
+      return new Response(
+        JSON.stringify({ error: "User email not available" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 }
+      );
+    }
+    logStep("User authenticated", { userId: user.id });
 
-    // Check if this is a test account with hardcoded paid access
-    if (TEST_ACCOUNTS_WITH_PAID_ACCESS.includes(user.email.toLowerCase())) {
-      logStep("Test account detected - granting Pro access", { email: user.email });
+    // Check if this is a test account with hardcoded paid access (now from env)
+    const testAccounts = getTestAccounts();
+    if (testAccounts.includes(user.email.toLowerCase())) {
+      logStep("Test account detected - granting Pro access");
       return new Response(JSON.stringify({
         subscribed: true,
-        product_id: "prod_TceBkBKC06XWa5", // Pro product ID
+        product_id: "prod_TceBkBKC06XWa5",
         price_id: "price_1SfOtEHuDkJH2JuHnV7SnZu8",
         subscription_end: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
       }), {
@@ -89,7 +118,7 @@ serve(async (req) => {
       subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
       productId = subscription.items.data[0].price.product;
       priceId = subscription.items.data[0].price.id;
-      logStep("Active subscription found", { productId, priceId, subscriptionEnd });
+      logStep("Active subscription found", { productId, subscriptionEnd });
     } else {
       logStep("No active subscription found");
     }
@@ -106,7 +135,7 @@ serve(async (req) => {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logStep("ERROR", { message: errorMessage });
-    return new Response(JSON.stringify({ error: errorMessage }), {
+    return new Response(JSON.stringify({ error: "An error occurred processing your request" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Gift, Zap, Snowflake, Star, Crown, Sparkles, X } from "lucide-react";
+import { Gift, Zap, Snowflake, Star, Crown, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
@@ -34,7 +34,7 @@ const DailySpinWheel = () => {
   const [rotation, setRotation] = useState(0);
   const [wonReward, setWonReward] = useState<Reward | null>(null);
   const [canSpin, setCanSpin] = useState(false);
-  const [lastSpinDate, setLastSpinDate] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const wheelRef = useRef<HTMLDivElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
 
@@ -44,19 +44,35 @@ const DailySpinWheel = () => {
     }
   }, [user]);
 
+  // Server-side check for spin availability
   const checkSpinAvailability = async () => {
     if (!user) return;
     
-    // Check if user has spun today using local storage + profile
-    const today = new Date().toDateString();
-    const storedDate = localStorage.getItem(`lastSpin_${user.id}`);
-    
-    if (storedDate !== today) {
-      setCanSpin(true);
-      setLastSpinDate(storedDate);
-    } else {
+    setIsLoading(true);
+    try {
+      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+      
+      // Check server-side if user has already spun today
+      const { data: existingSpin, error } = await supabase
+        .from("daily_spins")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("spin_date", today)
+        .maybeSingle();
+      
+      if (error) {
+        console.error("Error checking spin availability:", error);
+        setCanSpin(false);
+        return;
+      }
+      
+      // User can spin only if no record exists for today
+      setCanSpin(!existingSpin);
+    } catch (error) {
+      console.error("Error checking spin:", error);
       setCanSpin(false);
-      setLastSpinDate(today);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -78,7 +94,6 @@ const DailySpinWheel = () => {
       }
       const ctx = audioContextRef.current;
       
-      // Tick sounds during spin
       let tickCount = 0;
       const tickInterval = setInterval(() => {
         if (tickCount > 30) {
@@ -100,7 +115,7 @@ const DailySpinWheel = () => {
         tickCount++;
       }, 100 + tickCount * 10);
     } catch (e) {
-      console.log("Audio not supported");
+      // Audio not supported - silent fail
     }
   };
 
@@ -111,7 +126,7 @@ const DailySpinWheel = () => {
       }
       const ctx = audioContextRef.current;
       
-      const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+      const notes = [523.25, 659.25, 783.99, 1046.50];
       notes.forEach((freq, i) => {
         const oscillator = ctx.createOscillator();
         const gainNode = ctx.createGain();
@@ -127,16 +142,43 @@ const DailySpinWheel = () => {
         oscillator.stop(startTime + 0.3);
       });
     } catch (e) {
-      console.log("Audio not supported");
+      // Audio not supported - silent fail
     }
   };
 
-  const applyReward = async (reward: Reward) => {
-    if (!user) return;
+  const applyReward = async (reward: Reward): Promise<boolean> => {
+    if (!user) return false;
 
     try {
+      const today = new Date().toISOString().split('T')[0];
+      
+      // First, record the spin in daily_spins table (this enforces the unique constraint)
+      const { error: spinError } = await supabase
+        .from("daily_spins")
+        .insert({
+          user_id: user.id,
+          spin_date: today,
+          reward_id: reward.id,
+          reward_type: reward.type,
+          reward_value: reward.value,
+        });
+      
+      if (spinError) {
+        // If we get a unique constraint violation, user already spun today
+        if (spinError.code === "23505") {
+          toast({
+            title: "Already Spun Today",
+            description: "You've already claimed your daily spin reward!",
+            variant: "destructive",
+          });
+          setCanSpin(false);
+          return false;
+        }
+        throw spinError;
+      }
+      
+      // Now apply the reward since the spin was successfully recorded
       if (reward.type === "xp") {
-        // Add XP to profile
         const { data: profile } = await supabase
           .from("profiles")
           .select("total_xp")
@@ -148,7 +190,6 @@ const DailySpinWheel = () => {
           .update({ total_xp: (profile?.total_xp || 0) + reward.value })
           .eq("id", user.id);
       } else if (reward.type === "freeze") {
-        // Add streak freeze
         const { data: profile } = await supabase
           .from("profiles")
           .select("streak_freezes")
@@ -160,9 +201,11 @@ const DailySpinWheel = () => {
           .update({ streak_freezes: (profile?.streak_freezes || 0) + reward.value })
           .eq("id", user.id);
       }
-      // Other reward types can be handled similarly
+      
+      return true;
     } catch (error) {
       console.error("Error applying reward:", error);
+      return false;
     }
   };
 
@@ -177,31 +220,28 @@ const DailySpinWheel = () => {
     const rewardIndex = rewards.findIndex(r => r.id === selectedReward.id);
     const segmentAngle = 360 / rewards.length;
     
-    // Calculate rotation to land on the selected reward
-    const baseRotation = 360 * 5; // 5 full rotations
+    const baseRotation = 360 * 5;
     const targetAngle = 360 - (rewardIndex * segmentAngle + segmentAngle / 2);
     const finalRotation = rotation + baseRotation + targetAngle + (Math.random() * 10 - 5);
     
     setRotation(finalRotation);
 
-    // Wait for spin to complete
     setTimeout(async () => {
       setIsSpinning(false);
-      setWonReward(selectedReward);
-      playWinSound();
       
-      // Mark as spun today
-      const today = new Date().toDateString();
-      localStorage.setItem(`lastSpin_${user.id}`, today);
-      setCanSpin(false);
+      // Apply the reward (server-side validation)
+      const success = await applyReward(selectedReward);
       
-      // Apply the reward
-      await applyReward(selectedReward);
-      
-      toast({
-        title: "🎉 Congratulations!",
-        description: `You won ${selectedReward.name}!`,
-      });
+      if (success) {
+        setWonReward(selectedReward);
+        playWinSound();
+        setCanSpin(false);
+        
+        toast({
+          title: "🎉 Congratulations!",
+          description: `You won ${selectedReward.name}!`,
+        });
+      }
     }, 4000);
   };
 
@@ -219,12 +259,12 @@ const DailySpinWheel = () => {
           shadow-lg shadow-amber-500/30
           flex items-center justify-center
           transition-all duration-300
-          ${canSpin ? "animate-bounce hover:scale-110" : "opacity-70"}
+          ${canSpin && !isLoading ? "animate-bounce hover:scale-110" : "opacity-70"}
         `}
         aria-label="Daily Spin Wheel"
       >
         <Gift className="w-8 h-8 text-white" />
-        {canSpin && (
+        {canSpin && !isLoading && (
           <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive rounded-full flex items-center justify-center text-[10px] text-destructive-foreground font-bold">
             1
           </span>
@@ -316,11 +356,13 @@ const DailySpinWheel = () => {
             {/* Spin Button */}
             <Button
               onClick={handleSpin}
-              disabled={!canSpin || isSpinning}
+              disabled={!canSpin || isSpinning || isLoading}
               size="lg"
               className="w-full text-lg font-bold"
             >
-              {isSpinning ? (
+              {isLoading ? (
+                "Loading..."
+              ) : isSpinning ? (
                 "Spinning..."
               ) : canSpin ? (
                 <>
