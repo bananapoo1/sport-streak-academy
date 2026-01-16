@@ -8,19 +8,56 @@ const corsHeaders = {
 // Free users can only complete 1 drill per day
 const FREE_DRILL_LIMIT = 1;
 
-// Maximum allowed duration for any drill (in minutes)
-const MAX_DURATION = 120;
-const MIN_DURATION = 1;
+// Server-side XP calculation based on drill level
+// XP formula: base 20 XP * level * 1.5 (matches drillsData.ts)
+const DRILL_XP_BY_LEVEL: Record<number, number> = {
+  1: 30,   // 20 * 1 * 1.5
+  2: 60,   // 20 * 2 * 1.5
+  3: 90,   // 20 * 3 * 1.5
+  4: 120,  // 20 * 4 * 1.5
+  5: 150,  // 20 * 5 * 1.5
+};
 
-// Maximum XP per drill
-const MAX_XP = 500;
-const MIN_XP = 0;
+// Duration by level (matches drillsData.ts: 5 + level * 2)
+const DRILL_DURATION_BY_LEVEL: Record<number, number> = {
+  1: 7,   // 5 + 1 * 2
+  2: 9,   // 5 + 2 * 2
+  3: 11,  // 5 + 3 * 2
+  4: 13,  // 5 + 4 * 2
+  5: 15,  // 5 + 5 * 2
+};
+
+// Default values for unknown drills
+const DEFAULT_XP = 30;
+const DEFAULT_DURATION = 7;
+
+// Extract drill level from drill ID (format: sport-category-drillNum-level-X)
+function getDrillLevel(drillId: string): number {
+  const levelMatch = drillId.match(/-level-(\d+)$/);
+  if (levelMatch) {
+    const level = parseInt(levelMatch[1], 10);
+    if (level >= 1 && level <= 5) {
+      return level;
+    }
+  }
+  return 1; // Default to level 1
+}
+
+// Calculate XP server-side based on drill ID
+function calculateDrillXp(drillId: string): number {
+  const level = getDrillLevel(drillId);
+  return DRILL_XP_BY_LEVEL[level] ?? DEFAULT_XP;
+}
+
+// Calculate duration server-side based on drill ID
+function calculateDrillDuration(drillId: string): number {
+  const level = getDrillLevel(drillId);
+  return DRILL_DURATION_BY_LEVEL[level] ?? DEFAULT_DURATION;
+}
 
 interface CompleteDrillRequest {
   drillId: string;
   sport: string;
-  durationMinutes: number;
-  xpEarned: number;
 }
 
 // Simple logging helper
@@ -56,7 +93,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { drillId, sport, durationMinutes, xpEarned } = body;
+    const { drillId, sport } = body;
 
     // Validate required fields
     if (!drillId || typeof drillId !== "string" || drillId.length > 100) {
@@ -73,33 +110,11 @@ Deno.serve(async (req) => {
       );
     }
 
-    if (typeof durationMinutes !== "number" || isNaN(durationMinutes)) {
-      return new Response(
-        JSON.stringify({ error: "Duration must be a valid number" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    if (durationMinutes < MIN_DURATION || durationMinutes > MAX_DURATION) {
-      return new Response(
-        JSON.stringify({ error: `Duration must be between ${MIN_DURATION} and ${MAX_DURATION} minutes` }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    if (typeof xpEarned !== "number" || isNaN(xpEarned)) {
-      return new Response(
-        JSON.stringify({ error: "XP must be a valid number" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    if (xpEarned < MIN_XP || xpEarned > MAX_XP) {
-      return new Response(
-        JSON.stringify({ error: `XP must be between ${MIN_XP} and ${MAX_XP}` }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    // Calculate XP and duration server-side based on drill ID
+    const xpEarned = calculateDrillXp(drillId);
+    const durationMinutes = calculateDrillDuration(drillId);
+    
+    logStep("Server-calculated drill metrics", { drillId, xpEarned, durationMinutes, level: getDrillLevel(drillId) });
 
     // Get environment variables
     const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";

@@ -95,7 +95,7 @@ export const useProgress = () => {
     }
   };
 
-  const completeTraining = async (durationMinutes: number, xpEarned: number, sport: string, drillId: string) => {
+  const completeTraining = async (sport: string, drillId: string) => {
     if (!user) return { success: false };
 
     try {
@@ -107,6 +107,7 @@ export const useProgress = () => {
       }
 
       // Call the server-side edge function to complete the drill
+      // XP and duration are calculated server-side based on drill ID
       const response = await fetch(
         "https://nikvolkksngggjkvpzrd.supabase.co/functions/v1/complete-drill",
         {
@@ -118,8 +119,6 @@ export const useProgress = () => {
           body: JSON.stringify({
             drillId,
             sport,
-            durationMinutes,
-            xpEarned,
           }),
         }
       );
