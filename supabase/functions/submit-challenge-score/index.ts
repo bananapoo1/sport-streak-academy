@@ -56,8 +56,15 @@ Deno.serve(async (req) => {
     const validatedScore = Math.floor(score);
 
     // Create Supabase client with user's auth
-    const supabaseUrl = "https://nikvolkksngggjkvpzrd.supabase.co";
-    const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5pa3ZvbGtrc25nZ2dqa3ZwenJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2MDY3NTgsImV4cCI6MjA4MTE4Mjc1OH0.b6lwrPXqehUAN5VDxoB92BcCHsnMws0iKP2osDjSA60";
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+      return new Response(
+        JSON.stringify({ error: "Server configuration error" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey, {
       global: {
