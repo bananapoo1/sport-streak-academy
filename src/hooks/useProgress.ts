@@ -98,69 +98,53 @@ export const useProgress = () => {
   const completeTraining = async (durationMinutes: number, xpEarned: number, sport: string, drillId: string) => {
     if (!user) return { success: false };
 
-    const today = new Date().toISOString().split("T")[0];
+    try {
+      // Get auth session for the edge function
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        console.error("No active session");
+        return { success: false };
+      }
 
-    // Upsert daily progress
-    const { data: existingProgress } = await supabase
-      .from("daily_progress")
-      .select("*")
-      .eq("user_id", user.id)
-      .eq("date", today)
-      .maybeSingle();
+      // Call the server-side edge function to complete the drill
+      const response = await fetch(
+        "https://nikvolkksngggjkvpzrd.supabase.co/functions/v1/complete-drill",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            drillId,
+            sport,
+            durationMinutes,
+            xpEarned,
+          }),
+        }
+      );
 
-    if (existingProgress) {
-      await supabase
-        .from("daily_progress")
-        .update({
-          minutes_completed: existingProgress.minutes_completed + durationMinutes,
-          xp_earned: existingProgress.xp_earned + xpEarned,
-          drills_completed: existingProgress.drills_completed + 1,
-        })
-        .eq("id", existingProgress.id);
-    } else {
-      await supabase.from("daily_progress").insert({
-        user_id: user.id,
-        date: today,
-        minutes_completed: durationMinutes,
-        xp_earned: xpEarned,
-        drills_completed: 1,
-      });
+      const result = await response.json();
+
+      if (!response.ok) {
+        console.error("Error completing drill:", result.error);
+        return { 
+          success: false, 
+          error: result.error,
+          code: result.code 
+        };
+      }
+
+      // Refresh data after successful completion
+      await fetchTodayProgress();
+      await fetchWeekProgress();
+      await fetchStreak();
+
+      return { success: true };
+    } catch (error) {
+      console.error("Error completing training:", error);
+      return { success: false };
     }
-
-    // Record completed drill
-    await supabase.from("completed_drills").upsert({
-      user_id: user.id,
-      sport,
-      drill_id: drillId,
-      duration_minutes: durationMinutes,
-      xp_earned: xpEarned,
-    }, { onConflict: "user_id,drill_id" });
-
-    // Update profile total XP and streak
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("total_xp, current_streak, longest_streak")
-      .eq("id", user.id)
-      .single();
-
-    if (profile) {
-      const newStreak = profile.current_streak + (existingProgress ? 0 : 1);
-      await supabase
-        .from("profiles")
-        .update({
-          total_xp: profile.total_xp + xpEarned,
-          current_streak: newStreak,
-          longest_streak: Math.max(profile.longest_streak, newStreak),
-        })
-        .eq("id", user.id);
-    }
-
-    // Refresh data
-    await fetchTodayProgress();
-    await fetchWeekProgress();
-    await fetchStreak();
-
-    return { success: true };
   };
 
   useEffect(() => {
