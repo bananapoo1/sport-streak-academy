@@ -59,8 +59,6 @@ const DrillDetail = () => {
     if (!drill) return;
 
     const result = await completeTraining(
-      drill.duration,
-      drill.xp,
       sportSlug || "unknown",
       drillId || "unknown"
     );
