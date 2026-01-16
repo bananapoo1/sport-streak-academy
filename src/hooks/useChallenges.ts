@@ -186,38 +186,72 @@ export const useChallenges = () => {
     if (!user) return;
 
     try {
-      const challenge = challenges.find(c => c.id === challengeId);
-      if (!challenge) return;
-
-      const isChallenger = challenge.challenger_id === user.id;
-      const updateData = isChallenger 
-        ? { challenger_score: score }
-        : { challenged_score: score };
-
-      // Check if both scores are now available
-      const otherScore = isChallenger ? challenge.challenged_score : challenge.challenger_score;
-      if (otherScore !== null) {
-        const myScore = score;
-        const winnerId = myScore > otherScore ? user.id : 
-                         myScore < otherScore ? (isChallenger ? challenge.challenged_id : challenge.challenger_id) : 
-                         null;
-        Object.assign(updateData, {
-          status: "completed",
-          winner_id: winnerId,
-          completed_at: new Date().toISOString(),
+      // Validate score on client side first (server will validate again)
+      if (typeof score !== "number" || isNaN(score) || score < 0 || score > 100) {
+        toast({
+          title: "Invalid score",
+          description: "Score must be between 0 and 100",
+          variant: "destructive",
         });
+        return;
       }
 
-      const { error } = await supabase
-        .from("challenges")
-        .update(updateData)
-        .eq("id", challengeId);
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData?.session?.access_token;
 
-      if (error) throw error;
+      if (!accessToken) {
+        toast({
+          title: "Authentication error",
+          description: "Please sign in again",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Submit score via server-side edge function for validation
+      const response = await fetch(
+        "https://nikvolkksngggjkvpzrd.supabase.co/functions/v1/submit-challenge-score",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({ challengeId, score: Math.floor(score) }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to submit score",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (result.completed) {
+        toast({
+          title: "Challenge completed!",
+          description: "Check results to see who won!",
+        });
+      } else {
+        toast({
+          title: "Score submitted!",
+          description: "Waiting for opponent to complete the challenge.",
+        });
+      }
 
       await fetchChallenges();
     } catch (error) {
       console.error("Error completing challenge:", error);
+      toast({
+        title: "Error",
+        description: "Failed to submit score",
+        variant: "destructive",
+      });
     }
   };
 
