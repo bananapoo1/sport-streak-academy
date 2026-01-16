@@ -7,6 +7,24 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Validate Stripe price ID format
+const isValidPriceId = (priceId: string): boolean => {
+  if (typeof priceId !== "string") return false;
+  if (priceId.length < 10 || priceId.length > 100) return false;
+  return /^price_[a-zA-Z0-9]+$/.test(priceId);
+};
+
+// Validate origin URL
+const ALLOWED_ORIGINS = [
+  "https://drillzone.lovable.app",
+  "https://id-preview--aad47377-ddb4-4c81-b7ee-475bc8ae3340.lovable.app",
+];
+
+const isValidOrigin = (origin: string | null): boolean => {
+  if (!origin) return false;
+  return ALLOWED_ORIGINS.some(allowed => origin === allowed || origin.endsWith(".lovable.app"));
+};
+
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[CREATE-CHECKOUT] ${step}${detailsStr}`);
@@ -25,25 +43,68 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const { priceId } = await req.json();
-    logStep("Received request", { priceId });
-
-    if (!priceId) {
-      throw new Error("Price ID is required");
+    // Parse and validate request body
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: "Invalid JSON in request body" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      );
     }
+
+    if (!body || typeof body !== "object") {
+      return new Response(
+        JSON.stringify({ error: "Request body must be an object" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      );
+    }
+
+    const { priceId } = body as { priceId?: string };
+    
+    // Validate priceId
+    if (!priceId) {
+      return new Response(
+        JSON.stringify({ error: "Price ID is required" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      );
+    }
+
+    if (!isValidPriceId(priceId)) {
+      logStep("Invalid priceId format", { priceId: priceId.substring(0, 20) });
+      return new Response(
+        JSON.stringify({ error: "Invalid price ID format" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      );
+    }
+
+    logStep("Validated request", { priceId });
+
+    // Validate and get origin for redirect URLs
+    const origin = req.headers.get("origin");
+    const safeOrigin = isValidOrigin(origin) ? origin : ALLOWED_ORIGINS[0];
+    logStep("Using origin", { origin: safeOrigin });
 
     const authHeader = req.headers.get("Authorization");
     let userEmail: string | null = null;
     let customerId: string | undefined;
 
-    if (authHeader) {
+    if (authHeader && authHeader.startsWith("Bearer ")) {
       const token = authHeader.replace("Bearer ", "");
-      const { data } = await supabaseClient.auth.getUser(token);
-      userEmail = data.user?.email || null;
-      logStep("User authenticated", { email: userEmail });
+      if (token.length > 0 && token.length < 5000) {
+        const { data } = await supabaseClient.auth.getUser(token);
+        userEmail = data.user?.email || null;
+        logStep("User authenticated", { email: userEmail });
+      }
     }
 
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
+    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+    if (!stripeKey) {
+      throw new Error("STRIPE_SECRET_KEY is not configured");
+    }
+
+    const stripe = new Stripe(stripeKey, {
       apiVersion: "2025-08-27.basil",
     });
 
@@ -65,8 +126,8 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
-      success_url: `${req.headers.get("origin")}/checkout?success=true`,
-      cancel_url: `${req.headers.get("origin")}/checkout?canceled=true`,
+      success_url: `${safeOrigin}/checkout?success=true`,
+      cancel_url: `${safeOrigin}/checkout?canceled=true`,
     });
 
     logStep("Checkout session created", { sessionId: session.id });
@@ -78,7 +139,7 @@ serve(async (req) => {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logStep("ERROR", { message: errorMessage });
-    return new Response(JSON.stringify({ error: errorMessage }), {
+    return new Response(JSON.stringify({ error: "An error occurred processing your request" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });

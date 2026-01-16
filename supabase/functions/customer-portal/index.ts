@@ -7,6 +7,17 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Validate origin URL - whitelist approach
+const ALLOWED_ORIGINS = [
+  "https://drillzone.lovable.app",
+  "https://id-preview--aad47377-ddb4-4c81-b7ee-475bc8ae3340.lovable.app",
+];
+
+const isValidOrigin = (origin: string | null): boolean => {
+  if (!origin) return false;
+  return ALLOWED_ORIGINS.some(allowed => origin === allowed || origin.endsWith(".lovable.app"));
+};
+
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[CUSTOMER-PORTAL] ${step}${detailsStr}`);
@@ -29,33 +40,66 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
+    // Validate authorization header
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("No authorization header provided");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Authorization header required" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 }
+      );
+    }
 
     const token = authHeader.replace("Bearer ", "");
+    
+    // Basic token format validation
+    if (token.length === 0 || token.length > 5000) {
+      return new Response(
+        JSON.stringify({ error: "Invalid authorization token" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 }
+      );
+    }
+
     const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
-    if (userError) throw new Error(`Authentication error: ${userError.message}`);
+    if (userError) {
+      logStep("Authentication failed");
+      return new Response(
+        JSON.stringify({ error: "Authentication failed" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 }
+      );
+    }
     
     const user = userData.user;
-    if (!user?.email) throw new Error("User not authenticated or email not available");
-    logStep("User authenticated", { userId: user.id, email: user.email });
+    if (!user?.email) {
+      return new Response(
+        JSON.stringify({ error: "User email not available" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 }
+      );
+    }
+    logStep("User authenticated", { userId: user.id });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     
     if (customers.data.length === 0) {
-      throw new Error("No Stripe customer found for this user");
+      return new Response(
+        JSON.stringify({ error: "No subscription found for this account" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 404 }
+      );
     }
     
     const customerId = customers.data[0].id;
     logStep("Found Stripe customer", { customerId });
 
-    const origin = req.headers.get("origin") || "https://drillzone.lovable.app";
+    // Validate origin and use safe default
+    const origin = req.headers.get("origin");
+    const safeOrigin = isValidOrigin(origin) ? origin : ALLOWED_ORIGINS[0];
+    logStep("Using return URL origin", { origin: safeOrigin });
+
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: customerId,
-      return_url: `${origin}/profile`,
+      return_url: `${safeOrigin}/profile`,
     });
-    logStep("Customer portal session created", { url: portalSession.url });
+    logStep("Customer portal session created");
 
     return new Response(JSON.stringify({ url: portalSession.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -64,7 +108,7 @@ serve(async (req) => {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logStep("ERROR", { message: errorMessage });
-    return new Response(JSON.stringify({ error: errorMessage }), {
+    return new Response(JSON.stringify({ error: "An error occurred processing your request" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });
