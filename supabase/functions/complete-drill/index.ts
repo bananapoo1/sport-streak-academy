@@ -60,6 +60,19 @@ interface CompleteDrillRequest {
   sport: string;
 }
 
+interface Challenge {
+  id: string;
+  challenger_id: string;
+  challenged_id: string;
+  drill_id: string;
+  sport: string;
+  status: string;
+  challenger_score: number | null;
+  challenged_score: number | null;
+  winner_id: string | null;
+  expires_at: string;
+}
+
 // Simple logging helper
 function logStep(step: string, details?: unknown) {
   console.log(`[complete-drill] ${step}`, details ? JSON.stringify(details) : "");
@@ -206,7 +219,57 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Check free drill limit if user doesn't have a subscription
+    // ============================================================
+    // CHALLENGE DETECTION: Check if this drill is part of an active challenge
+    // ============================================================
+    const { data: activeChallenge, error: challengeError } = await supabaseAdmin
+      .from("challenges")
+      .select("*")
+      .eq("drill_id", drillId)
+      .eq("status", "accepted")
+      .or(`challenger_id.eq.${user.id},challenged_id.eq.${user.id}`)
+      .gt("expires_at", new Date().toISOString())
+      .maybeSingle();
+
+    if (challengeError) {
+      logStep("Error checking for active challenge", { error: challengeError.message });
+      // Don't fail - continue with normal drill completion
+    }
+
+    const isChallengeDrill = !!activeChallenge;
+    let challengeResult: { submitted: boolean; completed: boolean; won: boolean | null } | null = null;
+
+    if (isChallengeDrill) {
+      logStep("Active challenge found for drill", { 
+        challengeId: activeChallenge.id, 
+        drillId,
+        challenger: activeChallenge.challenger_id,
+        challenged: activeChallenge.challenged_id
+      });
+
+      // Check if user already submitted a score for this challenge
+      const isChallenger = activeChallenge.challenger_id === user.id;
+      const hasAlreadySubmitted = isChallenger 
+        ? activeChallenge.challenger_score !== null 
+        : activeChallenge.challenged_score !== null;
+
+      if (hasAlreadySubmitted) {
+        logStep("User already submitted score for this challenge");
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            message: "You have already submitted your score for this challenge",
+            isChallenge: true,
+            alreadySubmitted: true
+          }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
+    // ============================================================
+    // FREE DRILL LIMIT CHECK (applies to both regular and challenge drills)
+    // ============================================================
     if (!hasSubscription) {
       // Get today's date range
       const today = new Date();
@@ -214,7 +277,7 @@ Deno.serve(async (req) => {
       const todayEnd = new Date(todayStart);
       todayEnd.setDate(todayEnd.getDate() + 1);
 
-      // Count drills completed today
+      // Count drills completed today (from completed_drills table)
       const { count: todayDrillCount, error: countError } = await supabaseAdmin
         .from("completed_drills")
         .select("*", { count: "exact", head: true })
@@ -230,8 +293,21 @@ Deno.serve(async (req) => {
         );
       }
 
-      const completedToday = todayDrillCount ?? 0;
-      logStep("Free user drill count check", { completedToday, limit: FREE_DRILL_LIMIT });
+      // Also count challenge drill completions today (from challenges table)
+      const { count: todayChallengeCount, error: challengeCountError } = await supabaseAdmin
+        .from("challenges")
+        .select("*", { count: "exact", head: true })
+        .or(`and(challenger_id.eq.${user.id},challenger_score.not.is.null),and(challenged_id.eq.${user.id},challenged_score.not.is.null)`)
+        .gte("created_at", todayStart.toISOString())
+        .lt("created_at", todayEnd.toISOString());
+
+      const completedToday = (todayDrillCount ?? 0) + (todayChallengeCount ?? 0);
+      logStep("Free user drill count check", { 
+        regularDrills: todayDrillCount ?? 0, 
+        challengeDrills: todayChallengeCount ?? 0,
+        total: completedToday, 
+        limit: FREE_DRILL_LIMIT 
+      });
 
       if (completedToday >= FREE_DRILL_LIMIT) {
         return new Response(
@@ -246,6 +322,138 @@ Deno.serve(async (req) => {
       }
     }
 
+    // ============================================================
+    // CHALLENGE DRILL PATH: Submit score, update daily progress, but DON'T affect tree
+    // ============================================================
+    if (isChallengeDrill && activeChallenge) {
+      const isChallenger = activeChallenge.challenger_id === user.id;
+      const score = xpEarned; // Use XP as the score
+
+      // Build update data for challenge
+      const updateData: Record<string, unknown> = isChallenger
+        ? { challenger_score: score }
+        : { challenged_score: score };
+
+      // Check if both scores will be available after this update (to determine winner)
+      const otherScore = isChallenger ? activeChallenge.challenged_score : activeChallenge.challenger_score;
+      
+      challengeResult = {
+        submitted: true,
+        completed: otherScore !== null,
+        won: null
+      };
+
+      if (otherScore !== null) {
+        // Both players have submitted - determine winner
+        const winnerId =
+          score > otherScore
+            ? user.id
+            : score < otherScore
+            ? isChallenger
+              ? activeChallenge.challenged_id
+              : activeChallenge.challenger_id
+            : null; // Tie
+
+        updateData.status = "completed";
+        updateData.winner_id = winnerId;
+        updateData.completed_at = new Date().toISOString();
+
+        challengeResult.won = winnerId === user.id;
+        logStep("Challenge completed - winner determined", { 
+          winnerId, 
+          userScore: score, 
+          otherScore,
+          isTie: winnerId === null 
+        });
+      }
+
+      // Update the challenge with the score
+      const { error: updateError } = await supabaseAdmin
+        .from("challenges")
+        .update(updateData)
+        .eq("id", activeChallenge.id);
+
+      if (updateError) {
+        logStep("Error updating challenge", { error: updateError.message });
+        return new Response(
+          JSON.stringify({ error: "Failed to submit challenge score" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      logStep("Challenge score submitted successfully", { 
+        challengeId: activeChallenge.id, 
+        score,
+        isChallenger 
+      });
+
+      // Update daily progress (challenge drills count toward daily stats)
+      const today = new Date().toISOString().split("T")[0];
+      const { data: existingProgress } = await supabaseAdmin
+        .from("daily_progress")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("date", today)
+        .maybeSingle();
+
+      if (existingProgress) {
+        await supabaseAdmin
+          .from("daily_progress")
+          .update({
+            minutes_completed: existingProgress.minutes_completed + Math.floor(durationMinutes),
+            xp_earned: existingProgress.xp_earned + Math.floor(xpEarned),
+            drills_completed: existingProgress.drills_completed + 1,
+          })
+          .eq("id", existingProgress.id);
+      } else {
+        await supabaseAdmin.from("daily_progress").insert({
+          user_id: user.id,
+          date: today,
+          minutes_completed: Math.floor(durationMinutes),
+          xp_earned: Math.floor(xpEarned),
+          drills_completed: 1,
+        });
+      }
+
+      // Update profile total XP (but NOT streak - that's based on actual training)
+      const { data: profile } = await supabaseAdmin
+        .from("profiles")
+        .select("total_xp")
+        .eq("id", user.id)
+        .single();
+
+      if (profile) {
+        await supabaseAdmin
+          .from("profiles")
+          .update({
+            total_xp: profile.total_xp + Math.floor(xpEarned),
+          })
+          .eq("id", user.id);
+      }
+
+      // NOTE: We deliberately do NOT insert into completed_drills for challenge drills
+      // This ensures challenge drills don't affect the drill tree/level progression
+
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: challengeResult.completed 
+            ? `Challenge completed! ${challengeResult.won === true ? "You won!" : challengeResult.won === false ? "You lost." : "It's a tie!"}`
+            : "Challenge score submitted! Waiting for opponent.",
+          isChallenge: true,
+          challengeCompleted: challengeResult.completed,
+          won: challengeResult.won,
+          xpEarned: Math.floor(xpEarned),
+          hasSubscription
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // ============================================================
+    // REGULAR DRILL PATH: Full completion with tree progression
+    // ============================================================
+    
     // Check if drill was already completed by this user
     const { data: existingDrill, error: existingError } = await supabaseAdmin
       .from("completed_drills")
@@ -277,7 +485,7 @@ Deno.serve(async (req) => {
     // All validations passed - complete the drill
     const today = new Date().toISOString().split("T")[0];
 
-    // Record completed drill
+    // Record completed drill (this affects tree/level progression)
     const { error: insertError } = await supabaseAdmin
       .from("completed_drills")
       .insert({
