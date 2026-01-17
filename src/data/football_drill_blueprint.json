@@ -1,0 +1,4597 @@
+{
+  "sport": "football",
+  "categories": [
+    {
+      "id": "dribbling",
+      "name": "Dribbling",
+      "levels": 10,
+      "drills_per_level": 3
+    },
+    {
+      "id": "passing",
+      "name": "Passing",
+      "levels": 10,
+      "drills_per_level": 3
+    },
+    {
+      "id": "shooting",
+      "name": "Shooting",
+      "levels": 10,
+      "drills_per_level": 3
+    },
+    {
+      "id": "control",
+      "name": "Ball Control",
+      "levels": 10,
+      "drills_per_level": 3
+    },
+    {
+      "id": "fitness",
+      "name": "Fitness & Agility",
+      "levels": 10,
+      "drills_per_level": 3
+    }
+  ],
+  "drills": [
+    {
+      "id": "football-dribbling-L01-001",
+      "sport": "football",
+      "category": "dribbling",
+      "category_name": "Dribbling",
+      "level": 1,
+      "title": "Dribbling L1 Drill 1",
+      "description": "Dribbling practice at level 1.",
+      "duration_minutes": 7,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Set 3 cones 1.2m apart. Dribble through and back for 3 reps.",
+        "Focus on close touches and change of pace."
+      ],
+      "metric": {
+        "type": "mistakes",
+        "target": "<=2 mistakes per rep",
+        "success_eval": "self_or_partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 24,
+      "free": true,
+      "unlock_requires": "none"
+    },
+    {
+      "id": "football-dribbling-L01-002",
+      "sport": "football",
+      "category": "dribbling",
+      "category_name": "Dribbling",
+      "level": 1,
+      "title": "Dribbling L1 Drill 2",
+      "description": "Dribbling practice at level 1.",
+      "duration_minutes": 7,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Set 3 cones 1.2m apart. Dribble through and back for 3 reps.",
+        "Focus on close touches and change of pace."
+      ],
+      "metric": {
+        "type": "mistakes",
+        "target": "<=2 mistakes per rep",
+        "success_eval": "self_or_partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 24,
+      "free": true,
+      "unlock_requires": "none"
+    },
+    {
+      "id": "football-dribbling-L01-003",
+      "sport": "football",
+      "category": "dribbling",
+      "category_name": "Dribbling",
+      "level": 1,
+      "title": "Dribbling L1 Drill 3",
+      "description": "Dribbling practice at level 1.",
+      "duration_minutes": 7,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Set 3 cones 1.2m apart. Dribble through and back for 3 reps.",
+        "Focus on close touches and change of pace."
+      ],
+      "metric": {
+        "type": "mistakes",
+        "target": "<=2 mistakes per rep",
+        "success_eval": "self_or_partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 24,
+      "free": true,
+      "unlock_requires": "none"
+    },
+    {
+      "id": "football-dribbling-L02-001",
+      "sport": "football",
+      "category": "dribbling",
+      "category_name": "Dribbling",
+      "level": 2,
+      "title": "Dribbling L2 Drill 1",
+      "description": "Dribbling practice at level 2.",
+      "duration_minutes": 9,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Set 3 cones 1.4m apart. Dribble through and back for 3 reps.",
+        "Focus on close touches and change of pace."
+      ],
+      "metric": {
+        "type": "mistakes",
+        "target": "<=2 mistakes per rep",
+        "success_eval": "self_or_partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 30,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_1"
+    },
+    {
+      "id": "football-dribbling-L02-002",
+      "sport": "football",
+      "category": "dribbling",
+      "category_name": "Dribbling",
+      "level": 2,
+      "title": "Dribbling L2 Drill 2",
+      "description": "Dribbling practice at level 2.",
+      "duration_minutes": 9,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Set 3 cones 1.4m apart. Dribble through and back for 3 reps.",
+        "Focus on close touches and change of pace."
+      ],
+      "metric": {
+        "type": "mistakes",
+        "target": "<=2 mistakes per rep",
+        "success_eval": "self_or_partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 30,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_1"
+    },
+    {
+      "id": "football-dribbling-L02-003",
+      "sport": "football",
+      "category": "dribbling",
+      "category_name": "Dribbling",
+      "level": 2,
+      "title": "Dribbling L2 Drill 3",
+      "description": "Dribbling practice at level 2.",
+      "duration_minutes": 9,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Set 3 cones 1.4m apart. Dribble through and back for 3 reps.",
+        "Focus on close touches and change of pace."
+      ],
+      "metric": {
+        "type": "mistakes",
+        "target": "<=2 mistakes per rep",
+        "success_eval": "self_or_partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 30,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_1"
+    },
+    {
+      "id": "football-dribbling-L03-001",
+      "sport": "football",
+      "category": "dribbling",
+      "category_name": "Dribbling",
+      "level": 3,
+      "title": "Dribbling L3 Drill 1",
+      "description": "Dribbling practice at level 3.",
+      "duration_minutes": 11,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Set 3 cones 1.6m apart. Dribble through and back for 3 reps.",
+        "Focus on close touches and change of pace."
+      ],
+      "metric": {
+        "type": "mistakes",
+        "target": "<=2 mistakes per rep",
+        "success_eval": "self_or_partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 36,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_2"
+    },
+    {
+      "id": "football-dribbling-L03-002",
+      "sport": "football",
+      "category": "dribbling",
+      "category_name": "Dribbling",
+      "level": 3,
+      "title": "Dribbling L3 Drill 2",
+      "description": "Dribbling practice at level 3.",
+      "duration_minutes": 11,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Set 3 cones 1.6m apart. Dribble through and back for 3 reps.",
+        "Focus on close touches and change of pace."
+      ],
+      "metric": {
+        "type": "mistakes",
+        "target": "<=2 mistakes per rep",
+        "success_eval": "self_or_partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 36,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_2"
+    },
+    {
+      "id": "football-dribbling-L03-003",
+      "sport": "football",
+      "category": "dribbling",
+      "category_name": "Dribbling",
+      "level": 3,
+      "title": "Dribbling L3 Drill 3",
+      "description": "Dribbling practice at level 3.",
+      "duration_minutes": 11,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Set 3 cones 1.6m apart. Dribble through and back for 3 reps.",
+        "Focus on close touches and change of pace."
+      ],
+      "metric": {
+        "type": "mistakes",
+        "target": "<=2 mistakes per rep",
+        "success_eval": "self_or_partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 36,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_2"
+    },
+    {
+      "id": "football-dribbling-L04-001",
+      "sport": "football",
+      "category": "dribbling",
+      "category_name": "Dribbling",
+      "level": 4,
+      "title": "Dribbling L4 Drill 1",
+      "description": "Dribbling practice at level 4.",
+      "duration_minutes": 13,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Set 3 cones 1.8m apart. Dribble through and back for 4 reps.",
+        "Focus on close touches and change of pace."
+      ],
+      "metric": {
+        "type": "mistakes",
+        "target": "<=2 mistakes per rep",
+        "success_eval": "self_or_partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 42,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_3"
+    },
+    {
+      "id": "football-dribbling-L04-002",
+      "sport": "football",
+      "category": "dribbling",
+      "category_name": "Dribbling",
+      "level": 4,
+      "title": "Dribbling L4 Drill 2",
+      "description": "Dribbling practice at level 4.",
+      "duration_minutes": 13,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Set 3 cones 1.8m apart. Dribble through and back for 4 reps.",
+        "Focus on close touches and change of pace."
+      ],
+      "metric": {
+        "type": "mistakes",
+        "target": "<=2 mistakes per rep",
+        "success_eval": "self_or_partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 42,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_3"
+    },
+    {
+      "id": "football-dribbling-L04-003",
+      "sport": "football",
+      "category": "dribbling",
+      "category_name": "Dribbling",
+      "level": 4,
+      "title": "Dribbling L4 Drill 3",
+      "description": "Dribbling practice at level 4.",
+      "duration_minutes": 13,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Set 3 cones 1.8m apart. Dribble through and back for 4 reps.",
+        "Focus on close touches and change of pace."
+      ],
+      "metric": {
+        "type": "mistakes",
+        "target": "<=2 mistakes per rep",
+        "success_eval": "self_or_partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 42,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_3"
+    },
+    {
+      "id": "football-dribbling-L05-001",
+      "sport": "football",
+      "category": "dribbling",
+      "category_name": "Dribbling",
+      "level": 5,
+      "title": "Dribbling L5 Drill 1",
+      "description": "Dribbling practice at level 5.",
+      "duration_minutes": 15,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Set 3 cones 2.0m apart. Dribble through and back for 5 reps.",
+        "Focus on close touches and change of pace."
+      ],
+      "metric": {
+        "type": "mistakes",
+        "target": "<=2 mistakes per rep",
+        "success_eval": "self_or_partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 48,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_4"
+    },
+    {
+      "id": "football-dribbling-L05-002",
+      "sport": "football",
+      "category": "dribbling",
+      "category_name": "Dribbling",
+      "level": 5,
+      "title": "Dribbling L5 Drill 2",
+      "description": "Dribbling practice at level 5.",
+      "duration_minutes": 15,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Set 3 cones 2.0m apart. Dribble through and back for 5 reps.",
+        "Focus on close touches and change of pace."
+      ],
+      "metric": {
+        "type": "mistakes",
+        "target": "<=2 mistakes per rep",
+        "success_eval": "self_or_partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 48,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_4"
+    },
+    {
+      "id": "football-dribbling-L05-003",
+      "sport": "football",
+      "category": "dribbling",
+      "category_name": "Dribbling",
+      "level": 5,
+      "title": "Dribbling L5 Drill 3",
+      "description": "Dribbling practice at level 5.",
+      "duration_minutes": 15,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Set 3 cones 2.0m apart. Dribble through and back for 5 reps.",
+        "Focus on close touches and change of pace."
+      ],
+      "metric": {
+        "type": "mistakes",
+        "target": "<=2 mistakes per rep",
+        "success_eval": "self_or_partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 48,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_4"
+    },
+    {
+      "id": "football-dribbling-L06-001",
+      "sport": "football",
+      "category": "dribbling",
+      "category_name": "Dribbling",
+      "level": 6,
+      "title": "Dribbling L6 Drill 1",
+      "description": "Dribbling practice at level 6.",
+      "duration_minutes": 17,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Set 3 cones 2.2m apart. Dribble through and back for 6 reps.",
+        "Focus on close touches and change of pace."
+      ],
+      "metric": {
+        "type": "mistakes",
+        "target": "<=2 mistakes per rep",
+        "success_eval": "self_or_partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 54,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_5"
+    },
+    {
+      "id": "football-dribbling-L06-002",
+      "sport": "football",
+      "category": "dribbling",
+      "category_name": "Dribbling",
+      "level": 6,
+      "title": "Dribbling L6 Drill 2",
+      "description": "Dribbling practice at level 6.",
+      "duration_minutes": 17,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Set 3 cones 2.2m apart. Dribble through and back for 6 reps.",
+        "Focus on close touches and change of pace."
+      ],
+      "metric": {
+        "type": "mistakes",
+        "target": "<=2 mistakes per rep",
+        "success_eval": "self_or_partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 54,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_5"
+    },
+    {
+      "id": "football-dribbling-L06-003",
+      "sport": "football",
+      "category": "dribbling",
+      "category_name": "Dribbling",
+      "level": 6,
+      "title": "Dribbling L6 Drill 3",
+      "description": "Dribbling practice at level 6.",
+      "duration_minutes": 17,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Set 3 cones 2.2m apart. Dribble through and back for 6 reps.",
+        "Focus on close touches and change of pace."
+      ],
+      "metric": {
+        "type": "mistakes",
+        "target": "<=2 mistakes per rep",
+        "success_eval": "self_or_partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 54,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_5"
+    },
+    {
+      "id": "football-dribbling-L07-001",
+      "sport": "football",
+      "category": "dribbling",
+      "category_name": "Dribbling",
+      "level": 7,
+      "title": "Dribbling L7 Drill 1",
+      "description": "Dribbling practice at level 7.",
+      "duration_minutes": 19,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Set 3 cones 2.4m apart. Dribble through and back for 7 reps.",
+        "Focus on close touches and change of pace."
+      ],
+      "metric": {
+        "type": "mistakes",
+        "target": "<=2 mistakes per rep",
+        "success_eval": "self_or_partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 60,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_6"
+    },
+    {
+      "id": "football-dribbling-L07-002",
+      "sport": "football",
+      "category": "dribbling",
+      "category_name": "Dribbling",
+      "level": 7,
+      "title": "Dribbling L7 Drill 2",
+      "description": "Dribbling practice at level 7.",
+      "duration_minutes": 19,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Set 3 cones 2.4m apart. Dribble through and back for 7 reps.",
+        "Focus on close touches and change of pace."
+      ],
+      "metric": {
+        "type": "mistakes",
+        "target": "<=2 mistakes per rep",
+        "success_eval": "self_or_partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 60,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_6"
+    },
+    {
+      "id": "football-dribbling-L07-003",
+      "sport": "football",
+      "category": "dribbling",
+      "category_name": "Dribbling",
+      "level": 7,
+      "title": "Dribbling L7 Drill 3",
+      "description": "Dribbling practice at level 7.",
+      "duration_minutes": 19,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Set 3 cones 2.4m apart. Dribble through and back for 7 reps.",
+        "Focus on close touches and change of pace."
+      ],
+      "metric": {
+        "type": "mistakes",
+        "target": "<=2 mistakes per rep",
+        "success_eval": "self_or_partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 60,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_6"
+    },
+    {
+      "id": "football-dribbling-L08-001",
+      "sport": "football",
+      "category": "dribbling",
+      "category_name": "Dribbling",
+      "level": 8,
+      "title": "Dribbling L8 Drill 1",
+      "description": "Dribbling practice at level 8.",
+      "duration_minutes": 21,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Set 3 cones 2.6m apart. Dribble through and back for 8 reps.",
+        "Focus on close touches and change of pace."
+      ],
+      "metric": {
+        "type": "mistakes",
+        "target": "<=2 mistakes per rep",
+        "success_eval": "self_or_partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 66,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_7"
+    },
+    {
+      "id": "football-dribbling-L08-002",
+      "sport": "football",
+      "category": "dribbling",
+      "category_name": "Dribbling",
+      "level": 8,
+      "title": "Dribbling L8 Drill 2",
+      "description": "Dribbling practice at level 8.",
+      "duration_minutes": 21,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Set 3 cones 2.6m apart. Dribble through and back for 8 reps.",
+        "Focus on close touches and change of pace."
+      ],
+      "metric": {
+        "type": "mistakes",
+        "target": "<=2 mistakes per rep",
+        "success_eval": "self_or_partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 66,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_7"
+    },
+    {
+      "id": "football-dribbling-L08-003",
+      "sport": "football",
+      "category": "dribbling",
+      "category_name": "Dribbling",
+      "level": 8,
+      "title": "Dribbling L8 Drill 3",
+      "description": "Dribbling practice at level 8.",
+      "duration_minutes": 21,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Set 3 cones 2.6m apart. Dribble through and back for 8 reps.",
+        "Focus on close touches and change of pace."
+      ],
+      "metric": {
+        "type": "mistakes",
+        "target": "<=2 mistakes per rep",
+        "success_eval": "self_or_partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 66,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_7"
+    },
+    {
+      "id": "football-dribbling-L09-001",
+      "sport": "football",
+      "category": "dribbling",
+      "category_name": "Dribbling",
+      "level": 9,
+      "title": "Dribbling L9 Drill 1",
+      "description": "Dribbling practice at level 9.",
+      "duration_minutes": 23,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Set 3 cones 2.8m apart. Dribble through and back for 9 reps.",
+        "Focus on close touches and change of pace."
+      ],
+      "metric": {
+        "type": "mistakes",
+        "target": "<=2 mistakes per rep",
+        "success_eval": "self_or_partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 72,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_8"
+    },
+    {
+      "id": "football-dribbling-L09-002",
+      "sport": "football",
+      "category": "dribbling",
+      "category_name": "Dribbling",
+      "level": 9,
+      "title": "Dribbling L9 Drill 2",
+      "description": "Dribbling practice at level 9.",
+      "duration_minutes": 23,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Set 3 cones 2.8m apart. Dribble through and back for 9 reps.",
+        "Focus on close touches and change of pace."
+      ],
+      "metric": {
+        "type": "mistakes",
+        "target": "<=2 mistakes per rep",
+        "success_eval": "self_or_partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 72,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_8"
+    },
+    {
+      "id": "football-dribbling-L09-003",
+      "sport": "football",
+      "category": "dribbling",
+      "category_name": "Dribbling",
+      "level": 9,
+      "title": "Dribbling L9 Drill 3",
+      "description": "Dribbling practice at level 9.",
+      "duration_minutes": 23,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Set 3 cones 2.8m apart. Dribble through and back for 9 reps.",
+        "Focus on close touches and change of pace."
+      ],
+      "metric": {
+        "type": "mistakes",
+        "target": "<=2 mistakes per rep",
+        "success_eval": "self_or_partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 72,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_8"
+    },
+    {
+      "id": "football-dribbling-L10-001",
+      "sport": "football",
+      "category": "dribbling",
+      "category_name": "Dribbling",
+      "level": 10,
+      "title": "Dribbling L10 Drill 1",
+      "description": "Dribbling practice at level 10.",
+      "duration_minutes": 25,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Set 3 cones 3.0m apart. Dribble through and back for 10 reps.",
+        "Focus on close touches and change of pace."
+      ],
+      "metric": {
+        "type": "mistakes",
+        "target": "<=2 mistakes per rep",
+        "success_eval": "self_or_partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 78,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_9"
+    },
+    {
+      "id": "football-dribbling-L10-002",
+      "sport": "football",
+      "category": "dribbling",
+      "category_name": "Dribbling",
+      "level": 10,
+      "title": "Dribbling L10 Drill 2",
+      "description": "Dribbling practice at level 10.",
+      "duration_minutes": 25,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Set 3 cones 3.0m apart. Dribble through and back for 10 reps.",
+        "Focus on close touches and change of pace."
+      ],
+      "metric": {
+        "type": "mistakes",
+        "target": "<=2 mistakes per rep",
+        "success_eval": "self_or_partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 78,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_9"
+    },
+    {
+      "id": "football-dribbling-L10-003",
+      "sport": "football",
+      "category": "dribbling",
+      "category_name": "Dribbling",
+      "level": 10,
+      "title": "Dribbling L10 Drill 3",
+      "description": "Dribbling practice at level 10.",
+      "duration_minutes": 25,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Set 3 cones 3.0m apart. Dribble through and back for 10 reps.",
+        "Focus on close touches and change of pace."
+      ],
+      "metric": {
+        "type": "mistakes",
+        "target": "<=2 mistakes per rep",
+        "success_eval": "self_or_partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 78,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_9"
+    },
+    {
+      "id": "football-passing-L01-001",
+      "sport": "football",
+      "category": "passing",
+      "category_name": "Passing",
+      "level": 1,
+      "title": "Passing L1 Drill 1",
+      "description": "Passing practice at level 1.",
+      "duration_minutes": 7,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Partner up or use a wall. Complete sets of 6 passes from 4m.",
+        "Use both feet and follow through."
+      ],
+      "metric": {
+        "type": "accuracy",
+        "target": ">=80% on target",
+        "success_eval": "partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 24,
+      "free": true,
+      "unlock_requires": "none"
+    },
+    {
+      "id": "football-passing-L01-002",
+      "sport": "football",
+      "category": "passing",
+      "category_name": "Passing",
+      "level": 1,
+      "title": "Passing L1 Drill 2",
+      "description": "Passing practice at level 1.",
+      "duration_minutes": 7,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Partner up or use a wall. Complete sets of 6 passes from 4m.",
+        "Use both feet and follow through."
+      ],
+      "metric": {
+        "type": "accuracy",
+        "target": ">=80% on target",
+        "success_eval": "partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 24,
+      "free": true,
+      "unlock_requires": "none"
+    },
+    {
+      "id": "football-passing-L01-003",
+      "sport": "football",
+      "category": "passing",
+      "category_name": "Passing",
+      "level": 1,
+      "title": "Passing L1 Drill 3",
+      "description": "Passing practice at level 1.",
+      "duration_minutes": 7,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Partner up or use a wall. Complete sets of 6 passes from 4m.",
+        "Use both feet and follow through."
+      ],
+      "metric": {
+        "type": "accuracy",
+        "target": ">=80% on target",
+        "success_eval": "partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 24,
+      "free": true,
+      "unlock_requires": "none"
+    },
+    {
+      "id": "football-passing-L02-001",
+      "sport": "football",
+      "category": "passing",
+      "category_name": "Passing",
+      "level": 2,
+      "title": "Passing L2 Drill 1",
+      "description": "Passing practice at level 2.",
+      "duration_minutes": 9,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Partner up or use a wall. Complete sets of 7 passes from 5m.",
+        "Use both feet and follow through."
+      ],
+      "metric": {
+        "type": "accuracy",
+        "target": ">=80% on target",
+        "success_eval": "partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 30,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_1"
+    },
+    {
+      "id": "football-passing-L02-002",
+      "sport": "football",
+      "category": "passing",
+      "category_name": "Passing",
+      "level": 2,
+      "title": "Passing L2 Drill 2",
+      "description": "Passing practice at level 2.",
+      "duration_minutes": 9,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Partner up or use a wall. Complete sets of 7 passes from 5m.",
+        "Use both feet and follow through."
+      ],
+      "metric": {
+        "type": "accuracy",
+        "target": ">=80% on target",
+        "success_eval": "partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 30,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_1"
+    },
+    {
+      "id": "football-passing-L02-003",
+      "sport": "football",
+      "category": "passing",
+      "category_name": "Passing",
+      "level": 2,
+      "title": "Passing L2 Drill 3",
+      "description": "Passing practice at level 2.",
+      "duration_minutes": 9,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Partner up or use a wall. Complete sets of 7 passes from 5m.",
+        "Use both feet and follow through."
+      ],
+      "metric": {
+        "type": "accuracy",
+        "target": ">=80% on target",
+        "success_eval": "partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 30,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_1"
+    },
+    {
+      "id": "football-passing-L03-001",
+      "sport": "football",
+      "category": "passing",
+      "category_name": "Passing",
+      "level": 3,
+      "title": "Passing L3 Drill 1",
+      "description": "Passing practice at level 3.",
+      "duration_minutes": 11,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Partner up or use a wall. Complete sets of 8 passes from 6m.",
+        "Use both feet and follow through."
+      ],
+      "metric": {
+        "type": "accuracy",
+        "target": ">=80% on target",
+        "success_eval": "partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 36,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_2"
+    },
+    {
+      "id": "football-passing-L03-002",
+      "sport": "football",
+      "category": "passing",
+      "category_name": "Passing",
+      "level": 3,
+      "title": "Passing L3 Drill 2",
+      "description": "Passing practice at level 3.",
+      "duration_minutes": 11,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Partner up or use a wall. Complete sets of 8 passes from 6m.",
+        "Use both feet and follow through."
+      ],
+      "metric": {
+        "type": "accuracy",
+        "target": ">=80% on target",
+        "success_eval": "partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 36,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_2"
+    },
+    {
+      "id": "football-passing-L03-003",
+      "sport": "football",
+      "category": "passing",
+      "category_name": "Passing",
+      "level": 3,
+      "title": "Passing L3 Drill 3",
+      "description": "Passing practice at level 3.",
+      "duration_minutes": 11,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Partner up or use a wall. Complete sets of 8 passes from 6m.",
+        "Use both feet and follow through."
+      ],
+      "metric": {
+        "type": "accuracy",
+        "target": ">=80% on target",
+        "success_eval": "partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 36,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_2"
+    },
+    {
+      "id": "football-passing-L04-001",
+      "sport": "football",
+      "category": "passing",
+      "category_name": "Passing",
+      "level": 4,
+      "title": "Passing L4 Drill 1",
+      "description": "Passing practice at level 4.",
+      "duration_minutes": 13,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Partner up or use a wall. Complete sets of 9 passes from 7m.",
+        "Use both feet and follow through."
+      ],
+      "metric": {
+        "type": "accuracy",
+        "target": ">=80% on target",
+        "success_eval": "partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 42,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_3"
+    },
+    {
+      "id": "football-passing-L04-002",
+      "sport": "football",
+      "category": "passing",
+      "category_name": "Passing",
+      "level": 4,
+      "title": "Passing L4 Drill 2",
+      "description": "Passing practice at level 4.",
+      "duration_minutes": 13,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Partner up or use a wall. Complete sets of 9 passes from 7m.",
+        "Use both feet and follow through."
+      ],
+      "metric": {
+        "type": "accuracy",
+        "target": ">=80% on target",
+        "success_eval": "partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 42,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_3"
+    },
+    {
+      "id": "football-passing-L04-003",
+      "sport": "football",
+      "category": "passing",
+      "category_name": "Passing",
+      "level": 4,
+      "title": "Passing L4 Drill 3",
+      "description": "Passing practice at level 4.",
+      "duration_minutes": 13,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Partner up or use a wall. Complete sets of 9 passes from 7m.",
+        "Use both feet and follow through."
+      ],
+      "metric": {
+        "type": "accuracy",
+        "target": ">=80% on target",
+        "success_eval": "partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 42,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_3"
+    },
+    {
+      "id": "football-passing-L05-001",
+      "sport": "football",
+      "category": "passing",
+      "category_name": "Passing",
+      "level": 5,
+      "title": "Passing L5 Drill 1",
+      "description": "Passing practice at level 5.",
+      "duration_minutes": 15,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Partner up or use a wall. Complete sets of 10 passes from 8m.",
+        "Use both feet and follow through."
+      ],
+      "metric": {
+        "type": "accuracy",
+        "target": ">=80% on target",
+        "success_eval": "partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 48,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_4"
+    },
+    {
+      "id": "football-passing-L05-002",
+      "sport": "football",
+      "category": "passing",
+      "category_name": "Passing",
+      "level": 5,
+      "title": "Passing L5 Drill 2",
+      "description": "Passing practice at level 5.",
+      "duration_minutes": 15,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Partner up or use a wall. Complete sets of 10 passes from 8m.",
+        "Use both feet and follow through."
+      ],
+      "metric": {
+        "type": "accuracy",
+        "target": ">=80% on target",
+        "success_eval": "partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 48,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_4"
+    },
+    {
+      "id": "football-passing-L05-003",
+      "sport": "football",
+      "category": "passing",
+      "category_name": "Passing",
+      "level": 5,
+      "title": "Passing L5 Drill 3",
+      "description": "Passing practice at level 5.",
+      "duration_minutes": 15,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Partner up or use a wall. Complete sets of 10 passes from 8m.",
+        "Use both feet and follow through."
+      ],
+      "metric": {
+        "type": "accuracy",
+        "target": ">=80% on target",
+        "success_eval": "partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 48,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_4"
+    },
+    {
+      "id": "football-passing-L06-001",
+      "sport": "football",
+      "category": "passing",
+      "category_name": "Passing",
+      "level": 6,
+      "title": "Passing L6 Drill 1",
+      "description": "Passing practice at level 6.",
+      "duration_minutes": 17,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Partner up or use a wall. Complete sets of 11 passes from 9m.",
+        "Use both feet and follow through."
+      ],
+      "metric": {
+        "type": "accuracy",
+        "target": ">=80% on target",
+        "success_eval": "partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 54,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_5"
+    },
+    {
+      "id": "football-passing-L06-002",
+      "sport": "football",
+      "category": "passing",
+      "category_name": "Passing",
+      "level": 6,
+      "title": "Passing L6 Drill 2",
+      "description": "Passing practice at level 6.",
+      "duration_minutes": 17,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Partner up or use a wall. Complete sets of 11 passes from 9m.",
+        "Use both feet and follow through."
+      ],
+      "metric": {
+        "type": "accuracy",
+        "target": ">=80% on target",
+        "success_eval": "partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 54,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_5"
+    },
+    {
+      "id": "football-passing-L06-003",
+      "sport": "football",
+      "category": "passing",
+      "category_name": "Passing",
+      "level": 6,
+      "title": "Passing L6 Drill 3",
+      "description": "Passing practice at level 6.",
+      "duration_minutes": 17,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Partner up or use a wall. Complete sets of 11 passes from 9m.",
+        "Use both feet and follow through."
+      ],
+      "metric": {
+        "type": "accuracy",
+        "target": ">=80% on target",
+        "success_eval": "partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 54,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_5"
+    },
+    {
+      "id": "football-passing-L07-001",
+      "sport": "football",
+      "category": "passing",
+      "category_name": "Passing",
+      "level": 7,
+      "title": "Passing L7 Drill 1",
+      "description": "Passing practice at level 7.",
+      "duration_minutes": 19,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Partner up or use a wall. Complete sets of 12 passes from 10m.",
+        "Use both feet and follow through."
+      ],
+      "metric": {
+        "type": "accuracy",
+        "target": ">=80% on target",
+        "success_eval": "partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 60,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_6"
+    },
+    {
+      "id": "football-passing-L07-002",
+      "sport": "football",
+      "category": "passing",
+      "category_name": "Passing",
+      "level": 7,
+      "title": "Passing L7 Drill 2",
+      "description": "Passing practice at level 7.",
+      "duration_minutes": 19,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Partner up or use a wall. Complete sets of 12 passes from 10m.",
+        "Use both feet and follow through."
+      ],
+      "metric": {
+        "type": "accuracy",
+        "target": ">=80% on target",
+        "success_eval": "partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 60,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_6"
+    },
+    {
+      "id": "football-passing-L07-003",
+      "sport": "football",
+      "category": "passing",
+      "category_name": "Passing",
+      "level": 7,
+      "title": "Passing L7 Drill 3",
+      "description": "Passing practice at level 7.",
+      "duration_minutes": 19,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Partner up or use a wall. Complete sets of 12 passes from 10m.",
+        "Use both feet and follow through."
+      ],
+      "metric": {
+        "type": "accuracy",
+        "target": ">=80% on target",
+        "success_eval": "partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 60,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_6"
+    },
+    {
+      "id": "football-passing-L08-001",
+      "sport": "football",
+      "category": "passing",
+      "category_name": "Passing",
+      "level": 8,
+      "title": "Passing L8 Drill 1",
+      "description": "Passing practice at level 8.",
+      "duration_minutes": 21,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Partner up or use a wall. Complete sets of 13 passes from 11m.",
+        "Use both feet and follow through."
+      ],
+      "metric": {
+        "type": "accuracy",
+        "target": ">=80% on target",
+        "success_eval": "partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 66,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_7"
+    },
+    {
+      "id": "football-passing-L08-002",
+      "sport": "football",
+      "category": "passing",
+      "category_name": "Passing",
+      "level": 8,
+      "title": "Passing L8 Drill 2",
+      "description": "Passing practice at level 8.",
+      "duration_minutes": 21,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Partner up or use a wall. Complete sets of 13 passes from 11m.",
+        "Use both feet and follow through."
+      ],
+      "metric": {
+        "type": "accuracy",
+        "target": ">=80% on target",
+        "success_eval": "partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 66,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_7"
+    },
+    {
+      "id": "football-passing-L08-003",
+      "sport": "football",
+      "category": "passing",
+      "category_name": "Passing",
+      "level": 8,
+      "title": "Passing L8 Drill 3",
+      "description": "Passing practice at level 8.",
+      "duration_minutes": 21,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Partner up or use a wall. Complete sets of 13 passes from 11m.",
+        "Use both feet and follow through."
+      ],
+      "metric": {
+        "type": "accuracy",
+        "target": ">=80% on target",
+        "success_eval": "partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 66,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_7"
+    },
+    {
+      "id": "football-passing-L09-001",
+      "sport": "football",
+      "category": "passing",
+      "category_name": "Passing",
+      "level": 9,
+      "title": "Passing L9 Drill 1",
+      "description": "Passing practice at level 9.",
+      "duration_minutes": 23,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Partner up or use a wall. Complete sets of 14 passes from 12m.",
+        "Use both feet and follow through."
+      ],
+      "metric": {
+        "type": "accuracy",
+        "target": ">=80% on target",
+        "success_eval": "partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 72,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_8"
+    },
+    {
+      "id": "football-passing-L09-002",
+      "sport": "football",
+      "category": "passing",
+      "category_name": "Passing",
+      "level": 9,
+      "title": "Passing L9 Drill 2",
+      "description": "Passing practice at level 9.",
+      "duration_minutes": 23,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Partner up or use a wall. Complete sets of 14 passes from 12m.",
+        "Use both feet and follow through."
+      ],
+      "metric": {
+        "type": "accuracy",
+        "target": ">=80% on target",
+        "success_eval": "partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 72,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_8"
+    },
+    {
+      "id": "football-passing-L09-003",
+      "sport": "football",
+      "category": "passing",
+      "category_name": "Passing",
+      "level": 9,
+      "title": "Passing L9 Drill 3",
+      "description": "Passing practice at level 9.",
+      "duration_minutes": 23,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Partner up or use a wall. Complete sets of 14 passes from 12m.",
+        "Use both feet and follow through."
+      ],
+      "metric": {
+        "type": "accuracy",
+        "target": ">=80% on target",
+        "success_eval": "partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 72,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_8"
+    },
+    {
+      "id": "football-passing-L10-001",
+      "sport": "football",
+      "category": "passing",
+      "category_name": "Passing",
+      "level": 10,
+      "title": "Passing L10 Drill 1",
+      "description": "Passing practice at level 10.",
+      "duration_minutes": 25,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Partner up or use a wall. Complete sets of 15 passes from 13m.",
+        "Use both feet and follow through."
+      ],
+      "metric": {
+        "type": "accuracy",
+        "target": ">=80% on target",
+        "success_eval": "partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 78,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_9"
+    },
+    {
+      "id": "football-passing-L10-002",
+      "sport": "football",
+      "category": "passing",
+      "category_name": "Passing",
+      "level": 10,
+      "title": "Passing L10 Drill 2",
+      "description": "Passing practice at level 10.",
+      "duration_minutes": 25,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Partner up or use a wall. Complete sets of 15 passes from 13m.",
+        "Use both feet and follow through."
+      ],
+      "metric": {
+        "type": "accuracy",
+        "target": ">=80% on target",
+        "success_eval": "partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 78,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_9"
+    },
+    {
+      "id": "football-passing-L10-003",
+      "sport": "football",
+      "category": "passing",
+      "category_name": "Passing",
+      "level": 10,
+      "title": "Passing L10 Drill 3",
+      "description": "Passing practice at level 10.",
+      "duration_minutes": 25,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Partner up or use a wall. Complete sets of 15 passes from 13m.",
+        "Use both feet and follow through."
+      ],
+      "metric": {
+        "type": "accuracy",
+        "target": ">=80% on target",
+        "success_eval": "partner_count",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 78,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_9"
+    },
+    {
+      "id": "football-shooting-L01-001",
+      "sport": "football",
+      "category": "shooting",
+      "category_name": "Shooting",
+      "level": 1,
+      "title": "Shooting L1 Drill 1",
+      "description": "Shooting practice at level 1.",
+      "duration_minutes": 7,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Take 9 shots from designated spots. Focus on technique and placement.",
+        "Record makes vs attempts."
+      ],
+      "metric": {
+        "type": "goals",
+        "target": "varies by level (e.g., 3/10 to 8/10)",
+        "success_eval": "self_count_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 24,
+      "free": true,
+      "unlock_requires": "none"
+    },
+    {
+      "id": "football-shooting-L01-002",
+      "sport": "football",
+      "category": "shooting",
+      "category_name": "Shooting",
+      "level": 1,
+      "title": "Shooting L1 Drill 2",
+      "description": "Shooting practice at level 1.",
+      "duration_minutes": 7,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Take 9 shots from designated spots. Focus on technique and placement.",
+        "Record makes vs attempts."
+      ],
+      "metric": {
+        "type": "goals",
+        "target": "varies by level (e.g., 3/10 to 8/10)",
+        "success_eval": "self_count_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 24,
+      "free": true,
+      "unlock_requires": "none"
+    },
+    {
+      "id": "football-shooting-L01-003",
+      "sport": "football",
+      "category": "shooting",
+      "category_name": "Shooting",
+      "level": 1,
+      "title": "Shooting L1 Drill 3",
+      "description": "Shooting practice at level 1.",
+      "duration_minutes": 7,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Take 9 shots from designated spots. Focus on technique and placement.",
+        "Record makes vs attempts."
+      ],
+      "metric": {
+        "type": "goals",
+        "target": "varies by level (e.g., 3/10 to 8/10)",
+        "success_eval": "self_count_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 24,
+      "free": true,
+      "unlock_requires": "none"
+    },
+    {
+      "id": "football-shooting-L02-001",
+      "sport": "football",
+      "category": "shooting",
+      "category_name": "Shooting",
+      "level": 2,
+      "title": "Shooting L2 Drill 1",
+      "description": "Shooting practice at level 2.",
+      "duration_minutes": 9,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Take 10 shots from designated spots. Focus on technique and placement.",
+        "Record makes vs attempts."
+      ],
+      "metric": {
+        "type": "goals",
+        "target": "varies by level (e.g., 3/10 to 8/10)",
+        "success_eval": "self_count_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 30,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_1"
+    },
+    {
+      "id": "football-shooting-L02-002",
+      "sport": "football",
+      "category": "shooting",
+      "category_name": "Shooting",
+      "level": 2,
+      "title": "Shooting L2 Drill 2",
+      "description": "Shooting practice at level 2.",
+      "duration_minutes": 9,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Take 10 shots from designated spots. Focus on technique and placement.",
+        "Record makes vs attempts."
+      ],
+      "metric": {
+        "type": "goals",
+        "target": "varies by level (e.g., 3/10 to 8/10)",
+        "success_eval": "self_count_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 30,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_1"
+    },
+    {
+      "id": "football-shooting-L02-003",
+      "sport": "football",
+      "category": "shooting",
+      "category_name": "Shooting",
+      "level": 2,
+      "title": "Shooting L2 Drill 3",
+      "description": "Shooting practice at level 2.",
+      "duration_minutes": 9,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Take 10 shots from designated spots. Focus on technique and placement.",
+        "Record makes vs attempts."
+      ],
+      "metric": {
+        "type": "goals",
+        "target": "varies by level (e.g., 3/10 to 8/10)",
+        "success_eval": "self_count_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 30,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_1"
+    },
+    {
+      "id": "football-shooting-L03-001",
+      "sport": "football",
+      "category": "shooting",
+      "category_name": "Shooting",
+      "level": 3,
+      "title": "Shooting L3 Drill 1",
+      "description": "Shooting practice at level 3.",
+      "duration_minutes": 11,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Take 11 shots from designated spots. Focus on technique and placement.",
+        "Record makes vs attempts."
+      ],
+      "metric": {
+        "type": "goals",
+        "target": "varies by level (e.g., 3/10 to 8/10)",
+        "success_eval": "self_count_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 36,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_2"
+    },
+    {
+      "id": "football-shooting-L03-002",
+      "sport": "football",
+      "category": "shooting",
+      "category_name": "Shooting",
+      "level": 3,
+      "title": "Shooting L3 Drill 2",
+      "description": "Shooting practice at level 3.",
+      "duration_minutes": 11,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Take 11 shots from designated spots. Focus on technique and placement.",
+        "Record makes vs attempts."
+      ],
+      "metric": {
+        "type": "goals",
+        "target": "varies by level (e.g., 3/10 to 8/10)",
+        "success_eval": "self_count_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 36,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_2"
+    },
+    {
+      "id": "football-shooting-L03-003",
+      "sport": "football",
+      "category": "shooting",
+      "category_name": "Shooting",
+      "level": 3,
+      "title": "Shooting L3 Drill 3",
+      "description": "Shooting practice at level 3.",
+      "duration_minutes": 11,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Take 11 shots from designated spots. Focus on technique and placement.",
+        "Record makes vs attempts."
+      ],
+      "metric": {
+        "type": "goals",
+        "target": "varies by level (e.g., 3/10 to 8/10)",
+        "success_eval": "self_count_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 36,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_2"
+    },
+    {
+      "id": "football-shooting-L04-001",
+      "sport": "football",
+      "category": "shooting",
+      "category_name": "Shooting",
+      "level": 4,
+      "title": "Shooting L4 Drill 1",
+      "description": "Shooting practice at level 4.",
+      "duration_minutes": 13,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Take 12 shots from designated spots. Focus on technique and placement.",
+        "Record makes vs attempts."
+      ],
+      "metric": {
+        "type": "goals",
+        "target": "varies by level (e.g., 3/10 to 8/10)",
+        "success_eval": "self_count_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 42,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_3"
+    },
+    {
+      "id": "football-shooting-L04-002",
+      "sport": "football",
+      "category": "shooting",
+      "category_name": "Shooting",
+      "level": 4,
+      "title": "Shooting L4 Drill 2",
+      "description": "Shooting practice at level 4.",
+      "duration_minutes": 13,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Take 12 shots from designated spots. Focus on technique and placement.",
+        "Record makes vs attempts."
+      ],
+      "metric": {
+        "type": "goals",
+        "target": "varies by level (e.g., 3/10 to 8/10)",
+        "success_eval": "self_count_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 42,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_3"
+    },
+    {
+      "id": "football-shooting-L04-003",
+      "sport": "football",
+      "category": "shooting",
+      "category_name": "Shooting",
+      "level": 4,
+      "title": "Shooting L4 Drill 3",
+      "description": "Shooting practice at level 4.",
+      "duration_minutes": 13,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Take 12 shots from designated spots. Focus on technique and placement.",
+        "Record makes vs attempts."
+      ],
+      "metric": {
+        "type": "goals",
+        "target": "varies by level (e.g., 3/10 to 8/10)",
+        "success_eval": "self_count_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 42,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_3"
+    },
+    {
+      "id": "football-shooting-L05-001",
+      "sport": "football",
+      "category": "shooting",
+      "category_name": "Shooting",
+      "level": 5,
+      "title": "Shooting L5 Drill 1",
+      "description": "Shooting practice at level 5.",
+      "duration_minutes": 15,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Take 13 shots from designated spots. Focus on technique and placement.",
+        "Record makes vs attempts."
+      ],
+      "metric": {
+        "type": "goals",
+        "target": "varies by level (e.g., 3/10 to 8/10)",
+        "success_eval": "self_count_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 48,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_4"
+    },
+    {
+      "id": "football-shooting-L05-002",
+      "sport": "football",
+      "category": "shooting",
+      "category_name": "Shooting",
+      "level": 5,
+      "title": "Shooting L5 Drill 2",
+      "description": "Shooting practice at level 5.",
+      "duration_minutes": 15,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Take 13 shots from designated spots. Focus on technique and placement.",
+        "Record makes vs attempts."
+      ],
+      "metric": {
+        "type": "goals",
+        "target": "varies by level (e.g., 3/10 to 8/10)",
+        "success_eval": "self_count_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 48,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_4"
+    },
+    {
+      "id": "football-shooting-L05-003",
+      "sport": "football",
+      "category": "shooting",
+      "category_name": "Shooting",
+      "level": 5,
+      "title": "Shooting L5 Drill 3",
+      "description": "Shooting practice at level 5.",
+      "duration_minutes": 15,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Take 13 shots from designated spots. Focus on technique and placement.",
+        "Record makes vs attempts."
+      ],
+      "metric": {
+        "type": "goals",
+        "target": "varies by level (e.g., 3/10 to 8/10)",
+        "success_eval": "self_count_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 48,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_4"
+    },
+    {
+      "id": "football-shooting-L06-001",
+      "sport": "football",
+      "category": "shooting",
+      "category_name": "Shooting",
+      "level": 6,
+      "title": "Shooting L6 Drill 1",
+      "description": "Shooting practice at level 6.",
+      "duration_minutes": 17,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Take 14 shots from designated spots. Focus on technique and placement.",
+        "Record makes vs attempts."
+      ],
+      "metric": {
+        "type": "goals",
+        "target": "varies by level (e.g., 3/10 to 8/10)",
+        "success_eval": "self_count_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 54,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_5"
+    },
+    {
+      "id": "football-shooting-L06-002",
+      "sport": "football",
+      "category": "shooting",
+      "category_name": "Shooting",
+      "level": 6,
+      "title": "Shooting L6 Drill 2",
+      "description": "Shooting practice at level 6.",
+      "duration_minutes": 17,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Take 14 shots from designated spots. Focus on technique and placement.",
+        "Record makes vs attempts."
+      ],
+      "metric": {
+        "type": "goals",
+        "target": "varies by level (e.g., 3/10 to 8/10)",
+        "success_eval": "self_count_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 54,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_5"
+    },
+    {
+      "id": "football-shooting-L06-003",
+      "sport": "football",
+      "category": "shooting",
+      "category_name": "Shooting",
+      "level": 6,
+      "title": "Shooting L6 Drill 3",
+      "description": "Shooting practice at level 6.",
+      "duration_minutes": 17,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Take 14 shots from designated spots. Focus on technique and placement.",
+        "Record makes vs attempts."
+      ],
+      "metric": {
+        "type": "goals",
+        "target": "varies by level (e.g., 3/10 to 8/10)",
+        "success_eval": "self_count_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 54,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_5"
+    },
+    {
+      "id": "football-shooting-L07-001",
+      "sport": "football",
+      "category": "shooting",
+      "category_name": "Shooting",
+      "level": 7,
+      "title": "Shooting L7 Drill 1",
+      "description": "Shooting practice at level 7.",
+      "duration_minutes": 19,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Take 15 shots from designated spots. Focus on technique and placement.",
+        "Record makes vs attempts."
+      ],
+      "metric": {
+        "type": "goals",
+        "target": "varies by level (e.g., 3/10 to 8/10)",
+        "success_eval": "self_count_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 60,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_6"
+    },
+    {
+      "id": "football-shooting-L07-002",
+      "sport": "football",
+      "category": "shooting",
+      "category_name": "Shooting",
+      "level": 7,
+      "title": "Shooting L7 Drill 2",
+      "description": "Shooting practice at level 7.",
+      "duration_minutes": 19,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Take 15 shots from designated spots. Focus on technique and placement.",
+        "Record makes vs attempts."
+      ],
+      "metric": {
+        "type": "goals",
+        "target": "varies by level (e.g., 3/10 to 8/10)",
+        "success_eval": "self_count_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 60,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_6"
+    },
+    {
+      "id": "football-shooting-L07-003",
+      "sport": "football",
+      "category": "shooting",
+      "category_name": "Shooting",
+      "level": 7,
+      "title": "Shooting L7 Drill 3",
+      "description": "Shooting practice at level 7.",
+      "duration_minutes": 19,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Take 15 shots from designated spots. Focus on technique and placement.",
+        "Record makes vs attempts."
+      ],
+      "metric": {
+        "type": "goals",
+        "target": "varies by level (e.g., 3/10 to 8/10)",
+        "success_eval": "self_count_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 60,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_6"
+    },
+    {
+      "id": "football-shooting-L08-001",
+      "sport": "football",
+      "category": "shooting",
+      "category_name": "Shooting",
+      "level": 8,
+      "title": "Shooting L8 Drill 1",
+      "description": "Shooting practice at level 8.",
+      "duration_minutes": 21,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Take 16 shots from designated spots. Focus on technique and placement.",
+        "Record makes vs attempts."
+      ],
+      "metric": {
+        "type": "goals",
+        "target": "varies by level (e.g., 3/10 to 8/10)",
+        "success_eval": "self_count_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 66,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_7"
+    },
+    {
+      "id": "football-shooting-L08-002",
+      "sport": "football",
+      "category": "shooting",
+      "category_name": "Shooting",
+      "level": 8,
+      "title": "Shooting L8 Drill 2",
+      "description": "Shooting practice at level 8.",
+      "duration_minutes": 21,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Take 16 shots from designated spots. Focus on technique and placement.",
+        "Record makes vs attempts."
+      ],
+      "metric": {
+        "type": "goals",
+        "target": "varies by level (e.g., 3/10 to 8/10)",
+        "success_eval": "self_count_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 66,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_7"
+    },
+    {
+      "id": "football-shooting-L08-003",
+      "sport": "football",
+      "category": "shooting",
+      "category_name": "Shooting",
+      "level": 8,
+      "title": "Shooting L8 Drill 3",
+      "description": "Shooting practice at level 8.",
+      "duration_minutes": 21,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Take 16 shots from designated spots. Focus on technique and placement.",
+        "Record makes vs attempts."
+      ],
+      "metric": {
+        "type": "goals",
+        "target": "varies by level (e.g., 3/10 to 8/10)",
+        "success_eval": "self_count_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 66,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_7"
+    },
+    {
+      "id": "football-shooting-L09-001",
+      "sport": "football",
+      "category": "shooting",
+      "category_name": "Shooting",
+      "level": 9,
+      "title": "Shooting L9 Drill 1",
+      "description": "Shooting practice at level 9.",
+      "duration_minutes": 23,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Take 17 shots from designated spots. Focus on technique and placement.",
+        "Record makes vs attempts."
+      ],
+      "metric": {
+        "type": "goals",
+        "target": "varies by level (e.g., 3/10 to 8/10)",
+        "success_eval": "self_count_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 72,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_8"
+    },
+    {
+      "id": "football-shooting-L09-002",
+      "sport": "football",
+      "category": "shooting",
+      "category_name": "Shooting",
+      "level": 9,
+      "title": "Shooting L9 Drill 2",
+      "description": "Shooting practice at level 9.",
+      "duration_minutes": 23,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Take 17 shots from designated spots. Focus on technique and placement.",
+        "Record makes vs attempts."
+      ],
+      "metric": {
+        "type": "goals",
+        "target": "varies by level (e.g., 3/10 to 8/10)",
+        "success_eval": "self_count_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 72,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_8"
+    },
+    {
+      "id": "football-shooting-L09-003",
+      "sport": "football",
+      "category": "shooting",
+      "category_name": "Shooting",
+      "level": 9,
+      "title": "Shooting L9 Drill 3",
+      "description": "Shooting practice at level 9.",
+      "duration_minutes": 23,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Take 17 shots from designated spots. Focus on technique and placement.",
+        "Record makes vs attempts."
+      ],
+      "metric": {
+        "type": "goals",
+        "target": "varies by level (e.g., 3/10 to 8/10)",
+        "success_eval": "self_count_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 72,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_8"
+    },
+    {
+      "id": "football-shooting-L10-001",
+      "sport": "football",
+      "category": "shooting",
+      "category_name": "Shooting",
+      "level": 10,
+      "title": "Shooting L10 Drill 1",
+      "description": "Shooting practice at level 10.",
+      "duration_minutes": 25,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Take 18 shots from designated spots. Focus on technique and placement.",
+        "Record makes vs attempts."
+      ],
+      "metric": {
+        "type": "goals",
+        "target": "varies by level (e.g., 3/10 to 8/10)",
+        "success_eval": "self_count_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 78,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_9"
+    },
+    {
+      "id": "football-shooting-L10-002",
+      "sport": "football",
+      "category": "shooting",
+      "category_name": "Shooting",
+      "level": 10,
+      "title": "Shooting L10 Drill 2",
+      "description": "Shooting practice at level 10.",
+      "duration_minutes": 25,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Take 18 shots from designated spots. Focus on technique and placement.",
+        "Record makes vs attempts."
+      ],
+      "metric": {
+        "type": "goals",
+        "target": "varies by level (e.g., 3/10 to 8/10)",
+        "success_eval": "self_count_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 78,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_9"
+    },
+    {
+      "id": "football-shooting-L10-003",
+      "sport": "football",
+      "category": "shooting",
+      "category_name": "Shooting",
+      "level": 10,
+      "title": "Shooting L10 Drill 3",
+      "description": "Shooting practice at level 10.",
+      "duration_minutes": 25,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Take 18 shots from designated spots. Focus on technique and placement.",
+        "Record makes vs attempts."
+      ],
+      "metric": {
+        "type": "goals",
+        "target": "varies by level (e.g., 3/10 to 8/10)",
+        "success_eval": "self_count_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 78,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_9"
+    },
+    {
+      "id": "football-control-L01-001",
+      "sport": "football",
+      "category": "control",
+      "category_name": "Ball Control",
+      "level": 1,
+      "title": "Ball Control L1 Drill 1",
+      "description": "Ball Control practice at level 1.",
+      "duration_minutes": 7,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Receive 7 passes from partner or rebound off wall; control and pass back.",
+        "Prioritize soft first touch and body positioning."
+      ],
+      "metric": {
+        "type": "first_touch_errors",
+        "target": "<=3 errors",
+        "success_eval": "self_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 24,
+      "free": true,
+      "unlock_requires": "none"
+    },
+    {
+      "id": "football-control-L01-002",
+      "sport": "football",
+      "category": "control",
+      "category_name": "Ball Control",
+      "level": 1,
+      "title": "Ball Control L1 Drill 2",
+      "description": "Ball Control practice at level 1.",
+      "duration_minutes": 7,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Receive 7 passes from partner or rebound off wall; control and pass back.",
+        "Prioritize soft first touch and body positioning."
+      ],
+      "metric": {
+        "type": "first_touch_errors",
+        "target": "<=3 errors",
+        "success_eval": "self_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 24,
+      "free": true,
+      "unlock_requires": "none"
+    },
+    {
+      "id": "football-control-L01-003",
+      "sport": "football",
+      "category": "control",
+      "category_name": "Ball Control",
+      "level": 1,
+      "title": "Ball Control L1 Drill 3",
+      "description": "Ball Control practice at level 1.",
+      "duration_minutes": 7,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Receive 7 passes from partner or rebound off wall; control and pass back.",
+        "Prioritize soft first touch and body positioning."
+      ],
+      "metric": {
+        "type": "first_touch_errors",
+        "target": "<=3 errors",
+        "success_eval": "self_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 24,
+      "free": true,
+      "unlock_requires": "none"
+    },
+    {
+      "id": "football-control-L02-001",
+      "sport": "football",
+      "category": "control",
+      "category_name": "Ball Control",
+      "level": 2,
+      "title": "Ball Control L2 Drill 1",
+      "description": "Ball Control practice at level 2.",
+      "duration_minutes": 9,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Receive 8 passes from partner or rebound off wall; control and pass back.",
+        "Prioritize soft first touch and body positioning."
+      ],
+      "metric": {
+        "type": "first_touch_errors",
+        "target": "<=3 errors",
+        "success_eval": "self_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 30,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_1"
+    },
+    {
+      "id": "football-control-L02-002",
+      "sport": "football",
+      "category": "control",
+      "category_name": "Ball Control",
+      "level": 2,
+      "title": "Ball Control L2 Drill 2",
+      "description": "Ball Control practice at level 2.",
+      "duration_minutes": 9,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Receive 8 passes from partner or rebound off wall; control and pass back.",
+        "Prioritize soft first touch and body positioning."
+      ],
+      "metric": {
+        "type": "first_touch_errors",
+        "target": "<=3 errors",
+        "success_eval": "self_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 30,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_1"
+    },
+    {
+      "id": "football-control-L02-003",
+      "sport": "football",
+      "category": "control",
+      "category_name": "Ball Control",
+      "level": 2,
+      "title": "Ball Control L2 Drill 3",
+      "description": "Ball Control practice at level 2.",
+      "duration_minutes": 9,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Receive 8 passes from partner or rebound off wall; control and pass back.",
+        "Prioritize soft first touch and body positioning."
+      ],
+      "metric": {
+        "type": "first_touch_errors",
+        "target": "<=3 errors",
+        "success_eval": "self_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 30,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_1"
+    },
+    {
+      "id": "football-control-L03-001",
+      "sport": "football",
+      "category": "control",
+      "category_name": "Ball Control",
+      "level": 3,
+      "title": "Ball Control L3 Drill 1",
+      "description": "Ball Control practice at level 3.",
+      "duration_minutes": 11,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Receive 9 passes from partner or rebound off wall; control and pass back.",
+        "Prioritize soft first touch and body positioning."
+      ],
+      "metric": {
+        "type": "first_touch_errors",
+        "target": "<=3 errors",
+        "success_eval": "self_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 36,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_2"
+    },
+    {
+      "id": "football-control-L03-002",
+      "sport": "football",
+      "category": "control",
+      "category_name": "Ball Control",
+      "level": 3,
+      "title": "Ball Control L3 Drill 2",
+      "description": "Ball Control practice at level 3.",
+      "duration_minutes": 11,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Receive 9 passes from partner or rebound off wall; control and pass back.",
+        "Prioritize soft first touch and body positioning."
+      ],
+      "metric": {
+        "type": "first_touch_errors",
+        "target": "<=3 errors",
+        "success_eval": "self_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 36,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_2"
+    },
+    {
+      "id": "football-control-L03-003",
+      "sport": "football",
+      "category": "control",
+      "category_name": "Ball Control",
+      "level": 3,
+      "title": "Ball Control L3 Drill 3",
+      "description": "Ball Control practice at level 3.",
+      "duration_minutes": 11,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Receive 9 passes from partner or rebound off wall; control and pass back.",
+        "Prioritize soft first touch and body positioning."
+      ],
+      "metric": {
+        "type": "first_touch_errors",
+        "target": "<=3 errors",
+        "success_eval": "self_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 36,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_2"
+    },
+    {
+      "id": "football-control-L04-001",
+      "sport": "football",
+      "category": "control",
+      "category_name": "Ball Control",
+      "level": 4,
+      "title": "Ball Control L4 Drill 1",
+      "description": "Ball Control practice at level 4.",
+      "duration_minutes": 13,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Receive 10 passes from partner or rebound off wall; control and pass back.",
+        "Prioritize soft first touch and body positioning."
+      ],
+      "metric": {
+        "type": "first_touch_errors",
+        "target": "<=3 errors",
+        "success_eval": "self_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 42,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_3"
+    },
+    {
+      "id": "football-control-L04-002",
+      "sport": "football",
+      "category": "control",
+      "category_name": "Ball Control",
+      "level": 4,
+      "title": "Ball Control L4 Drill 2",
+      "description": "Ball Control practice at level 4.",
+      "duration_minutes": 13,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Receive 10 passes from partner or rebound off wall; control and pass back.",
+        "Prioritize soft first touch and body positioning."
+      ],
+      "metric": {
+        "type": "first_touch_errors",
+        "target": "<=3 errors",
+        "success_eval": "self_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 42,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_3"
+    },
+    {
+      "id": "football-control-L04-003",
+      "sport": "football",
+      "category": "control",
+      "category_name": "Ball Control",
+      "level": 4,
+      "title": "Ball Control L4 Drill 3",
+      "description": "Ball Control practice at level 4.",
+      "duration_minutes": 13,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Receive 10 passes from partner or rebound off wall; control and pass back.",
+        "Prioritize soft first touch and body positioning."
+      ],
+      "metric": {
+        "type": "first_touch_errors",
+        "target": "<=3 errors",
+        "success_eval": "self_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 42,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_3"
+    },
+    {
+      "id": "football-control-L05-001",
+      "sport": "football",
+      "category": "control",
+      "category_name": "Ball Control",
+      "level": 5,
+      "title": "Ball Control L5 Drill 1",
+      "description": "Ball Control practice at level 5.",
+      "duration_minutes": 15,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Receive 11 passes from partner or rebound off wall; control and pass back.",
+        "Prioritize soft first touch and body positioning."
+      ],
+      "metric": {
+        "type": "first_touch_errors",
+        "target": "<=3 errors",
+        "success_eval": "self_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 48,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_4"
+    },
+    {
+      "id": "football-control-L05-002",
+      "sport": "football",
+      "category": "control",
+      "category_name": "Ball Control",
+      "level": 5,
+      "title": "Ball Control L5 Drill 2",
+      "description": "Ball Control practice at level 5.",
+      "duration_minutes": 15,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Receive 11 passes from partner or rebound off wall; control and pass back.",
+        "Prioritize soft first touch and body positioning."
+      ],
+      "metric": {
+        "type": "first_touch_errors",
+        "target": "<=3 errors",
+        "success_eval": "self_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 48,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_4"
+    },
+    {
+      "id": "football-control-L05-003",
+      "sport": "football",
+      "category": "control",
+      "category_name": "Ball Control",
+      "level": 5,
+      "title": "Ball Control L5 Drill 3",
+      "description": "Ball Control practice at level 5.",
+      "duration_minutes": 15,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Receive 11 passes from partner or rebound off wall; control and pass back.",
+        "Prioritize soft first touch and body positioning."
+      ],
+      "metric": {
+        "type": "first_touch_errors",
+        "target": "<=3 errors",
+        "success_eval": "self_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 48,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_4"
+    },
+    {
+      "id": "football-control-L06-001",
+      "sport": "football",
+      "category": "control",
+      "category_name": "Ball Control",
+      "level": 6,
+      "title": "Ball Control L6 Drill 1",
+      "description": "Ball Control practice at level 6.",
+      "duration_minutes": 17,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Receive 12 passes from partner or rebound off wall; control and pass back.",
+        "Prioritize soft first touch and body positioning."
+      ],
+      "metric": {
+        "type": "first_touch_errors",
+        "target": "<=3 errors",
+        "success_eval": "self_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 54,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_5"
+    },
+    {
+      "id": "football-control-L06-002",
+      "sport": "football",
+      "category": "control",
+      "category_name": "Ball Control",
+      "level": 6,
+      "title": "Ball Control L6 Drill 2",
+      "description": "Ball Control practice at level 6.",
+      "duration_minutes": 17,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Receive 12 passes from partner or rebound off wall; control and pass back.",
+        "Prioritize soft first touch and body positioning."
+      ],
+      "metric": {
+        "type": "first_touch_errors",
+        "target": "<=3 errors",
+        "success_eval": "self_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 54,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_5"
+    },
+    {
+      "id": "football-control-L06-003",
+      "sport": "football",
+      "category": "control",
+      "category_name": "Ball Control",
+      "level": 6,
+      "title": "Ball Control L6 Drill 3",
+      "description": "Ball Control practice at level 6.",
+      "duration_minutes": 17,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Receive 12 passes from partner or rebound off wall; control and pass back.",
+        "Prioritize soft first touch and body positioning."
+      ],
+      "metric": {
+        "type": "first_touch_errors",
+        "target": "<=3 errors",
+        "success_eval": "self_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 54,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_5"
+    },
+    {
+      "id": "football-control-L07-001",
+      "sport": "football",
+      "category": "control",
+      "category_name": "Ball Control",
+      "level": 7,
+      "title": "Ball Control L7 Drill 1",
+      "description": "Ball Control practice at level 7.",
+      "duration_minutes": 19,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Receive 13 passes from partner or rebound off wall; control and pass back.",
+        "Prioritize soft first touch and body positioning."
+      ],
+      "metric": {
+        "type": "first_touch_errors",
+        "target": "<=3 errors",
+        "success_eval": "self_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 60,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_6"
+    },
+    {
+      "id": "football-control-L07-002",
+      "sport": "football",
+      "category": "control",
+      "category_name": "Ball Control",
+      "level": 7,
+      "title": "Ball Control L7 Drill 2",
+      "description": "Ball Control practice at level 7.",
+      "duration_minutes": 19,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Receive 13 passes from partner or rebound off wall; control and pass back.",
+        "Prioritize soft first touch and body positioning."
+      ],
+      "metric": {
+        "type": "first_touch_errors",
+        "target": "<=3 errors",
+        "success_eval": "self_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 60,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_6"
+    },
+    {
+      "id": "football-control-L07-003",
+      "sport": "football",
+      "category": "control",
+      "category_name": "Ball Control",
+      "level": 7,
+      "title": "Ball Control L7 Drill 3",
+      "description": "Ball Control practice at level 7.",
+      "duration_minutes": 19,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Receive 13 passes from partner or rebound off wall; control and pass back.",
+        "Prioritize soft first touch and body positioning."
+      ],
+      "metric": {
+        "type": "first_touch_errors",
+        "target": "<=3 errors",
+        "success_eval": "self_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 60,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_6"
+    },
+    {
+      "id": "football-control-L08-001",
+      "sport": "football",
+      "category": "control",
+      "category_name": "Ball Control",
+      "level": 8,
+      "title": "Ball Control L8 Drill 1",
+      "description": "Ball Control practice at level 8.",
+      "duration_minutes": 21,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Receive 14 passes from partner or rebound off wall; control and pass back.",
+        "Prioritize soft first touch and body positioning."
+      ],
+      "metric": {
+        "type": "first_touch_errors",
+        "target": "<=3 errors",
+        "success_eval": "self_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 66,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_7"
+    },
+    {
+      "id": "football-control-L08-002",
+      "sport": "football",
+      "category": "control",
+      "category_name": "Ball Control",
+      "level": 8,
+      "title": "Ball Control L8 Drill 2",
+      "description": "Ball Control practice at level 8.",
+      "duration_minutes": 21,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Receive 14 passes from partner or rebound off wall; control and pass back.",
+        "Prioritize soft first touch and body positioning."
+      ],
+      "metric": {
+        "type": "first_touch_errors",
+        "target": "<=3 errors",
+        "success_eval": "self_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 66,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_7"
+    },
+    {
+      "id": "football-control-L08-003",
+      "sport": "football",
+      "category": "control",
+      "category_name": "Ball Control",
+      "level": 8,
+      "title": "Ball Control L8 Drill 3",
+      "description": "Ball Control practice at level 8.",
+      "duration_minutes": 21,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Receive 14 passes from partner or rebound off wall; control and pass back.",
+        "Prioritize soft first touch and body positioning."
+      ],
+      "metric": {
+        "type": "first_touch_errors",
+        "target": "<=3 errors",
+        "success_eval": "self_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 66,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_7"
+    },
+    {
+      "id": "football-control-L09-001",
+      "sport": "football",
+      "category": "control",
+      "category_name": "Ball Control",
+      "level": 9,
+      "title": "Ball Control L9 Drill 1",
+      "description": "Ball Control practice at level 9.",
+      "duration_minutes": 23,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Receive 15 passes from partner or rebound off wall; control and pass back.",
+        "Prioritize soft first touch and body positioning."
+      ],
+      "metric": {
+        "type": "first_touch_errors",
+        "target": "<=3 errors",
+        "success_eval": "self_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 72,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_8"
+    },
+    {
+      "id": "football-control-L09-002",
+      "sport": "football",
+      "category": "control",
+      "category_name": "Ball Control",
+      "level": 9,
+      "title": "Ball Control L9 Drill 2",
+      "description": "Ball Control practice at level 9.",
+      "duration_minutes": 23,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Receive 15 passes from partner or rebound off wall; control and pass back.",
+        "Prioritize soft first touch and body positioning."
+      ],
+      "metric": {
+        "type": "first_touch_errors",
+        "target": "<=3 errors",
+        "success_eval": "self_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 72,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_8"
+    },
+    {
+      "id": "football-control-L09-003",
+      "sport": "football",
+      "category": "control",
+      "category_name": "Ball Control",
+      "level": 9,
+      "title": "Ball Control L9 Drill 3",
+      "description": "Ball Control practice at level 9.",
+      "duration_minutes": 23,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Receive 15 passes from partner or rebound off wall; control and pass back.",
+        "Prioritize soft first touch and body positioning."
+      ],
+      "metric": {
+        "type": "first_touch_errors",
+        "target": "<=3 errors",
+        "success_eval": "self_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 72,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_8"
+    },
+    {
+      "id": "football-control-L10-001",
+      "sport": "football",
+      "category": "control",
+      "category_name": "Ball Control",
+      "level": 10,
+      "title": "Ball Control L10 Drill 1",
+      "description": "Ball Control practice at level 10.",
+      "duration_minutes": 25,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Receive 16 passes from partner or rebound off wall; control and pass back.",
+        "Prioritize soft first touch and body positioning."
+      ],
+      "metric": {
+        "type": "first_touch_errors",
+        "target": "<=3 errors",
+        "success_eval": "self_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 78,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_9"
+    },
+    {
+      "id": "football-control-L10-002",
+      "sport": "football",
+      "category": "control",
+      "category_name": "Ball Control",
+      "level": 10,
+      "title": "Ball Control L10 Drill 2",
+      "description": "Ball Control practice at level 10.",
+      "duration_minutes": 25,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Receive 16 passes from partner or rebound off wall; control and pass back.",
+        "Prioritize soft first touch and body positioning."
+      ],
+      "metric": {
+        "type": "first_touch_errors",
+        "target": "<=3 errors",
+        "success_eval": "self_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 78,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_9"
+    },
+    {
+      "id": "football-control-L10-003",
+      "sport": "football",
+      "category": "control",
+      "category_name": "Ball Control",
+      "level": 10,
+      "title": "Ball Control L10 Drill 3",
+      "description": "Ball Control practice at level 10.",
+      "duration_minutes": 25,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball"
+      ],
+      "steps": [
+        "Receive 16 passes from partner or rebound off wall; control and pass back.",
+        "Prioritize soft first touch and body positioning."
+      ],
+      "metric": {
+        "type": "first_touch_errors",
+        "target": "<=3 errors",
+        "success_eval": "self_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 78,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_9"
+    },
+    {
+      "id": "football-fitness-L01-001",
+      "sport": "football",
+      "category": "fitness",
+      "category_name": "Fitness & Agility",
+      "level": 1,
+      "title": "Fitness & Agility L1 Drill 1",
+      "description": "Fitness & Agility practice at level 1.",
+      "duration_minutes": 7,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Perform 5 sets of agility drills (shuttle runs, ladder, quick-feet) for 7 minutes total.",
+        "Keep rest short (20-30s) and maintain intensity."
+      ],
+      "metric": {
+        "type": "minutes_or_reps",
+        "target": "Complete sets with required intensity",
+        "success_eval": "self_timer_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 24,
+      "free": true,
+      "unlock_requires": "none"
+    },
+    {
+      "id": "football-fitness-L01-002",
+      "sport": "football",
+      "category": "fitness",
+      "category_name": "Fitness & Agility",
+      "level": 1,
+      "title": "Fitness & Agility L1 Drill 2",
+      "description": "Fitness & Agility practice at level 1.",
+      "duration_minutes": 7,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Perform 5 sets of agility drills (shuttle runs, ladder, quick-feet) for 7 minutes total.",
+        "Keep rest short (20-30s) and maintain intensity."
+      ],
+      "metric": {
+        "type": "minutes_or_reps",
+        "target": "Complete sets with required intensity",
+        "success_eval": "self_timer_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 24,
+      "free": true,
+      "unlock_requires": "none"
+    },
+    {
+      "id": "football-fitness-L01-003",
+      "sport": "football",
+      "category": "fitness",
+      "category_name": "Fitness & Agility",
+      "level": 1,
+      "title": "Fitness & Agility L1 Drill 3",
+      "description": "Fitness & Agility practice at level 1.",
+      "duration_minutes": 7,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Perform 5 sets of agility drills (shuttle runs, ladder, quick-feet) for 7 minutes total.",
+        "Keep rest short (20-30s) and maintain intensity."
+      ],
+      "metric": {
+        "type": "minutes_or_reps",
+        "target": "Complete sets with required intensity",
+        "success_eval": "self_timer_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 24,
+      "free": true,
+      "unlock_requires": "none"
+    },
+    {
+      "id": "football-fitness-L02-001",
+      "sport": "football",
+      "category": "fitness",
+      "category_name": "Fitness & Agility",
+      "level": 2,
+      "title": "Fitness & Agility L2 Drill 1",
+      "description": "Fitness & Agility practice at level 2.",
+      "duration_minutes": 9,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Perform 6 sets of agility drills (shuttle runs, ladder, quick-feet) for 9 minutes total.",
+        "Keep rest short (20-30s) and maintain intensity."
+      ],
+      "metric": {
+        "type": "minutes_or_reps",
+        "target": "Complete sets with required intensity",
+        "success_eval": "self_timer_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 30,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_1"
+    },
+    {
+      "id": "football-fitness-L02-002",
+      "sport": "football",
+      "category": "fitness",
+      "category_name": "Fitness & Agility",
+      "level": 2,
+      "title": "Fitness & Agility L2 Drill 2",
+      "description": "Fitness & Agility practice at level 2.",
+      "duration_minutes": 9,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Perform 6 sets of agility drills (shuttle runs, ladder, quick-feet) for 9 minutes total.",
+        "Keep rest short (20-30s) and maintain intensity."
+      ],
+      "metric": {
+        "type": "minutes_or_reps",
+        "target": "Complete sets with required intensity",
+        "success_eval": "self_timer_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 30,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_1"
+    },
+    {
+      "id": "football-fitness-L02-003",
+      "sport": "football",
+      "category": "fitness",
+      "category_name": "Fitness & Agility",
+      "level": 2,
+      "title": "Fitness & Agility L2 Drill 3",
+      "description": "Fitness & Agility practice at level 2.",
+      "duration_minutes": 9,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Perform 6 sets of agility drills (shuttle runs, ladder, quick-feet) for 9 minutes total.",
+        "Keep rest short (20-30s) and maintain intensity."
+      ],
+      "metric": {
+        "type": "minutes_or_reps",
+        "target": "Complete sets with required intensity",
+        "success_eval": "self_timer_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 30,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_1"
+    },
+    {
+      "id": "football-fitness-L03-001",
+      "sport": "football",
+      "category": "fitness",
+      "category_name": "Fitness & Agility",
+      "level": 3,
+      "title": "Fitness & Agility L3 Drill 1",
+      "description": "Fitness & Agility practice at level 3.",
+      "duration_minutes": 11,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Perform 7 sets of agility drills (shuttle runs, ladder, quick-feet) for 11 minutes total.",
+        "Keep rest short (20-30s) and maintain intensity."
+      ],
+      "metric": {
+        "type": "minutes_or_reps",
+        "target": "Complete sets with required intensity",
+        "success_eval": "self_timer_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 36,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_2"
+    },
+    {
+      "id": "football-fitness-L03-002",
+      "sport": "football",
+      "category": "fitness",
+      "category_name": "Fitness & Agility",
+      "level": 3,
+      "title": "Fitness & Agility L3 Drill 2",
+      "description": "Fitness & Agility practice at level 3.",
+      "duration_minutes": 11,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Perform 7 sets of agility drills (shuttle runs, ladder, quick-feet) for 11 minutes total.",
+        "Keep rest short (20-30s) and maintain intensity."
+      ],
+      "metric": {
+        "type": "minutes_or_reps",
+        "target": "Complete sets with required intensity",
+        "success_eval": "self_timer_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 36,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_2"
+    },
+    {
+      "id": "football-fitness-L03-003",
+      "sport": "football",
+      "category": "fitness",
+      "category_name": "Fitness & Agility",
+      "level": 3,
+      "title": "Fitness & Agility L3 Drill 3",
+      "description": "Fitness & Agility practice at level 3.",
+      "duration_minutes": 11,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Perform 7 sets of agility drills (shuttle runs, ladder, quick-feet) for 11 minutes total.",
+        "Keep rest short (20-30s) and maintain intensity."
+      ],
+      "metric": {
+        "type": "minutes_or_reps",
+        "target": "Complete sets with required intensity",
+        "success_eval": "self_timer_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 36,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_2"
+    },
+    {
+      "id": "football-fitness-L04-001",
+      "sport": "football",
+      "category": "fitness",
+      "category_name": "Fitness & Agility",
+      "level": 4,
+      "title": "Fitness & Agility L4 Drill 1",
+      "description": "Fitness & Agility practice at level 4.",
+      "duration_minutes": 13,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Perform 8 sets of agility drills (shuttle runs, ladder, quick-feet) for 13 minutes total.",
+        "Keep rest short (20-30s) and maintain intensity."
+      ],
+      "metric": {
+        "type": "minutes_or_reps",
+        "target": "Complete sets with required intensity",
+        "success_eval": "self_timer_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 42,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_3"
+    },
+    {
+      "id": "football-fitness-L04-002",
+      "sport": "football",
+      "category": "fitness",
+      "category_name": "Fitness & Agility",
+      "level": 4,
+      "title": "Fitness & Agility L4 Drill 2",
+      "description": "Fitness & Agility practice at level 4.",
+      "duration_minutes": 13,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Perform 8 sets of agility drills (shuttle runs, ladder, quick-feet) for 13 minutes total.",
+        "Keep rest short (20-30s) and maintain intensity."
+      ],
+      "metric": {
+        "type": "minutes_or_reps",
+        "target": "Complete sets with required intensity",
+        "success_eval": "self_timer_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 42,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_3"
+    },
+    {
+      "id": "football-fitness-L04-003",
+      "sport": "football",
+      "category": "fitness",
+      "category_name": "Fitness & Agility",
+      "level": 4,
+      "title": "Fitness & Agility L4 Drill 3",
+      "description": "Fitness & Agility practice at level 4.",
+      "duration_minutes": 13,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Perform 8 sets of agility drills (shuttle runs, ladder, quick-feet) for 13 minutes total.",
+        "Keep rest short (20-30s) and maintain intensity."
+      ],
+      "metric": {
+        "type": "minutes_or_reps",
+        "target": "Complete sets with required intensity",
+        "success_eval": "self_timer_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 42,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_3"
+    },
+    {
+      "id": "football-fitness-L05-001",
+      "sport": "football",
+      "category": "fitness",
+      "category_name": "Fitness & Agility",
+      "level": 5,
+      "title": "Fitness & Agility L5 Drill 1",
+      "description": "Fitness & Agility practice at level 5.",
+      "duration_minutes": 15,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Perform 9 sets of agility drills (shuttle runs, ladder, quick-feet) for 15 minutes total.",
+        "Keep rest short (20-30s) and maintain intensity."
+      ],
+      "metric": {
+        "type": "minutes_or_reps",
+        "target": "Complete sets with required intensity",
+        "success_eval": "self_timer_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 48,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_4"
+    },
+    {
+      "id": "football-fitness-L05-002",
+      "sport": "football",
+      "category": "fitness",
+      "category_name": "Fitness & Agility",
+      "level": 5,
+      "title": "Fitness & Agility L5 Drill 2",
+      "description": "Fitness & Agility practice at level 5.",
+      "duration_minutes": 15,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Perform 9 sets of agility drills (shuttle runs, ladder, quick-feet) for 15 minutes total.",
+        "Keep rest short (20-30s) and maintain intensity."
+      ],
+      "metric": {
+        "type": "minutes_or_reps",
+        "target": "Complete sets with required intensity",
+        "success_eval": "self_timer_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 48,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_4"
+    },
+    {
+      "id": "football-fitness-L05-003",
+      "sport": "football",
+      "category": "fitness",
+      "category_name": "Fitness & Agility",
+      "level": 5,
+      "title": "Fitness & Agility L5 Drill 3",
+      "description": "Fitness & Agility practice at level 5.",
+      "duration_minutes": 15,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Perform 9 sets of agility drills (shuttle runs, ladder, quick-feet) for 15 minutes total.",
+        "Keep rest short (20-30s) and maintain intensity."
+      ],
+      "metric": {
+        "type": "minutes_or_reps",
+        "target": "Complete sets with required intensity",
+        "success_eval": "self_timer_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 48,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_4"
+    },
+    {
+      "id": "football-fitness-L06-001",
+      "sport": "football",
+      "category": "fitness",
+      "category_name": "Fitness & Agility",
+      "level": 6,
+      "title": "Fitness & Agility L6 Drill 1",
+      "description": "Fitness & Agility practice at level 6.",
+      "duration_minutes": 17,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Perform 10 sets of agility drills (shuttle runs, ladder, quick-feet) for 17 minutes total.",
+        "Keep rest short (20-30s) and maintain intensity."
+      ],
+      "metric": {
+        "type": "minutes_or_reps",
+        "target": "Complete sets with required intensity",
+        "success_eval": "self_timer_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 54,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_5"
+    },
+    {
+      "id": "football-fitness-L06-002",
+      "sport": "football",
+      "category": "fitness",
+      "category_name": "Fitness & Agility",
+      "level": 6,
+      "title": "Fitness & Agility L6 Drill 2",
+      "description": "Fitness & Agility practice at level 6.",
+      "duration_minutes": 17,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Perform 10 sets of agility drills (shuttle runs, ladder, quick-feet) for 17 minutes total.",
+        "Keep rest short (20-30s) and maintain intensity."
+      ],
+      "metric": {
+        "type": "minutes_or_reps",
+        "target": "Complete sets with required intensity",
+        "success_eval": "self_timer_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 54,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_5"
+    },
+    {
+      "id": "football-fitness-L06-003",
+      "sport": "football",
+      "category": "fitness",
+      "category_name": "Fitness & Agility",
+      "level": 6,
+      "title": "Fitness & Agility L6 Drill 3",
+      "description": "Fitness & Agility practice at level 6.",
+      "duration_minutes": 17,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Perform 10 sets of agility drills (shuttle runs, ladder, quick-feet) for 17 minutes total.",
+        "Keep rest short (20-30s) and maintain intensity."
+      ],
+      "metric": {
+        "type": "minutes_or_reps",
+        "target": "Complete sets with required intensity",
+        "success_eval": "self_timer_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 54,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_5"
+    },
+    {
+      "id": "football-fitness-L07-001",
+      "sport": "football",
+      "category": "fitness",
+      "category_name": "Fitness & Agility",
+      "level": 7,
+      "title": "Fitness & Agility L7 Drill 1",
+      "description": "Fitness & Agility practice at level 7.",
+      "duration_minutes": 19,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Perform 11 sets of agility drills (shuttle runs, ladder, quick-feet) for 19 minutes total.",
+        "Keep rest short (20-30s) and maintain intensity."
+      ],
+      "metric": {
+        "type": "minutes_or_reps",
+        "target": "Complete sets with required intensity",
+        "success_eval": "self_timer_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 60,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_6"
+    },
+    {
+      "id": "football-fitness-L07-002",
+      "sport": "football",
+      "category": "fitness",
+      "category_name": "Fitness & Agility",
+      "level": 7,
+      "title": "Fitness & Agility L7 Drill 2",
+      "description": "Fitness & Agility practice at level 7.",
+      "duration_minutes": 19,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Perform 11 sets of agility drills (shuttle runs, ladder, quick-feet) for 19 minutes total.",
+        "Keep rest short (20-30s) and maintain intensity."
+      ],
+      "metric": {
+        "type": "minutes_or_reps",
+        "target": "Complete sets with required intensity",
+        "success_eval": "self_timer_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 60,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_6"
+    },
+    {
+      "id": "football-fitness-L07-003",
+      "sport": "football",
+      "category": "fitness",
+      "category_name": "Fitness & Agility",
+      "level": 7,
+      "title": "Fitness & Agility L7 Drill 3",
+      "description": "Fitness & Agility practice at level 7.",
+      "duration_minutes": 19,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Perform 11 sets of agility drills (shuttle runs, ladder, quick-feet) for 19 minutes total.",
+        "Keep rest short (20-30s) and maintain intensity."
+      ],
+      "metric": {
+        "type": "minutes_or_reps",
+        "target": "Complete sets with required intensity",
+        "success_eval": "self_timer_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 60,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_6"
+    },
+    {
+      "id": "football-fitness-L08-001",
+      "sport": "football",
+      "category": "fitness",
+      "category_name": "Fitness & Agility",
+      "level": 8,
+      "title": "Fitness & Agility L8 Drill 1",
+      "description": "Fitness & Agility practice at level 8.",
+      "duration_minutes": 21,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Perform 12 sets of agility drills (shuttle runs, ladder, quick-feet) for 21 minutes total.",
+        "Keep rest short (20-30s) and maintain intensity."
+      ],
+      "metric": {
+        "type": "minutes_or_reps",
+        "target": "Complete sets with required intensity",
+        "success_eval": "self_timer_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 66,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_7"
+    },
+    {
+      "id": "football-fitness-L08-002",
+      "sport": "football",
+      "category": "fitness",
+      "category_name": "Fitness & Agility",
+      "level": 8,
+      "title": "Fitness & Agility L8 Drill 2",
+      "description": "Fitness & Agility practice at level 8.",
+      "duration_minutes": 21,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Perform 12 sets of agility drills (shuttle runs, ladder, quick-feet) for 21 minutes total.",
+        "Keep rest short (20-30s) and maintain intensity."
+      ],
+      "metric": {
+        "type": "minutes_or_reps",
+        "target": "Complete sets with required intensity",
+        "success_eval": "self_timer_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 66,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_7"
+    },
+    {
+      "id": "football-fitness-L08-003",
+      "sport": "football",
+      "category": "fitness",
+      "category_name": "Fitness & Agility",
+      "level": 8,
+      "title": "Fitness & Agility L8 Drill 3",
+      "description": "Fitness & Agility practice at level 8.",
+      "duration_minutes": 21,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Perform 12 sets of agility drills (shuttle runs, ladder, quick-feet) for 21 minutes total.",
+        "Keep rest short (20-30s) and maintain intensity."
+      ],
+      "metric": {
+        "type": "minutes_or_reps",
+        "target": "Complete sets with required intensity",
+        "success_eval": "self_timer_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 66,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_7"
+    },
+    {
+      "id": "football-fitness-L09-001",
+      "sport": "football",
+      "category": "fitness",
+      "category_name": "Fitness & Agility",
+      "level": 9,
+      "title": "Fitness & Agility L9 Drill 1",
+      "description": "Fitness & Agility practice at level 9.",
+      "duration_minutes": 23,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Perform 13 sets of agility drills (shuttle runs, ladder, quick-feet) for 23 minutes total.",
+        "Keep rest short (20-30s) and maintain intensity."
+      ],
+      "metric": {
+        "type": "minutes_or_reps",
+        "target": "Complete sets with required intensity",
+        "success_eval": "self_timer_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 72,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_8"
+    },
+    {
+      "id": "football-fitness-L09-002",
+      "sport": "football",
+      "category": "fitness",
+      "category_name": "Fitness & Agility",
+      "level": 9,
+      "title": "Fitness & Agility L9 Drill 2",
+      "description": "Fitness & Agility practice at level 9.",
+      "duration_minutes": 23,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Perform 13 sets of agility drills (shuttle runs, ladder, quick-feet) for 23 minutes total.",
+        "Keep rest short (20-30s) and maintain intensity."
+      ],
+      "metric": {
+        "type": "minutes_or_reps",
+        "target": "Complete sets with required intensity",
+        "success_eval": "self_timer_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 72,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_8"
+    },
+    {
+      "id": "football-fitness-L09-003",
+      "sport": "football",
+      "category": "fitness",
+      "category_name": "Fitness & Agility",
+      "level": 9,
+      "title": "Fitness & Agility L9 Drill 3",
+      "description": "Fitness & Agility practice at level 9.",
+      "duration_minutes": 23,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Perform 13 sets of agility drills (shuttle runs, ladder, quick-feet) for 23 minutes total.",
+        "Keep rest short (20-30s) and maintain intensity."
+      ],
+      "metric": {
+        "type": "minutes_or_reps",
+        "target": "Complete sets with required intensity",
+        "success_eval": "self_timer_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 72,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_8"
+    },
+    {
+      "id": "football-fitness-L10-001",
+      "sport": "football",
+      "category": "fitness",
+      "category_name": "Fitness & Agility",
+      "level": 10,
+      "title": "Fitness & Agility L10 Drill 1",
+      "description": "Fitness & Agility practice at level 10.",
+      "duration_minutes": 25,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Perform 14 sets of agility drills (shuttle runs, ladder, quick-feet) for 25 minutes total.",
+        "Keep rest short (20-30s) and maintain intensity."
+      ],
+      "metric": {
+        "type": "minutes_or_reps",
+        "target": "Complete sets with required intensity",
+        "success_eval": "self_timer_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 78,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_9"
+    },
+    {
+      "id": "football-fitness-L10-002",
+      "sport": "football",
+      "category": "fitness",
+      "category_name": "Fitness & Agility",
+      "level": 10,
+      "title": "Fitness & Agility L10 Drill 2",
+      "description": "Fitness & Agility practice at level 10.",
+      "duration_minutes": 25,
+      "solo_or_duo": "duo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Perform 14 sets of agility drills (shuttle runs, ladder, quick-feet) for 25 minutes total.",
+        "Keep rest short (20-30s) and maintain intensity."
+      ],
+      "metric": {
+        "type": "minutes_or_reps",
+        "target": "Complete sets with required intensity",
+        "success_eval": "self_timer_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 78,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_9"
+    },
+    {
+      "id": "football-fitness-L10-003",
+      "sport": "football",
+      "category": "fitness",
+      "category_name": "Fitness & Agility",
+      "level": 10,
+      "title": "Fitness & Agility L10 Drill 3",
+      "description": "Fitness & Agility practice at level 10.",
+      "duration_minutes": 25,
+      "solo_or_duo": "solo",
+      "equipment": [
+        "ball",
+        "cones"
+      ],
+      "steps": [
+        "Perform 14 sets of agility drills (shuttle runs, ladder, quick-feet) for 25 minutes total.",
+        "Keep rest short (20-30s) and maintain intensity."
+      ],
+      "metric": {
+        "type": "minutes_or_reps",
+        "target": "Complete sets with required intensity",
+        "success_eval": "self_timer_or_partner",
+        "score_range": [
+          0,
+          100
+        ]
+      },
+      "xp": 78,
+      "free": false,
+      "unlock_requires": "complete_any_in_category_level_9"
+    }
+  ]
+}

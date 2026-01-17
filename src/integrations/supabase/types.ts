@@ -147,6 +147,7 @@ export type Database = {
           drill_id: string
           duration_minutes: number | null
           id: string
+          score_data: Json | null
           sport: string
           user_id: string
           xp_earned: number | null
@@ -156,6 +157,7 @@ export type Database = {
           drill_id: string
           duration_minutes?: number | null
           id?: string
+          score_data?: Json | null
           sport: string
           user_id: string
           xp_earned?: number | null
@@ -165,6 +167,7 @@ export type Database = {
           drill_id?: string
           duration_minutes?: number | null
           id?: string
+          score_data?: Json | null
           sport?: string
           user_id?: string
           xp_earned?: number | null
@@ -258,6 +261,93 @@ export type Database = {
           reward_value?: number
           spin_date?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      drill_categories: {
+        Row: {
+          created_at: string | null
+          drills_per_level: number
+          id: string
+          levels: number
+          name: string
+          sport: string
+        }
+        Insert: {
+          created_at?: string | null
+          drills_per_level?: number
+          id: string
+          levels?: number
+          name: string
+          sport: string
+        }
+        Update: {
+          created_at?: string | null
+          drills_per_level?: number
+          id?: string
+          levels?: number
+          name?: string
+          sport?: string
+        }
+        Relationships: []
+      }
+      drills: {
+        Row: {
+          category: string
+          category_name: string | null
+          created_at: string | null
+          description: string | null
+          duration_minutes: number
+          equipment: Json | null
+          free: boolean | null
+          id: string
+          level: number
+          metric: Json | null
+          solo_or_duo: string | null
+          sport: string
+          steps: Json | null
+          title: string
+          unlock_requires: string | null
+          updated_at: string | null
+          xp: number
+        }
+        Insert: {
+          category: string
+          category_name?: string | null
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number
+          equipment?: Json | null
+          free?: boolean | null
+          id: string
+          level: number
+          metric?: Json | null
+          solo_or_duo?: string | null
+          sport: string
+          steps?: Json | null
+          title: string
+          unlock_requires?: string | null
+          updated_at?: string | null
+          xp?: number
+        }
+        Update: {
+          category?: string
+          category_name?: string | null
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number
+          equipment?: Json | null
+          free?: boolean | null
+          id?: string
+          level?: number
+          metric?: Json | null
+          solo_or_duo?: string | null
+          sport?: string
+          steps?: Json | null
+          title?: string
+          unlock_requires?: string | null
+          updated_at?: string | null
+          xp?: number
         }
         Relationships: []
       }
