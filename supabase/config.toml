@@ -14,3 +14,15 @@ verify_jwt = false
 
 [functions.complete-drill]
 verify_jwt = false
+
+[functions.get-drills]
+verify_jwt = false
+
+[functions.get-drill]
+verify_jwt = false
+
+[functions.get-categories]
+verify_jwt = false
+
+[functions.get-user-completed-drills]
+verify_jwt = false
