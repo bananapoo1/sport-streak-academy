@@ -14,6 +14,20 @@ interface WeekDay {
   progress: number;
 }
 
+interface CompleteTrainingResult {
+  success: boolean;
+  error?: string;
+  code?: string;
+  earned_xp?: number;
+  new_total_xp?: number;
+  day_minutes?: number;
+  challenge_submitted?: boolean;
+  challenge_completed?: boolean;
+  won?: boolean | null;
+  already_completed?: boolean;
+  unlocked_new_drills?: string[];
+}
+
 export const useProgress = () => {
   const { user } = useAuth();
   const [todayProgress, setTodayProgress] = useState<DailyProgress>({
@@ -43,7 +57,7 @@ export const useProgress = () => {
         minutes_completed: data.minutes_completed || 0,
         xp_earned: data.xp_earned || 0,
         drills_completed: data.drills_completed || 0,
-        goal_minutes: data.goal_minutes || 10,
+        goal_minutes: data.goal_minutes || 30,
       });
     }
   };
@@ -69,7 +83,7 @@ export const useProgress = () => {
         .maybeSingle();
 
       const minutes = data?.minutes_completed || 0;
-      const goal = data?.goal_minutes || 10;
+      const goal = data?.goal_minutes || 30;
       const progress = Math.min((minutes / goal) * 100, 100);
 
       weekData.push({
@@ -95,19 +109,25 @@ export const useProgress = () => {
     }
   };
 
-  const completeTraining = async (sport: string, drillId: string) => {
-    if (!user) return { success: false };
+  const completeTraining = async (
+    sport: string, 
+    drillId: string,
+    options?: {
+      duration_minutes?: number;
+      score_data?: Record<string, unknown>;
+      challenge_id?: string;
+    }
+  ): Promise<CompleteTrainingResult> => {
+    if (!user) return { success: false, error: "Not authenticated" };
 
     try {
-      // Get auth session for the edge function
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) {
         console.error("No active session");
-        return { success: false };
+        return { success: false, error: "No active session" };
       }
 
-      // Call the server-side edge function to complete the drill
-      // XP and duration are calculated server-side based on drill ID
+      // Call the server-side edge function with new API format
       const response = await fetch(
         "https://nikvolkksngggjkvpzrd.supabase.co/functions/v1/complete-drill",
         {
@@ -117,8 +137,10 @@ export const useProgress = () => {
             "Authorization": `Bearer ${session.access_token}`,
           },
           body: JSON.stringify({
-            drillId,
-            sport,
+            drill_id: drillId,
+            duration_minutes: options?.duration_minutes,
+            score_data: options?.score_data,
+            challenge_id: options?.challenge_id,
           }),
         }
       );
@@ -135,14 +157,26 @@ export const useProgress = () => {
       }
 
       // Refresh data after successful completion
-      await fetchTodayProgress();
-      await fetchWeekProgress();
-      await fetchStreak();
+      await Promise.all([
+        fetchTodayProgress(),
+        fetchWeekProgress(),
+        fetchStreak()
+      ]);
 
-      return { success: true };
+      return { 
+        success: true,
+        earned_xp: result.earned_xp,
+        new_total_xp: result.new_total_xp,
+        day_minutes: result.day_minutes,
+        challenge_submitted: result.challenge_submitted,
+        challenge_completed: result.challenge_completed,
+        won: result.won,
+        already_completed: result.already_completed,
+        unlocked_new_drills: result.unlocked_new_drills
+      };
     } catch (error) {
       console.error("Error completing training:", error);
-      return { success: false };
+      return { success: false, error: "Network error" };
     }
   };
 

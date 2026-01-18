@@ -3,37 +3,38 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, CheckCircle, Clock, Zap, Trophy, ChevronDown, ChevronUp, LogIn, Lock, Target } from "lucide-react";
+import { ArrowLeft, CheckCircle, Clock, Zap, Trophy, ChevronDown, ChevronUp, LogIn, Lock, Target, Users } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProgress } from "@/hooks/useProgress";
-import { useCompletedDrills } from "@/hooks/useCompletedDrills";
-import { useFreeDrillLimit, FREE_DRILL_LIMIT } from "@/hooks/useFreeDrillLimit";
-import { getDrillById, getSportData } from "@/data/drillsData";
+import { useDrill } from "@/hooks/useDrills";
+import { FREE_DRILL_LIMIT_PER_DAY } from "@/lib/constants";
 import { useFriendActivity } from "@/hooks/useFriendActivity";
 import CelebrationOverlay from "@/components/CelebrationOverlay";
+
+// Sport metadata (for display purposes)
+const sportMeta: Record<string, { name: string; emoji: string; color: string }> = {
+  football: { name: "Football", emoji: "⚽", color: "#22c55e" },
+  basketball: { name: "Basketball", emoji: "🏀", color: "#f97316" },
+  tennis: { name: "Tennis", emoji: "🎾", color: "#eab308" },
+  swimming: { name: "Swimming", emoji: "🏊", color: "#3b82f6" },
+  running: { name: "Running", emoji: "🏃", color: "#ef4444" },
+};
 
 const DrillDetail = () => {
   const { sportSlug, drillId } = useParams();
   const navigate = useNavigate();
-  const [isCompleted, setIsCompleted] = useState(false);
   const [showInstructions, setShowInstructions] = useState(true);
   const [showCelebration, setShowCelebration] = useState(false);
   const [earnedXp, setEarnedXp] = useState(0);
+  const [isCompleting, setIsCompleting] = useState(false);
+  
   const { user } = useAuth();
   const { completeTraining } = useProgress();
-  const { isDrillCompleted, loading: checkingCompletion } = useCompletedDrills(sportSlug);
-  const { canDoMoreDrills, hasSubscription, loading: limitLoading } = useFreeDrillLimit();
+  const { drill, loading, refetch } = useDrill(drillId);
   const { notifyFriendsOfCompletion } = useFriendActivity();
 
-  const drill = getDrillById(sportSlug || "", drillId || "");
-  const sportData = getSportData(sportSlug || "");
-
-  useEffect(() => {
-    if (!checkingCompletion && drillId && isDrillCompleted(drillId)) {
-      setIsCompleted(true);
-    }
-  }, [checkingCompletion, drillId, isDrillCompleted]);
+  const sportData = sportSlug ? sportMeta[sportSlug] : null;
 
   const handleCompleteDrill = async () => {
     if (!user) {
@@ -46,38 +47,73 @@ const DrillDetail = () => {
       return;
     }
 
-    if (!hasSubscription && !canDoMoreDrills && !isCompleted) {
-      toast.error("You've used your free drill! Upgrade to Pro for unlimited access.", {
-        action: {
-          label: "View Plans",
-          onClick: () => navigate("/#pricing"),
-        },
-      });
+    if (!drill) return;
+
+    // Check if locked
+    if (drill.unlock_status === "locked") {
+      toast.error("This drill is locked. Complete previous drills first!");
       return;
     }
 
-    if (!drill) return;
+    setIsCompleting(true);
 
     const result = await completeTraining(
-      sportSlug || "unknown",
-      drillId || "unknown"
+      drill.sport,
+      drill.id,
+      { duration_minutes: drill.duration_minutes }
     );
 
+    setIsCompleting(false);
+
     if (result.success) {
-      setIsCompleted(true);
-      setEarnedXp(drill.xp);
-      setShowCelebration(true);
-      
-      // Notify friends
-      notifyFriendsOfCompletion();
+      if (result.already_completed) {
+        toast.info("You've already completed this drill!");
+      } else {
+        setEarnedXp(result.earned_xp || drill.xp);
+        setShowCelebration(true);
+        notifyFriendsOfCompletion();
+        
+        // Refresh drill data to update unlock_status
+        refetch();
+
+        // Show challenge result if applicable
+        if (result.challenge_submitted) {
+          if (result.challenge_completed) {
+            toast.success(
+              result.won === true 
+                ? "🏆 You won the challenge!" 
+                : result.won === false 
+                  ? "Challenge complete - opponent won" 
+                  : "It's a tie!"
+            );
+          } else {
+            toast.info("Challenge score submitted! Waiting for opponent.");
+          }
+        }
+      }
     } else {
-      toast.error("Failed to save progress. Please try again.");
+      if (result.code === "DRILL_LIMIT_REACHED") {
+        toast.error(`You've used your ${FREE_DRILL_LIMIT_PER_DAY} free drill! Upgrade to Pro for unlimited access.`, {
+          action: {
+            label: "View Plans",
+            onClick: () => navigate("/#pricing"),
+          },
+        });
+      } else if (result.code === "DRILL_LOCKED") {
+        toast.error(result.error || "This drill is locked");
+      } else {
+        toast.error(result.error || "Failed to save progress. Please try again.");
+      }
     }
   };
 
-  const isBlockedByLimit = user && !hasSubscription && !canDoMoreDrills && !isCompleted;
+  const getDifficultyFromLevel = (level: number): string => {
+    if (level <= 2) return "beginner";
+    if (level <= 5) return "intermediate";
+    if (level <= 8) return "advanced";
+    return "elite";
+  };
 
-  // Difficulty color
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case "beginner": return "text-success";
@@ -88,14 +124,29 @@ const DrillDetail = () => {
     }
   };
 
-  if (!drill || !sportData) {
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="pt-24 pb-16">
+          <div className="container mx-auto px-4 max-w-4xl text-center">
+            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
+            <p className="text-muted-foreground">Loading drill...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!drill) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
         <main className="pt-24 pb-16">
           <div className="container mx-auto px-4 max-w-4xl text-center">
             <h1 className="text-2xl font-bold text-foreground mb-4">Drill Not Found</h1>
-            <Link to={`/sports/${sportSlug}`}>
+            <Link to={sportSlug ? `/sports/${sportSlug}` : "/sports"}>
               <Button variant="outline">Back to Sport</Button>
             </Link>
           </div>
@@ -104,6 +155,11 @@ const DrillDetail = () => {
       </div>
     );
   }
+
+  const difficulty = getDifficultyFromLevel(drill.level);
+  const isCompleted = drill.unlock_status === "completed";
+  const isLocked = drill.unlock_status === "locked";
+  const steps = Array.isArray(drill.steps) ? drill.steps : [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -115,21 +171,21 @@ const DrillDetail = () => {
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to {sportData.name}
+            Back to {sportData?.name || "Sport"}
           </Link>
 
           {/* Drill Header */}
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-3">
-              <span className="text-3xl">{sportData.emoji}</span>
+              <span className="text-3xl">{sportData?.emoji || "🎯"}</span>
               <span 
                 className="text-sm font-semibold uppercase tracking-wide"
-                style={{ color: sportData.color }}
+                style={{ color: sportData?.color }}
               >
-                {sportData.name}
+                {sportData?.name || drill.sport}
               </span>
-              <span className={`text-sm font-medium px-3 py-1 rounded-full bg-secondary ${getDifficultyColor(drill.difficulty)}`}>
-                {drill.difficulty}
+              <span className={`text-sm font-medium px-3 py-1 rounded-full bg-secondary ${getDifficultyColor(difficulty)}`}>
+                {difficulty}
               </span>
               <span className="text-sm text-muted-foreground">
                 Level {drill.level}
@@ -138,15 +194,23 @@ const DrillDetail = () => {
             <h1 className="text-3xl md:text-4xl font-extrabold text-foreground mt-2 mb-4">
               {drill.title}
             </h1>
-            <p className="text-muted-foreground mb-4">{drill.description}</p>
+            {drill.description && (
+              <p className="text-muted-foreground mb-4">{drill.description}</p>
+            )}
             <div className="flex flex-wrap gap-4">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Clock className="w-5 h-5" />
-                {drill.duration} min
+                {drill.duration_minutes} min
               </div>
+              {drill.solo_or_duo && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Users className="w-5 h-5" />
+                  {drill.solo_or_duo}
+                </div>
+              )}
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Target className="w-5 h-5" />
-                {drill.category}
+                {drill.category_name || drill.category}
               </div>
               <div className="flex items-center gap-2 text-xp">
                 <Trophy className="w-5 h-5" />
@@ -158,7 +222,6 @@ const DrillDetail = () => {
           {/* Video Section */}
           <div className="relative border-2 rounded-2xl overflow-hidden mb-6 shadow-lg bg-gradient-to-br from-card to-secondary/30 border-border">
             <div className="aspect-video relative group cursor-pointer hover:bg-secondary/20 transition-colors">
-              {/* Video placeholder - ready for future video content */}
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mb-4 group-hover:bg-primary/30 transition-colors">
                   <svg className="w-10 h-10 text-primary" fill="currentColor" viewBox="0 0 24 24">
@@ -172,67 +235,72 @@ const DrillDetail = () => {
                   </p>
                 </div>
               </div>
-              {/* Sport badge */}
               <div className="absolute top-4 left-4">
                 <span className="px-3 py-1.5 rounded-full bg-background/80 backdrop-blur-sm text-sm font-semibold flex items-center gap-2">
-                  <span>{sportData.emoji}</span>
-                  <span style={{ color: sportData.color }}>{sportData.name}</span>
+                  <span>{sportData?.emoji}</span>
+                  <span style={{ color: sportData?.color }}>{sportData?.name}</span>
                 </span>
               </div>
-              {/* Duration badge */}
               <div className="absolute top-4 right-4">
                 <span className="px-3 py-1.5 rounded-full bg-background/80 backdrop-blur-sm text-sm font-medium flex items-center gap-1.5">
                   <Clock className="w-4 h-4 text-muted-foreground" />
-                  {drill.duration} min
+                  {drill.duration_minutes} min
                 </span>
               </div>
             </div>
           </div>
 
           {/* Instructions Collapsible */}
-          <div className="bg-card border-2 border-border rounded-2xl overflow-hidden mb-6 shadow-lg">
-            <button
-              onClick={() => setShowInstructions(!showInstructions)}
-              className="w-full flex items-center justify-between p-4 text-left hover:bg-secondary/50 transition-colors"
-            >
-              <h2 className="text-xl font-bold text-foreground">Step-by-Step Instructions</h2>
-              {showInstructions ? (
-                <ChevronUp className="w-5 h-5 text-muted-foreground" />
-              ) : (
-                <ChevronDown className="w-5 h-5 text-muted-foreground" />
+          {steps.length > 0 && (
+            <div className="bg-card border-2 border-border rounded-2xl overflow-hidden mb-6 shadow-lg">
+              <button
+                onClick={() => setShowInstructions(!showInstructions)}
+                className="w-full flex items-center justify-between p-4 text-left hover:bg-secondary/50 transition-colors"
+              >
+                <h2 className="text-xl font-bold text-foreground">Step-by-Step Instructions</h2>
+                {showInstructions ? (
+                  <ChevronUp className="w-5 h-5 text-muted-foreground" />
+                ) : (
+                  <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                )}
+              </button>
+              
+              {showInstructions && (
+                <div className="px-4 pb-4">
+                  <ol className="space-y-3">
+                    {steps.map((step, index) => {
+                      const stepText = typeof step === 'string' 
+                        ? step 
+                        : (step as { instruction?: string })?.instruction || String(step);
+                      return (
+                        <li key={index} className="flex gap-4">
+                          <span className="flex-shrink-0 w-8 h-8 font-bold rounded-full flex items-center justify-center bg-primary/10 text-primary">
+                            {index + 1}
+                          </span>
+                          <p className="text-foreground pt-1">{stepText}</p>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                </div>
               )}
-            </button>
-            
-            {showInstructions && (
-              <div className="px-4 pb-4">
-                <ol className="space-y-3">
-                  {drill.instructions.map((instruction, index) => (
-                    <li key={index} className="flex gap-4">
-                      <span className="flex-shrink-0 w-8 h-8 font-bold rounded-full flex items-center justify-center bg-primary/10 text-primary">
-                        {index + 1}
-                      </span>
-                      <p className="text-foreground pt-1">{instruction}</p>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            )}
-          </div>
+            </div>
+          )}
 
-          {/* Blocked by free limit */}
-          {isBlockedByLimit ? (
+          {/* Action Button */}
+          {isLocked ? (
             <div className="border-2 border-streak bg-gradient-to-r from-streak/10 to-streak/5 rounded-2xl p-6 text-center">
               <Lock className="w-12 h-12 mx-auto mb-3 text-streak" />
               <h3 className="text-xl font-bold text-foreground mb-2">
-                Free Drill Used
+                Drill Locked
               </h3>
               <p className="text-muted-foreground mb-4">
-                You've used your {FREE_DRILL_LIMIT} free drill. Upgrade to Pro for unlimited access to all drills!
+                {drill.unlock_requires?.includes("complete_any_in_category_level")
+                  ? `Complete a level ${drill.level - 1} drill in ${drill.category_name || drill.category} first`
+                  : "Complete previous drills to unlock this one"}
               </p>
-              <Link to="/#pricing">
-                <Button className="bg-gradient-to-r from-streak to-streak/80 hover:from-streak/90 hover:to-streak/70">
-                  Upgrade to Pro
-                </Button>
+              <Link to={`/sports/${sportSlug}`}>
+                <Button variant="outline">Back to Training</Button>
               </Link>
             </div>
           ) : !isCompleted ? (
@@ -240,8 +308,11 @@ const DrillDetail = () => {
               size="lg" 
               className="w-full h-14 text-lg font-bold"
               onClick={handleCompleteDrill}
+              disabled={isCompleting}
             >
-              {user ? (
+              {isCompleting ? (
+                <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2" />
+              ) : user ? (
                 <>
                   <CheckCircle className="w-5 h-5 mr-2" />
                   Mark as Complete (+{drill.xp} XP)

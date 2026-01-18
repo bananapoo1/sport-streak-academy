@@ -2,27 +2,35 @@ import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { ArrowLeft, Trophy, Target, Flame, Lock, Crown, Zap, TreeDeciduous, LayoutList } from "lucide-react";
+import { ArrowLeft, Trophy, Target, Flame, Lock, Crown, TreeDeciduous, LayoutList } from "lucide-react";
 import LevelMap from "@/components/LevelMap";
 import CategoryMap from "@/components/CategoryMap";
 import SkillTree from "@/components/SkillTree";
-import { useCompletedDrills } from "@/hooks/useCompletedDrills";
-import { getSportData, getAllDrillsForSport } from "@/data/drillsData";
+import { useDrills, useCategories } from "@/hooks/useDrills";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+// Sport metadata
+const sportMeta: Record<string, { name: string; emoji: string; color: string }> = {
+  football: { name: "Football", emoji: "⚽", color: "#22c55e" },
+  basketball: { name: "Basketball", emoji: "🏀", color: "#f97316" },
+  tennis: { name: "Tennis", emoji: "🎾", color: "#eab308" },
+  swimming: { name: "Swimming", emoji: "🏊", color: "#3b82f6" },
+  running: { name: "Running", emoji: "🏃", color: "#ef4444" },
+};
 
 const SportDetail = () => {
   const { sportSlug } = useParams();
   const [viewMode, setViewMode] = useState<"list" | "tree">("list");
-  const { completedDrills, loading } = useCompletedDrills(sportSlug);
+  
+  const { drills, loading: drillsLoading } = useDrills({ sport: sportSlug });
+  const { categories, loading: categoriesLoading } = useCategories(sportSlug);
   const { isPro, isSingleSport, loading: subLoading } = useSubscription();
   const { user } = useAuth();
   
-  const sportData = getSportData(sportSlug || "");
-  const allDrills = getAllDrillsForSport(sportSlug || "");
-  const completedDrillIds = new Set(completedDrills.map(d => d.drill_id));
+  const sportData = sportSlug ? sportMeta[sportSlug] : null;
   
   if (!sportData) {
     return (
@@ -41,17 +49,39 @@ const SportDetail = () => {
     );
   }
   
-  // Get level 1 drills for stats (base drills)
-  const baseDrills = allDrills.filter(d => d.level === 1);
-  const completedCount = completedDrills.length;
+  const loading = drillsLoading || categoriesLoading || subLoading;
+  
+  // Calculate stats from API data
+  const completedDrillIds = new Set(drills.filter(d => d.is_completed).map(d => d.id));
+  const completedCount = completedDrillIds.size;
+  const baseDrills = drills.filter(d => d.level === 1);
   const totalDrills = baseDrills.length;
-  const totalXP = baseDrills.reduce((sum, d) => sum + d.xp, 0);
-  const earnedXP = allDrills
-    .filter(d => completedDrillIds.has(d.id))
-    .reduce((sum, d) => sum + d.xp, 0);
+  const earnedXP = drills.filter(d => d.is_completed).reduce((sum, d) => sum + d.xp, 0);
 
   const hasPaidAccess = isPro || isSingleSport;
-  const hasCategories = sportData.categories && sportData.categories.length > 0;
+  const hasCategories = categories.length > 0;
+
+  // Transform API categories to the format expected by CategoryMap
+  const categoryMapData = categories.map(cat => ({
+    id: cat.id,
+    name: cat.name,
+    description: `Train your ${cat.name.toLowerCase()} skills`,
+    icon: "🎯",
+    drills: drills
+      .filter(d => d.category === cat.id)
+      .map(d => ({
+        id: d.id,
+        title: d.title,
+        duration: d.duration_minutes,
+        xp: d.xp,
+        level: Math.min(Math.max(d.level, 1), 5) as 1 | 2 | 3 | 4 | 5,
+        sport: sportSlug || "",
+        difficulty: (d.level <= 2 ? "beginner" : d.level <= 5 ? "intermediate" : "advanced") as "beginner" | "intermediate" | "advanced" | "elite",
+        description: d.description || "",
+        category: d.category_name || d.category,
+        instructions: [] as string[]
+      }))
+  }));
 
   return (
     <div className="min-h-screen bg-background">
@@ -98,7 +128,7 @@ const SportDetail = () => {
             </div>
             <div className="bg-card border-2 border-border rounded-2xl p-4 text-center hover:border-streak/50 transition-colors">
               <Trophy className="w-6 h-6 mx-auto mb-2 text-streak" />
-              <p className="text-2xl font-bold text-foreground">{sportData.categories.length}</p>
+              <p className="text-2xl font-bold text-foreground">{categories.length || 5}</p>
               <p className="text-xs text-muted-foreground">Categories</p>
             </div>
           </div>
@@ -138,7 +168,7 @@ const SportDetail = () => {
             </Tabs>
           </div>
 
-          {loading || subLoading ? (
+          {loading ? (
             <div className="text-center py-12">
               <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
               <p className="text-muted-foreground">Loading your progress...</p>
@@ -159,7 +189,7 @@ const SportDetail = () => {
               </div>
               
               <CategoryMap 
-                categories={sportData.categories}
+                categories={categoryMapData}
                 sportSlug={sportSlug || ""}
                 completedDrillIds={completedDrillIds}
                 sportColor={sportData.color}
@@ -169,7 +199,7 @@ const SportDetail = () => {
             <div className="bg-card border-2 border-border rounded-3xl p-6 shadow-lg">
               <h2 className="text-xl font-bold text-foreground mb-2 text-center">Training Journey</h2>
               <p className="text-sm text-muted-foreground text-center mb-4">
-                Complete each level to unlock the next. Progress through all 5 levels per drill!
+                Complete each level to unlock the next. Progress through all levels!
               </p>
               
               {user && !hasPaidAccess && (
@@ -190,7 +220,18 @@ const SportDetail = () => {
               )}
               
               <LevelMap 
-                drills={baseDrills}
+                drills={baseDrills.map(d => ({
+                  id: d.id,
+                  title: d.title,
+                  duration: d.duration_minutes,
+                  xp: d.xp,
+                  level: Math.min(Math.max(d.level, 1), 5) as 1 | 2 | 3 | 4 | 5,
+                  sport: sportSlug || "",
+                  difficulty: (d.level <= 2 ? "beginner" : d.level <= 5 ? "intermediate" : "advanced") as "beginner" | "intermediate" | "advanced" | "elite",
+                  description: d.description || "",
+                  category: d.category_name || d.category,
+                  instructions: [] as string[]
+                }))}
                 sportSlug={sportSlug || ""}
                 completedDrillIds={completedDrillIds}
                 sportColor={sportData.color}
