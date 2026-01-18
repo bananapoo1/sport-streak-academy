@@ -5,62 +5,40 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Free users can only complete 1 drill per day
-const FREE_DRILL_LIMIT = 1;
+// ============================================================
+// SHARED CONSTANTS (mirrored from src/lib/constants.ts)
+// ============================================================
+const FREE_DRILL_LIMIT_PER_DAY = 1;
+const DAILY_GOAL_MINUTES = 30;
+const XP_MULTIPLIER = 1;
+const CHALLENGE_XP_BONUS = 50;
 
-// Server-side XP calculation based on drill level
-// XP formula: base 20 XP * level * 1.5 (matches drillsData.ts)
-const DRILL_XP_BY_LEVEL: Record<number, number> = {
-  1: 30,   // 20 * 1 * 1.5
-  2: 60,   // 20 * 2 * 1.5
-  3: 90,   // 20 * 3 * 1.5
-  4: 120,  // 20 * 4 * 1.5
-  5: 150,  // 20 * 5 * 1.5
-};
-
-// Duration by level (matches drillsData.ts: 5 + level * 2)
-const DRILL_DURATION_BY_LEVEL: Record<number, number> = {
-  1: 7,   // 5 + 1 * 2
-  2: 9,   // 5 + 2 * 2
-  3: 11,  // 5 + 3 * 2
-  4: 13,  // 5 + 4 * 2
-  5: 15,  // 5 + 5 * 2
-};
-
-// Default values for unknown drills
-const DEFAULT_XP = 30;
-const DEFAULT_DURATION = 7;
-
-// Extract drill level from drill ID (format: sport-category-drillNum-level-X)
-function getDrillLevel(drillId: string): number {
-  const levelMatch = drillId.match(/-level-(\d+)$/);
-  if (levelMatch) {
-    const level = parseInt(levelMatch[1], 10);
-    if (level >= 1 && level <= 5) {
-      return level;
-    }
-  }
-  return 1; // Default to level 1
-}
-
-// Calculate XP server-side based on drill ID
-function calculateDrillXp(drillId: string): number {
-  const level = getDrillLevel(drillId);
-  return DRILL_XP_BY_LEVEL[level] ?? DEFAULT_XP;
-}
-
-// Calculate duration server-side based on drill ID
-function calculateDrillDuration(drillId: string): number {
-  const level = getDrillLevel(drillId);
-  return DRILL_DURATION_BY_LEVEL[level] ?? DEFAULT_DURATION;
-}
-
+// ============================================================
+// TYPES
+// ============================================================
 interface CompleteDrillRequest {
-  drillId: string;
-  sport: string;
+  drill_id: string;
+  duration_minutes?: number;
+  score_data?: Record<string, unknown>;
+  challenge_id?: string;
 }
 
-interface Challenge {
+interface DrillRow {
+  id: string;
+  sport: string;
+  category: string;
+  category_name: string | null;
+  level: number;
+  title: string;
+  description: string | null;
+  duration_minutes: number;
+  xp: number;
+  free: boolean;
+  unlock_requires: string | null;
+  metric: Record<string, unknown> | null;
+}
+
+interface ChallengeRow {
   id: string;
   challenger_id: string;
   challenged_id: string;
@@ -71,31 +49,228 @@ interface Challenge {
   challenged_score: number | null;
   winner_id: string | null;
   expires_at: string;
+  xp_bonus: number;
 }
 
-// Simple logging helper
-function logStep(step: string, details?: unknown) {
+// ============================================================
+// LOGGING HELPER
+// ============================================================
+function log(step: string, details?: unknown) {
   console.log(`[complete-drill] ${step}`, details ? JSON.stringify(details) : "");
 }
 
+function logError(step: string, error: unknown) {
+  console.error(`[complete-drill] ERROR - ${step}`, error);
+}
+
+// ============================================================
+// SUBSCRIPTION HELPERS
+// ============================================================
+async function checkSubscription(
+  userId: string,
+  email: string | undefined,
+  supabaseAdmin: any,
+  stripeSecretKey: string
+): Promise<{ hasSubscription: boolean; subscriptionType: "none" | "single_sport" | "pro"; subscribedSport?: string }> {
+  // Check for test accounts with paid access
+  const testAccountsEnv = Deno.env.get("TEST_ACCOUNTS_WITH_PAID_ACCESS") ?? "";
+  const testAccounts = testAccountsEnv.split(",").map(e => e.trim().toLowerCase()).filter(e => e.length > 0);
+  
+  if (email && testAccounts.includes(email.toLowerCase())) {
+    log("Test account with Pro access", { email });
+    return { hasSubscription: true, subscriptionType: "pro" };
+  }
+
+  // Check Stripe subscription
+  if (stripeSecretKey && email) {
+    try {
+      const customerSearchResponse = await fetch(
+        `https://api.stripe.com/v1/customers/search?query=email:'${encodeURIComponent(email)}'`,
+        { headers: { Authorization: `Bearer ${stripeSecretKey}` } }
+      );
+
+      if (customerSearchResponse.ok) {
+        const customerData = await customerSearchResponse.json();
+        if (customerData.data && customerData.data.length > 0) {
+          const customerId = customerData.data[0].id;
+
+          const subscriptionsResponse = await fetch(
+            `https://api.stripe.com/v1/subscriptions?customer=${customerId}&status=active&limit=10`,
+            { headers: { Authorization: `Bearer ${stripeSecretKey}` } }
+          );
+
+          if (subscriptionsResponse.ok) {
+            const subscriptionsData = await subscriptionsResponse.json();
+            if (subscriptionsData.data && subscriptionsData.data.length > 0) {
+              // Check subscription metadata for type
+              for (const sub of subscriptionsData.data) {
+                const productId = sub.items?.data?.[0]?.price?.product;
+                if (productId) {
+                  // Fetch product to check metadata
+                  const productResponse = await fetch(
+                    `https://api.stripe.com/v1/products/${productId}`,
+                    { headers: { Authorization: `Bearer ${stripeSecretKey}` } }
+                  );
+                  if (productResponse.ok) {
+                    const product = await productResponse.json();
+                    const subType = product.metadata?.subscription_type || "pro";
+                    const sport = product.metadata?.sport;
+                    
+                    if (subType === "single_sport" && sport) {
+                      return { hasSubscription: true, subscriptionType: "single_sport", subscribedSport: sport };
+                    }
+                    return { hasSubscription: true, subscriptionType: "pro" };
+                  }
+                }
+              }
+              // Default to pro if we found a subscription but couldn't determine type
+              return { hasSubscription: true, subscriptionType: "pro" };
+            }
+          }
+        }
+      }
+    } catch (error) {
+      logError("Stripe subscription check", error);
+    }
+  }
+
+  return { hasSubscription: false, subscriptionType: "none" };
+}
+
+// ============================================================
+// UNLOCK VALIDATION
+// ============================================================
+async function validateUnlockRequirements(
+  drill: DrillRow,
+  userId: string,
+  supabaseAdmin: any,
+  hasSubscription: boolean,
+  subscriptionType: string,
+  subscribedSport?: string
+): Promise<{ unlocked: boolean; reason?: string }> {
+  // Pro users bypass all unlock requirements
+  if (subscriptionType === "pro") {
+    return { unlocked: true };
+  }
+
+  // SingleSport subscribers get unlimited for their sport
+  if (subscriptionType === "single_sport" && subscribedSport === drill.sport) {
+    return { unlocked: true };
+  }
+
+  // Free drills at level 1 are always unlocked
+  if (drill.free && drill.level === 1) {
+    return { unlocked: true };
+  }
+
+  // Free users can only do level 1 free drills
+  if (!hasSubscription) {
+    if (drill.level > 1) {
+      return { unlocked: false, reason: "Upgrade to access higher level drills" };
+    }
+    if (!drill.free) {
+      return { unlocked: false, reason: "This drill requires a subscription" };
+    }
+  }
+
+  // Check unlock_requires for progression rules
+  const unlockRequires = drill.unlock_requires;
+  if (!unlockRequires || unlockRequires === "none") {
+    return { unlocked: true };
+  }
+
+  // Parse unlock_requires: "complete_any_in_category_level_N"
+  const levelMatch = unlockRequires.match(/complete_any_in_category_level_(\d+)/);
+  if (levelMatch) {
+    const requiredLevel = parseInt(levelMatch[1], 10);
+    
+    // Get all drills in this category at the required level
+    const { data: categoryDrills, error: drillsError } = await supabaseAdmin
+      .from("drills")
+      .select("id")
+      .eq("category", drill.category)
+      .eq("level", requiredLevel);
+
+    if (drillsError || !categoryDrills || categoryDrills.length === 0) {
+      return { unlocked: false, reason: "Failed to verify unlock requirements" };
+    }
+
+    const categoryDrillIds = (categoryDrills as { id: string }[]).map(d => d.id);
+    
+    // Check if any completed drill matches
+    const { count, error: countError } = await supabaseAdmin
+      .from("completed_drills")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .in("drill_id", categoryDrillIds);
+
+    if (countError) {
+      return { unlocked: false, reason: "Failed to verify unlock requirements" };
+    }
+
+    if ((count ?? 0) === 0) {
+      return { unlocked: false, reason: `Complete a level ${requiredLevel} drill in ${drill.category_name || drill.category} first` };
+    }
+  }
+
+  return { unlocked: true };
+}
+
+// ============================================================
+// COMPUTE SCORE FROM METRIC
+// ============================================================
+function computeScoreFromMetric(
+  metric: Record<string, unknown> | null,
+  scoreData: Record<string, unknown> | undefined,
+  xp: number
+): number {
+  // If no metric or score_data, use XP as score
+  if (!metric || !scoreData) {
+    return xp;
+  }
+
+  // Try to extract score from score_data based on metric type
+  const metricType = metric.type as string | undefined;
+  
+  if (metricType === "time" && typeof scoreData.time === "number") {
+    return Math.max(0, 100 - Math.floor(scoreData.time)); // Lower time = higher score
+  }
+  
+  if (metricType === "reps" && typeof scoreData.reps === "number") {
+    return Math.floor(scoreData.reps);
+  }
+  
+  if (metricType === "accuracy" && typeof scoreData.accuracy === "number") {
+    return Math.floor(scoreData.accuracy);
+  }
+  
+  if (typeof scoreData.score === "number") {
+    return Math.floor(scoreData.score);
+  }
+
+  // Default to XP as score
+  return xp;
+}
+
+// ============================================================
+// MAIN HANDLER
+// ============================================================
 Deno.serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Get authorization header
+    // ========== AUTHENTICATION ==========
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      logStep("Missing or invalid auth header");
+    if (!authHeader?.startsWith("Bearer ")) {
       return new Response(
         JSON.stringify({ error: "Missing or invalid authorization header" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Parse and validate request body
+    // ========== PARSE REQUEST ==========
     let body: CompleteDrillRequest;
     try {
       body = await req.json();
@@ -106,289 +281,398 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { drillId, sport } = body;
+    const { drill_id, duration_minutes, score_data, challenge_id } = body;
 
-    // Validate required fields
-    if (!drillId || typeof drillId !== "string" || drillId.length > 100) {
+    if (!drill_id || typeof drill_id !== "string" || drill_id.length > 100) {
       return new Response(
-        JSON.stringify({ error: "Invalid drill ID" }),
+        JSON.stringify({ error: "Invalid drill_id" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    if (!sport || typeof sport !== "string" || sport.length > 50) {
-      return new Response(
-        JSON.stringify({ error: "Invalid sport" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    log("Processing drill completion", { drill_id, challenge_id, duration_minutes });
 
-    // Calculate XP and duration server-side based on drill ID
-    const xpEarned = calculateDrillXp(drillId);
-    const durationMinutes = calculateDrillDuration(drillId);
-    
-    logStep("Server-calculated drill metrics", { drillId, xpEarned, durationMinutes, level: getDrillLevel(drillId) });
-
-    // Get environment variables
+    // ========== SETUP SUPABASE CLIENTS ==========
     const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
     const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
     const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY") ?? "";
 
     if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceRoleKey) {
-      logStep("Missing Supabase environment variables");
       return new Response(
         JSON.stringify({ error: "Server configuration error" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Create Supabase client with user's auth
     const supabaseWithAuth = createClient(supabaseUrl, supabaseAnonKey, {
-      global: {
-        headers: { Authorization: authHeader },
-      },
+      global: { headers: { Authorization: authHeader } },
     });
 
-    // Verify the user
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey);
+
+    // ========== VERIFY USER ==========
     const { data: { user }, error: userError } = await supabaseWithAuth.auth.getUser();
     if (userError || !user) {
-      logStep("Invalid user auth", { error: userError?.message });
       return new Response(
         JSON.stringify({ error: "Invalid authorization" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    logStep("User authenticated", { userId: user.id, email: user.email });
+    log("User authenticated", { userId: user.id, email: user.email });
 
-    // Create admin client for checking subscription and updating data
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey);
-
-    // Check if user has a subscription
-    let hasSubscription = false;
-
-    // Check for test accounts with paid access
-    const testAccountsEnv = Deno.env.get("TEST_ACCOUNTS_WITH_PAID_ACCESS") ?? "";
-    const testAccounts = testAccountsEnv.split(",").map(e => e.trim().toLowerCase()).filter(e => e.length > 0);
-    if (user.email && testAccounts.includes(user.email.toLowerCase())) {
-      logStep("User is a test account with paid access");
-      hasSubscription = true;
-    }
-
-    // Check Stripe subscription if not a test account
-    if (!hasSubscription && stripeSecretKey && user.email) {
-      try {
-        // Search for customer by email in Stripe
-        const customerSearchResponse = await fetch(
-          `https://api.stripe.com/v1/customers/search?query=email:'${encodeURIComponent(user.email)}'`,
-          {
-            headers: {
-              Authorization: `Bearer ${stripeSecretKey}`,
-            },
-          }
-        );
-
-        if (customerSearchResponse.ok) {
-          const customerData = await customerSearchResponse.json();
-          if (customerData.data && customerData.data.length > 0) {
-            const customerId = customerData.data[0].id;
-
-            // Check for active subscriptions
-            const subscriptionsResponse = await fetch(
-              `https://api.stripe.com/v1/subscriptions?customer=${customerId}&status=active&limit=1`,
-              {
-                headers: {
-                  Authorization: `Bearer ${stripeSecretKey}`,
-                },
-              }
-            );
-
-            if (subscriptionsResponse.ok) {
-              const subscriptionsData = await subscriptionsResponse.json();
-              if (subscriptionsData.data && subscriptionsData.data.length > 0) {
-                hasSubscription = true;
-                logStep("User has active Stripe subscription");
-              }
-            }
-          }
-        }
-      } catch (stripeError) {
-        logStep("Error checking Stripe subscription", { error: String(stripeError) });
-        // Continue without subscription - will enforce free limit
-      }
-    }
-
-    // ============================================================
-    // CHALLENGE DETECTION: Check if this drill is part of an active challenge
-    // ============================================================
-    const { data: activeChallenge, error: challengeError } = await supabaseAdmin
-      .from("challenges")
+    // ========== FETCH DRILL FROM DATABASE ==========
+    const { data: drill, error: drillError } = await supabaseAdmin
+      .from("drills")
       .select("*")
-      .eq("drill_id", drillId)
-      .eq("status", "accepted")
-      .or(`challenger_id.eq.${user.id},challenged_id.eq.${user.id}`)
-      .gt("expires_at", new Date().toISOString())
+      .eq("id", drill_id)
       .maybeSingle();
 
-    if (challengeError) {
-      logStep("Error checking for active challenge", { error: challengeError.message });
-      // Don't fail - continue with normal drill completion
+    if (drillError) {
+      logError("Fetching drill", drillError);
+      return new Response(
+        JSON.stringify({ error: "Failed to fetch drill" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (!drill) {
+      return new Response(
+        JSON.stringify({ error: "Drill not found", drill_id }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    log("Drill fetched", { id: drill.id, title: drill.title, level: drill.level, xp: drill.xp });
+
+    // ========== CHECK SUBSCRIPTION ==========
+    const { hasSubscription, subscriptionType, subscribedSport } = await checkSubscription(
+      user.id,
+      user.email,
+      supabaseAdmin,
+      stripeSecretKey
+    );
+
+    log("Subscription status", { hasSubscription, subscriptionType, subscribedSport });
+
+    // ========== DETECT ACTIVE CHALLENGE ==========
+    let activeChallenge: ChallengeRow | null = null;
+    
+    // Check if challenge_id was provided or find active challenge for this drill
+    if (challenge_id) {
+      const { data: challengeById } = await supabaseAdmin
+        .from("challenges")
+        .select("*")
+        .eq("id", challenge_id)
+        .eq("status", "accepted")
+        .or(`challenger_id.eq.${user.id},challenged_id.eq.${user.id}`)
+        .maybeSingle();
+      
+      activeChallenge = challengeById;
+    } else {
+      const { data: challengeByDrill } = await supabaseAdmin
+        .from("challenges")
+        .select("*")
+        .eq("drill_id", drill_id)
+        .eq("status", "accepted")
+        .or(`challenger_id.eq.${user.id},challenged_id.eq.${user.id}`)
+        .gt("expires_at", new Date().toISOString())
+        .maybeSingle();
+      
+      activeChallenge = challengeByDrill;
     }
 
     const isChallengeDrill = !!activeChallenge;
-    let challengeResult: { submitted: boolean; completed: boolean; won: boolean | null } | null = null;
 
     if (isChallengeDrill) {
-      logStep("Active challenge found for drill", { 
-        challengeId: activeChallenge.id, 
-        drillId,
-        challenger: activeChallenge.challenger_id,
-        challenged: activeChallenge.challenged_id
-      });
-
-      // Check if user already submitted a score for this challenge
-      const isChallenger = activeChallenge.challenger_id === user.id;
-      const hasAlreadySubmitted = isChallenger 
-        ? activeChallenge.challenger_score !== null 
-        : activeChallenge.challenged_score !== null;
-
-      if (hasAlreadySubmitted) {
-        logStep("User already submitted score for this challenge");
-        return new Response(
-          JSON.stringify({ 
-            success: true, 
-            message: "You have already submitted your score for this challenge",
-            isChallenge: true,
-            alreadySubmitted: true
-          }),
-          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
+      log("Active challenge detected", { challengeId: activeChallenge!.id });
     }
 
-    // ============================================================
-    // FREE DRILL LIMIT CHECK (applies to both regular and challenge drills)
-    // ============================================================
+    // ========== FREE DRILL LIMIT CHECK ==========
     if (!hasSubscription) {
-      // Get today's date range
       const today = new Date();
       const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
       const todayEnd = new Date(todayStart);
       todayEnd.setDate(todayEnd.getDate() + 1);
 
-      // Count drills completed today (from completed_drills table)
-      const { count: todayDrillCount, error: countError } = await supabaseAdmin
+      // Count regular drills completed today
+      const { count: regularCount } = await supabaseAdmin
         .from("completed_drills")
         .select("*", { count: "exact", head: true })
         .eq("user_id", user.id)
         .gte("completed_at", todayStart.toISOString())
         .lt("completed_at", todayEnd.toISOString());
 
-      if (countError) {
-        logStep("Error counting today's drills", { error: countError.message });
-        return new Response(
-          JSON.stringify({ error: "Failed to check drill limit" }),
-          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-
-      // Also count challenge drill completions today (from challenges table)
-      const { count: todayChallengeCount, error: challengeCountError } = await supabaseAdmin
+      // Count challenge drills where user submitted a score today
+      const { count: challengeCount } = await supabaseAdmin
         .from("challenges")
         .select("*", { count: "exact", head: true })
         .or(`and(challenger_id.eq.${user.id},challenger_score.not.is.null),and(challenged_id.eq.${user.id},challenged_score.not.is.null)`)
         .gte("created_at", todayStart.toISOString())
         .lt("created_at", todayEnd.toISOString());
 
-      const completedToday = (todayDrillCount ?? 0) + (todayChallengeCount ?? 0);
-      logStep("Free user drill count check", { 
-        regularDrills: todayDrillCount ?? 0, 
-        challengeDrills: todayChallengeCount ?? 0,
-        total: completedToday, 
-        limit: FREE_DRILL_LIMIT 
-      });
+      const completedToday = (regularCount ?? 0) + (challengeCount ?? 0);
 
-      if (completedToday >= FREE_DRILL_LIMIT) {
+      log("Free limit check", { regularCount, challengeCount, completedToday, limit: FREE_DRILL_LIMIT_PER_DAY });
+
+      if (completedToday >= FREE_DRILL_LIMIT_PER_DAY) {
         return new Response(
           JSON.stringify({ 
-            error: "Daily free drill limit reached", 
+            error: "Daily free drill limit reached",
             code: "DRILL_LIMIT_REACHED",
-            limit: FREE_DRILL_LIMIT,
-            completedToday 
+            limit: FREE_DRILL_LIMIT_PER_DAY,
+            completedToday
           }),
           { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
     }
 
-    // ============================================================
-    // CHALLENGE DRILL PATH: Submit score, update daily progress, but DON'T affect tree
-    // ============================================================
-    if (isChallengeDrill && activeChallenge) {
-      const isChallenger = activeChallenge.challenger_id === user.id;
-      const score = xpEarned; // Use XP as the score
+    // ========== UNLOCK VALIDATION (for non-challenge drills) ==========
+    if (!isChallengeDrill) {
+      const unlockResult = await validateUnlockRequirements(
+        drill as DrillRow,
+        user.id,
+        supabaseAdmin,
+        hasSubscription,
+        subscriptionType,
+        subscribedSport
+      );
 
-      // Build update data for challenge
+      if (!unlockResult.unlocked) {
+        log("Drill locked", { reason: unlockResult.reason });
+        return new Response(
+          JSON.stringify({ 
+            error: unlockResult.reason || "Drill is locked",
+            code: "DRILL_LOCKED"
+          }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
+    // Calculate values
+    const xpEarned = Math.floor(drill.xp * XP_MULTIPLIER);
+    const actualDuration = duration_minutes ?? drill.duration_minutes;
+    const today = new Date().toISOString().split("T")[0];
+
+    // ========== CHALLENGE DRILL PATH ==========
+    if (isChallengeDrill && activeChallenge) {
+      const challenge = activeChallenge;
+      const isChallenger = challenge.challenger_id === user.id;
+
+      // Check if already submitted
+      const hasSubmitted = isChallenger 
+        ? challenge.challenger_score !== null 
+        : challenge.challenged_score !== null;
+
+      if (hasSubmitted) {
+        return new Response(
+          JSON.stringify({ 
+            success: true,
+            message: "You have already submitted your score for this challenge",
+            already_completed: true,
+            challenge_submitted: true
+          }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Compute score from metric/score_data or use XP
+      const score = computeScoreFromMetric(drill.metric as Record<string, unknown> | null, score_data, xpEarned);
+
+      // Build update data
       const updateData: Record<string, unknown> = isChallenger
         ? { challenger_score: score }
         : { challenged_score: score };
 
-      // Check if both scores will be available after this update (to determine winner)
-      const otherScore = isChallenger ? activeChallenge.challenged_score : activeChallenge.challenger_score;
-      
-      challengeResult = {
-        submitted: true,
-        completed: otherScore !== null,
-        won: null
-      };
+      const otherScore = isChallenger ? challenge.challenged_score : challenge.challenger_score;
+      let challengeCompleted = false;
+      let won: boolean | null = null;
+      let bonusXp = 0;
 
       if (otherScore !== null) {
         // Both players have submitted - determine winner
-        const winnerId =
-          score > otherScore
-            ? user.id
-            : score < otherScore
-            ? isChallenger
-              ? activeChallenge.challenged_id
-              : activeChallenge.challenger_id
-            : null; // Tie
+        const winnerId = score > otherScore
+          ? user.id
+          : score < otherScore
+            ? (isChallenger ? challenge.challenged_id : challenge.challenger_id)
+            : null;
 
         updateData.status = "completed";
         updateData.winner_id = winnerId;
         updateData.completed_at = new Date().toISOString();
 
-        challengeResult.won = winnerId === user.id;
-        logStep("Challenge completed - winner determined", { 
-          winnerId, 
-          userScore: score, 
-          otherScore,
-          isTie: winnerId === null 
-        });
+        challengeCompleted = true;
+        won = winnerId === user.id;
+        
+        if (won) {
+          bonusXp = challenge.xp_bonus || CHALLENGE_XP_BONUS;
+        }
+
+        log("Challenge completed", { winnerId, score, otherScore, won, bonusXp });
       }
 
-      // Update the challenge with the score
+      // Update challenge
       const { error: updateError } = await supabaseAdmin
         .from("challenges")
         .update(updateData)
-        .eq("id", activeChallenge.id);
+        .eq("id", challenge.id);
 
       if (updateError) {
-        logStep("Error updating challenge", { error: updateError.message });
+        logError("Updating challenge", updateError);
         return new Response(
           JSON.stringify({ error: "Failed to submit challenge score" }),
           { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
-      logStep("Challenge score submitted successfully", { 
-        challengeId: activeChallenge.id, 
-        score,
-        isChallenger 
+      // Update daily progress (challenge drills count toward daily stats)
+      const totalXp = xpEarned + bonusXp;
+
+      const { error: progressError } = await supabaseAdmin
+        .from("daily_progress")
+        .upsert({
+          user_id: user.id,
+          date: today,
+          minutes_completed: actualDuration,
+          xp_earned: totalXp,
+          drills_completed: 1,
+          goal_minutes: DAILY_GOAL_MINUTES
+        }, {
+          onConflict: "user_id,date",
+          ignoreDuplicates: false
+        });
+
+      if (progressError) {
+        // Fallback: try update
+        const { data: existingProgress } = await supabaseAdmin
+          .from("daily_progress")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("date", today)
+          .maybeSingle();
+
+        if (existingProgress) {
+          await supabaseAdmin
+            .from("daily_progress")
+            .update({
+              minutes_completed: (existingProgress.minutes_completed ?? 0) + actualDuration,
+              xp_earned: (existingProgress.xp_earned ?? 0) + totalXp,
+              drills_completed: (existingProgress.drills_completed ?? 0) + 1,
+            })
+            .eq("id", existingProgress.id);
+        } else {
+          await supabaseAdmin.from("daily_progress").insert({
+            user_id: user.id,
+            date: today,
+            minutes_completed: actualDuration,
+            xp_earned: totalXp,
+            drills_completed: 1,
+            goal_minutes: DAILY_GOAL_MINUTES
+          });
+        }
+      }
+
+      // Update profile XP (NOT completing drill tree)
+      const { data: profile } = await supabaseAdmin
+        .from("profiles")
+        .select("total_xp")
+        .eq("id", user.id)
+        .single();
+
+      if (profile) {
+        await supabaseAdmin
+          .from("profiles")
+          .update({ total_xp: (profile.total_xp ?? 0) + totalXp })
+          .eq("id", user.id);
+      }
+
+      log("Challenge score submitted", { challengeId: challenge.id, score, xpEarned: totalXp });
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: challengeCompleted
+            ? (won === true ? "You won the challenge!" : won === false ? "Challenge complete - opponent won." : "It's a tie!")
+            : "Challenge score submitted! Waiting for opponent.",
+          earned_xp: totalXp,
+          new_total_xp: (profile?.total_xp ?? 0) + totalXp,
+          day_minutes: actualDuration,
+          challenge_submitted: true,
+          challenge_completed: challengeCompleted,
+          won,
+          already_completed: false,
+          unlocked_new_drills: []
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // ========== REGULAR DRILL PATH ==========
+    
+    // Check idempotency - already completed?
+    const { data: existingDrill } = await supabaseAdmin
+      .from("completed_drills")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("drill_id", drill_id)
+      .maybeSingle();
+
+    if (existingDrill) {
+      log("Drill already completed - idempotent return");
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: "Drill already completed",
+          already_completed: true,
+          earned_xp: 0,
+          challenge_submitted: false,
+          unlocked_new_drills: []
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Insert completed drill (affects tree progression)
+    const { error: insertError } = await supabaseAdmin
+      .from("completed_drills")
+      .insert({
+        user_id: user.id,
+        sport: drill.sport,
+        drill_id: drill_id,
+        duration_minutes: actualDuration,
+        xp_earned: xpEarned,
+        score_data: score_data ?? null,
+        completed_at: new Date().toISOString(),
       });
 
-      // Update daily progress (challenge drills count toward daily stats)
-      const today = new Date().toISOString().split("T")[0];
+    if (insertError) {
+      logError("Inserting completed drill", insertError);
+      return new Response(
+        JSON.stringify({ error: "Failed to record drill completion" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Upsert daily progress
+    const { error: progressError } = await supabaseAdmin
+      .from("daily_progress")
+      .upsert({
+        user_id: user.id,
+        date: today,
+        minutes_completed: actualDuration,
+        xp_earned: xpEarned,
+        drills_completed: 1,
+        goal_minutes: DAILY_GOAL_MINUTES
+      }, {
+        onConflict: "user_id,date",
+        ignoreDuplicates: false
+      });
+
+    if (progressError) {
+      // Fallback logic
       const { data: existingProgress } = await supabaseAdmin
         .from("daily_progress")
         .select("*")
@@ -400,170 +684,99 @@ Deno.serve(async (req) => {
         await supabaseAdmin
           .from("daily_progress")
           .update({
-            minutes_completed: existingProgress.minutes_completed + Math.floor(durationMinutes),
-            xp_earned: existingProgress.xp_earned + Math.floor(xpEarned),
-            drills_completed: existingProgress.drills_completed + 1,
+            minutes_completed: (existingProgress.minutes_completed ?? 0) + actualDuration,
+            xp_earned: (existingProgress.xp_earned ?? 0) + xpEarned,
+            drills_completed: (existingProgress.drills_completed ?? 0) + 1,
           })
           .eq("id", existingProgress.id);
       } else {
         await supabaseAdmin.from("daily_progress").insert({
           user_id: user.id,
           date: today,
-          minutes_completed: Math.floor(durationMinutes),
-          xp_earned: Math.floor(xpEarned),
+          minutes_completed: actualDuration,
+          xp_earned: xpEarned,
           drills_completed: 1,
+          goal_minutes: DAILY_GOAL_MINUTES
         });
       }
-
-      // Update profile total XP (but NOT streak - that's based on actual training)
-      const { data: profile } = await supabaseAdmin
-        .from("profiles")
-        .select("total_xp")
-        .eq("id", user.id)
-        .single();
-
-      if (profile) {
-        await supabaseAdmin
-          .from("profiles")
-          .update({
-            total_xp: profile.total_xp + Math.floor(xpEarned),
-          })
-          .eq("id", user.id);
-      }
-
-      // NOTE: We deliberately do NOT insert into completed_drills for challenge drills
-      // This ensures challenge drills don't affect the drill tree/level progression
-
-      return new Response(
-        JSON.stringify({ 
-          success: true, 
-          message: challengeResult.completed 
-            ? `Challenge completed! ${challengeResult.won === true ? "You won!" : challengeResult.won === false ? "You lost." : "It's a tie!"}`
-            : "Challenge score submitted! Waiting for opponent.",
-          isChallenge: true,
-          challengeCompleted: challengeResult.completed,
-          won: challengeResult.won,
-          xpEarned: Math.floor(xpEarned),
-          hasSubscription
-        }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
     }
 
-    // ============================================================
-    // REGULAR DRILL PATH: Full completion with tree progression
-    // ============================================================
-    
-    // Check if drill was already completed by this user
-    const { data: existingDrill, error: existingError } = await supabaseAdmin
-      .from("completed_drills")
-      .select("id")
-      .eq("user_id", user.id)
-      .eq("drill_id", drillId)
-      .maybeSingle();
-
-    if (existingError) {
-      logStep("Error checking existing drill", { error: existingError.message });
-      return new Response(
-        JSON.stringify({ error: "Failed to check drill status" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    if (existingDrill) {
-      logStep("Drill already completed by user");
-      return new Response(
-        JSON.stringify({ 
-          success: true, 
-          message: "Drill already completed",
-          alreadyCompleted: true 
-        }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // All validations passed - complete the drill
-    const today = new Date().toISOString().split("T")[0];
-
-    // Record completed drill (this affects tree/level progression)
-    const { error: insertError } = await supabaseAdmin
-      .from("completed_drills")
-      .insert({
-        user_id: user.id,
-        sport,
-        drill_id: drillId,
-        duration_minutes: Math.floor(durationMinutes),
-        xp_earned: Math.floor(xpEarned),
-        completed_at: new Date().toISOString(),
-      });
-
-    if (insertError) {
-      logStep("Error inserting completed drill", { error: insertError.message });
-      return new Response(
-        JSON.stringify({ error: "Failed to record drill completion" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // Update daily progress
-    const { data: existingProgress } = await supabaseAdmin
-      .from("daily_progress")
-      .select("*")
-      .eq("user_id", user.id)
-      .eq("date", today)
-      .maybeSingle();
-
-    if (existingProgress) {
-      await supabaseAdmin
-        .from("daily_progress")
-        .update({
-          minutes_completed: existingProgress.minutes_completed + Math.floor(durationMinutes),
-          xp_earned: existingProgress.xp_earned + Math.floor(xpEarned),
-          drills_completed: existingProgress.drills_completed + 1,
-        })
-        .eq("id", existingProgress.id);
-    } else {
-      await supabaseAdmin.from("daily_progress").insert({
-        user_id: user.id,
-        date: today,
-        minutes_completed: Math.floor(durationMinutes),
-        xp_earned: Math.floor(xpEarned),
-        drills_completed: 1,
-      });
-    }
-
-    // Update profile total XP and streak
+    // Update profile XP and streak
     const { data: profile } = await supabaseAdmin
       .from("profiles")
       .select("total_xp, current_streak, longest_streak")
       .eq("id", user.id)
       .single();
 
+    let newStreak = profile?.current_streak ?? 0;
+    let longestStreak = profile?.longest_streak ?? 0;
+    let newTotalXp = (profile?.total_xp ?? 0) + xpEarned;
+
+    // Check if this is first drill of the day (for streak)
+    const { data: todayProgress } = await supabaseAdmin
+      .from("daily_progress")
+      .select("minutes_completed")
+      .eq("user_id", user.id)
+      .eq("date", today)
+      .single();
+
+    const todayMinutes = todayProgress?.minutes_completed ?? 0;
+    const wasGoalMetBefore = (todayMinutes - actualDuration) >= DAILY_GOAL_MINUTES;
+    const isGoalMetNow = todayMinutes >= DAILY_GOAL_MINUTES;
+
+    // Only increment streak when goal is first met today
+    if (isGoalMetNow && !wasGoalMetBefore) {
+      newStreak += 1;
+      longestStreak = Math.max(longestStreak, newStreak);
+      log("Daily goal met - streak incremented", { newStreak, longestStreak });
+    }
+
     if (profile) {
-      const newStreak = profile.current_streak + (existingProgress ? 0 : 1);
       await supabaseAdmin
         .from("profiles")
         .update({
-          total_xp: profile.total_xp + Math.floor(xpEarned),
+          total_xp: newTotalXp,
           current_streak: newStreak,
-          longest_streak: Math.max(profile.longest_streak, newStreak),
+          longest_streak: longestStreak,
         })
         .eq("id", user.id);
     }
 
-    logStep("Drill completed successfully", { drillId, xpEarned });
+    // Find newly unlocked drills
+    const unlockedDrills: string[] = [];
+    
+    // Check if completing this drill unlocks any level+1 drills
+    const { data: nextLevelDrills } = await supabaseAdmin
+      .from("drills")
+      .select("id")
+      .eq("category", drill.category)
+      .eq("level", drill.level + 1)
+      .limit(10);
+
+    if (nextLevelDrills) {
+      for (const nextDrill of nextLevelDrills) {
+        unlockedDrills.push(nextDrill.id);
+      }
+    }
+
+    log("Drill completed successfully", { drill_id, xpEarned, newTotalXp, newStreak, unlockedDrills });
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
+      JSON.stringify({
+        success: true,
         message: "Drill completed successfully",
-        xpEarned: Math.floor(xpEarned),
-        hasSubscription
+        earned_xp: xpEarned,
+        new_total_xp: newTotalXp,
+        day_minutes: todayMinutes,
+        already_completed: false,
+        challenge_submitted: false,
+        unlocked_new_drills: unlockedDrills
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
+
   } catch (error) {
-    logStep("Unexpected error", { error: String(error) });
+    logError("Unexpected error", error);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
