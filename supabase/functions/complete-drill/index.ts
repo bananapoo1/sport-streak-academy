@@ -133,7 +133,8 @@ async function checkSubscription(
 async function validateUnlockRequirements(
   drill: DrillRow,
   userId: string,
-  supabaseAdmin: unknown,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabaseAdmin: any,
   hasSubscription: boolean,
   subscriptionType: string,
   subscribedSport: string | undefined,
