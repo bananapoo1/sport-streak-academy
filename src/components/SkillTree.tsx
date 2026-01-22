@@ -2,14 +2,22 @@ import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Lock, Check, ChevronRight, Star, Zap, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getSportData, DrillInfo } from "@/data/drillsData";
+import { useDrills, useCategories } from "@/hooks/useDrills";
 
 interface SkillTreeProps {
   sportSlug: string;
   completedDrillIds: string[];
 }
 
-interface DrillNode extends DrillInfo {
+interface DrillNode {
+  id: string;
+  title: string;
+  description: string;
+  duration: number;
+  xp: number;
+  level: number;
+  category: string;
+  difficulty: "beginner" | "intermediate" | "advanced" | "elite";
   isUnlocked: boolean;
   isCompleted: boolean;
   prerequisiteMet: boolean;
@@ -18,41 +26,67 @@ interface DrillNode extends DrillInfo {
 const SkillTree = ({ sportSlug, completedDrillIds }: SkillTreeProps) => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   
-  const sportData = getSportData(sportSlug);
+  const { drills, loading: drillsLoading } = useDrills({ sport: sportSlug });
+  const { categories, loading: categoriesLoading } = useCategories(sportSlug);
   
-  // Flatten all drills from categories
-  const allDrills = useMemo(() => {
-    if (!sportData) return [];
-    return sportData.categories.flatMap(cat => cat.drills);
-  }, [sportData]);
+  const loading = drillsLoading || categoriesLoading;
   
-  const drillNodes = useMemo(() => {
-    if (!sportData || allDrills.length === 0) return [];
+  // Get sport metadata for display
+  const sportMeta: Record<string, { name: string; emoji: string }> = {
+    football: { name: "Football", emoji: "⚽" },
+    basketball: { name: "Basketball", emoji: "🏀" },
+    tennis: { name: "Tennis", emoji: "🎾" },
+    swimming: { name: "Swimming", emoji: "🏊" },
+    running: { name: "Running", emoji: "🏃" },
+  };
+  
+  const sportData = sportMeta[sportSlug] || { name: sportSlug, emoji: "🎯" };
+  
+  // Transform API drills to DrillNode format with unlock logic
+  const drillNodes = useMemo((): DrillNode[] => {
+    if (!drills || drills.length === 0) return [];
     
-    return allDrills.map((drill): DrillNode => {
-      const isCompleted = completedDrillIds.includes(drill.id);
+    const completedSet = new Set(completedDrillIds);
+    
+    return drills.map((drill): DrillNode => {
+      const isCompleted = completedSet.has(drill.id);
       
       // Unlock logic: Level 1 drills are always unlocked
-      // Higher levels require previous level in same category to be completed
-      const prerequisiteMet = drill.level === 1 || allDrills.some(
+      // Higher levels require any drill at previous level in same category to be completed
+      const prerequisiteMet = drill.level === 1 || drills.some(
         d => d.category === drill.category && 
              d.level === drill.level - 1 && 
-             completedDrillIds.includes(d.id)
+             completedSet.has(d.id)
       );
       
       const isUnlocked = prerequisiteMet;
       
+      // Calculate difficulty from level
+      const getDifficulty = (level: number): "beginner" | "intermediate" | "advanced" | "elite" => {
+        if (level <= 2) return "beginner";
+        if (level <= 5) return "intermediate";
+        if (level <= 8) return "advanced";
+        return "elite";
+      };
+      
       return {
-        ...drill,
+        id: drill.id,
+        title: drill.title,
+        description: drill.description || "",
+        duration: drill.duration_minutes,
+        xp: drill.xp,
+        level: drill.level,
+        category: drill.category_name || drill.category,
+        difficulty: getDifficulty(drill.level),
         isUnlocked,
         isCompleted,
         prerequisiteMet,
       };
     });
-  }, [sportData, allDrills, completedDrillIds]);
+  }, [drills, completedDrillIds]);
 
   // Group by category
-  const categories = useMemo(() => {
+  const groupedCategories = useMemo(() => {
     const grouped: Record<string, DrillNode[]> = {};
     drillNodes.forEach(drill => {
       if (!grouped[drill.category]) {
@@ -67,13 +101,22 @@ const SkillTree = ({ sportSlug, completedDrillIds }: SkillTreeProps) => {
     return grouped;
   }, [drillNodes]);
 
-  const categoryNames = Object.keys(categories);
+  const categoryNames = Object.keys(groupedCategories);
   const activeCategory = selectedCategory || categoryNames[0];
 
-  if (!sportData) {
+  if (loading) {
+    return (
+      <div className="text-center py-8">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
+        <p className="text-muted-foreground">Loading skill tree...</p>
+      </div>
+    );
+  }
+
+  if (!drills || drills.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        Sport not found
+        No drills found for this sport
       </div>
     );
   }
@@ -122,7 +165,7 @@ const SkillTree = ({ sportSlug, completedDrillIds }: SkillTreeProps) => {
       {/* Category Tabs */}
       <div className="flex gap-2 overflow-x-auto pb-2">
         {categoryNames.map(category => {
-          const categoryDrills = categories[category];
+          const categoryDrills = groupedCategories[category];
           const catCompleted = categoryDrills.filter(d => d.isCompleted).length;
           const isActive = category === activeCategory;
           
@@ -156,7 +199,7 @@ const SkillTree = ({ sportSlug, completedDrillIds }: SkillTreeProps) => {
         <div className="absolute left-[2.5rem] top-0 bottom-0 w-1 bg-gradient-to-b from-primary/50 via-primary/30 to-border rounded-full" />
         
         <div className="space-y-4 relative">
-          {categories[activeCategory]?.map((drill, index) => (
+          {groupedCategories[activeCategory]?.map((drill) => (
             <div key={drill.id} className="relative">
               {/* Node */}
               <div className={cn(
