@@ -711,6 +711,42 @@ Deno.serve(async (req) => {
     const wasGoalMetBefore = (todayMinutes - actualDuration) >= config.DAILY_GOAL_MINUTES;
     const isGoalMetNow = todayMinutes >= config.DAILY_GOAL_MINUTES;
 
+    // ========== STREAK RESET LOGIC ==========
+    // Check if user missed yesterday - if so, reset streak before incrementing
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split("T")[0];
+
+    const { data: yesterdayProgress } = await supabaseAdmin
+      .from("daily_progress")
+      .select("minutes_completed, goal_minutes")
+      .eq("user_id", user.id)
+      .eq("date", yesterdayStr)
+      .maybeSingle();
+
+    // Check if yesterday's goal was met
+    const yesterdayGoalMet = yesterdayProgress 
+      && (yesterdayProgress.minutes_completed ?? 0) >= (yesterdayProgress.goal_minutes ?? config.DAILY_GOAL_MINUTES);
+
+    // Also check for streak freeze usage
+    const { data: freezeUsed } = await supabaseAdmin
+      .from("streak_freeze_log")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("date_protected", yesterdayStr)
+      .maybeSingle();
+
+    // If yesterday wasn't completed AND no freeze was used, reset streak
+    if (!yesterdayGoalMet && !freezeUsed && newStreak > 0) {
+      logger.event("streak_reset", { 
+        previous_streak: newStreak, 
+        yesterday: yesterdayStr,
+        yesterday_goal_met: yesterdayGoalMet,
+        freeze_used: !!freezeUsed
+      });
+      newStreak = 0;
+    }
+
     if (isGoalMetNow && !wasGoalMetBefore) {
       newStreak += 1;
       longestStreak = Math.max(longestStreak, newStreak);
