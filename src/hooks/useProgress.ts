@@ -98,15 +98,53 @@ export const useProgress = () => {
   const fetchStreak = async () => {
     if (!user) return;
 
-    const { data } = await supabase
+    const { data: profile } = await supabase
       .from("profiles")
       .select("current_streak")
       .eq("id", user.id)
       .single();
 
-    if (data) {
-      setStreak(data.current_streak || 0);
+    if (!profile) return;
+
+    let currentStreak = profile.current_streak || 0;
+
+    // Check if yesterday's goal was missed - if so, reset streak
+    if (currentStreak > 0) {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split("T")[0];
+
+      const { data: yesterdayProgress } = await supabase
+        .from("daily_progress")
+        .select("minutes_completed, goal_minutes")
+        .eq("user_id", user.id)
+        .eq("date", yesterdayStr)
+        .maybeSingle();
+
+      const yesterdayGoalMet = yesterdayProgress
+        && (yesterdayProgress.minutes_completed ?? 0) >= (yesterdayProgress.goal_minutes ?? 30);
+
+      if (!yesterdayGoalMet) {
+        // Check for streak freeze
+        const { data: freezeUsed } = await supabase
+          .from("streak_freeze_log")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("date_protected", yesterdayStr)
+          .maybeSingle();
+
+        if (!freezeUsed) {
+          // Reset streak in DB and locally
+          currentStreak = 0;
+          await supabase
+            .from("profiles")
+            .update({ current_streak: 0 })
+            .eq("id", user.id);
+        }
+      }
     }
+
+    setStreak(currentStreak);
   };
 
   const completeTraining = async (

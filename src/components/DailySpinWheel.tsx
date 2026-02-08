@@ -273,7 +273,7 @@ const DailySpinWheel = () => {
 
       {/* Spin Wheel Dialog */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="sm:max-w-md overflow-visible">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-center text-2xl font-extrabold">
               🎡 Daily Spin Wheel
