@@ -166,8 +166,9 @@ export const useProgress = () => {
       }
 
       // Call the server-side edge function with new API format
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const response = await fetch(
-        "https://nikvolkksngggjkvpzrd.supabase.co/functions/v1/complete-drill",
+        `${supabaseUrl}/functions/v1/complete-drill`,
         {
           method: "POST",
           headers: {
