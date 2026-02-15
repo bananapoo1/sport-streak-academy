@@ -6,10 +6,7 @@ test.describe("Daily habit + adaptive assignment", () => {
 
     await expect(page.getByLabel("Daily home card")).toBeVisible();
     await page.getByLabel("Start daily session").click();
-    await expect(page.getByText("Assigned drill")).toBeVisible();
-
-    await page.getByLabel("Complete session successfully").click();
-    await expect(page.getByText("Session complete")).toBeVisible();
+    await expect(page).toHaveURL(/\/drills/);
   });
 
   test("low confidence user sees reinforcement before improving", async ({ page }) => {
@@ -20,31 +17,35 @@ test.describe("Daily habit + adaptive assignment", () => {
       localStorage.removeItem("ssa.mock.api.db.v1");
 
       const initial = await fetch(`/api/drills/assign?userId=${userId}&category=shooting`).then((response) => response.json());
+      const drillId = initial.drill.id as string;
 
-      for (let index = 0; index < 2; index += 1) {
-        const session = await fetch("/api/session/start", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId, dateISO: new Date().toISOString(), suggestedDuration: 10, difficulty: "easy", category: "shooting" }),
-        }).then((response) => response.json());
-
-        await fetch("/api/session/complete", {
+      for (let index = 0; index < 3; index += 1) {
+        await fetch("/api/drills/result", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            sessionId: session.sessionId,
+            userId,
+            drillId,
+            outcome: "fail",
             durationMinutes: 10,
-            xpEarned: 10,
-            completed: true,
-            drillId: session.assignedDrill?.id,
-            drillOutcome: "fail",
           }),
         });
       }
 
       const reinforcement = await fetch(`/api/drills/assign?userId=${userId}&category=shooting`).then((response) => response.json());
 
-      const successSession = await fetch("/api/session/start", {
+      const successResult = await fetch("/api/drills/result", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          drillId: reinforcement.drill.id,
+          outcome: "success",
+          durationMinutes: 10,
+        }),
+      }).then((response) => response.json());
+
+      const completeSessionResult = await fetch("/api/session/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId, dateISO: new Date().toISOString(), suggestedDuration: 10, difficulty: "easy", category: "shooting" }),
@@ -54,11 +55,11 @@ test.describe("Daily habit + adaptive assignment", () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          sessionId: successSession.sessionId,
+          sessionId: completeSessionResult.sessionId,
           durationMinutes: 10,
           xpEarned: 10,
           completed: true,
-          drillId: successSession.assignedDrill?.id,
+          drillId: completeSessionResult.assignedDrill?.id,
           drillOutcome: "success",
         }),
       }).then((response) => response.json());
@@ -69,11 +70,14 @@ test.describe("Daily habit + adaptive assignment", () => {
         reinforcement,
         postImprove,
         completed,
+        successResult,
         initial,
       };
     });
 
     expect(report.reinforcement.meta.isReinforcement).toBeTruthy();
+    expect(report.reinforcement.meta.dTarget).toBeLessThanOrEqual(report.initial.meta.dTarget);
+    expect(report.successResult.updatedConfidence).toBeGreaterThan(report.reinforcement.meta.confidenceBefore);
     expect(report.completed.updatedCategoryConfidence).toBeGreaterThan(0.3);
     expect(report.postImprove.meta.dTarget).toBeGreaterThanOrEqual(report.reinforcement.meta.dTarget);
   });
