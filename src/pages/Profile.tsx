@@ -23,6 +23,8 @@ import type { Database } from "@/integrations/supabase/types";
 import DailyGoalSetter from "@/components/DailyGoalSetter";
 import StreakFreezeCard from "@/components/StreakFreezeCard";
 import WeeklyLeaderboard from "@/components/WeeklyLeaderboard";
+import MobileQuickActions from "@/components/MobileQuickActions";
+import { Skeleton } from "@/components/ui/skeleton";
 const avatarOptions = [
   { emoji: "⚽", name: "Football", unlocked: true },
   { emoji: "🏀", name: "Basketball", unlocked: true },
@@ -192,8 +194,13 @@ const Profile = () => {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <main className="pt-20 pb-24 md:pt-24 md:pb-16 flex items-center justify-center">
-          <div className="animate-pulse text-muted-foreground">Loading...</div>
+        <main className="pt-20 pb-24 md:pt-24 md:pb-16">
+          <MobileQuickActions />
+          <div className="container mx-auto px-4 max-w-4xl space-y-4">
+            <Skeleton className="h-12 w-48" />
+            <Skeleton className="h-40 w-full rounded-3xl" />
+            <Skeleton className="h-64 w-full rounded-3xl" />
+          </div>
         </main>
       </div>
     );
@@ -203,6 +210,7 @@ const Profile = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <main className="pt-20 pb-24 md:pt-24 md:pb-16">
+        <MobileQuickActions />
         <div className="container mx-auto px-4 max-w-4xl">
           <h1 className="text-3xl font-extrabold text-foreground mb-8">My Profile</h1>
 

@@ -136,7 +136,7 @@ export const usePushNotifications = () => {
       icon: "/favicon.ico",
       badge: "/favicon.ico",
       tag: "local-notification",
-      data,
+      data: { ...(typeof data === "object" && data ? data as Record<string, unknown> : {}), deepLink: "sportstreak://drills" },
     });
   }, [registration, permission]);
 
@@ -160,7 +160,7 @@ export const usePushNotifications = () => {
       sendLocalNotification(
         "🔥 Streak Reminder!",
         "Time to complete your daily training and keep your streak alive!",
-        { url: "/sports" }
+        { deepLink: "sportstreak://drills" }
       );
     }, delay);
 

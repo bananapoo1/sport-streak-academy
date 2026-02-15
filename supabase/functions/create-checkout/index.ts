@@ -15,14 +15,14 @@ const isValidPriceId = (priceId: string): boolean => {
 };
 
 // Validate origin URL
-const ALLOWED_ORIGINS = [
-  "https://drillzone.lovable.app",
-  "https://id-preview--aad47377-ddb4-4c81-b7ee-475bc8ae3340.lovable.app",
-];
+const ALLOWED_ORIGINS = (Deno.env.get("ALLOWED_ORIGINS") ?? "https://app.sportstreakacademy.com,http://localhost:8080")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
-const isValidOrigin = (origin: string | null): boolean => {
+const isValidOrigin = (origin: string | null): origin is string => {
   if (!origin) return false;
-  return ALLOWED_ORIGINS.some(allowed => origin === allowed || origin.endsWith(".lovable.app"));
+  return ALLOWED_ORIGINS.includes(origin);
 };
 
 const logStep = (step: string, details?: unknown) => {

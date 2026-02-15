@@ -1,7 +1,10 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { ArrowRight } from "lucide-react";
+import MobileQuickActions from "@/components/MobileQuickActions";
+import TabSkeleton from "@/components/TabSkeleton";
 
 const sports = [
   { slug: "football", name: "Football", emoji: "⚽", drillCount: 85, color: "22 163 74" },
@@ -19,49 +22,65 @@ const sports = [
 ];
 
 const Sports = () => {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 300);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <main className="pt-20 pb-24 md:pt-24 md:pb-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <span className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-4">
-              12 Sports Available
-            </span>
-            <h1 className="text-4xl md:text-5xl font-extrabold text-foreground mb-4">
-              Choose Your Sport
-            </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Master any sport with structured drills designed by coaches. New content added weekly.
-            </p>
-          </div>
+        <MobileQuickActions />
+        {loading ? (
+          <TabSkeleton />
+        ) : (
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <span className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-4">
+                12 Sports Available
+              </span>
+              <h1 className="text-4xl md:text-5xl font-extrabold text-foreground mb-4">Choose Your Sport</h1>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Master any sport with structured drills designed by coaches. New content added weekly.
+              </p>
+            </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {sports.map((sport, index) => (
-              <Link
-                key={sport.slug}
-                to={`/sports/${sport.slug}`}
-                className="animate-fade-in group relative bg-card hover:bg-card/80 border border-border rounded-2xl p-6 shadow-soft hover:shadow-card transition-all duration-300 hover:-translate-y-1"
-                style={{ animationDelay: `${index * 0.05}s` }}
-              >
-                {/* Hover gradient */}
-                <div 
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"
-                  style={{ background: `linear-gradient(135deg, rgb(${sport.color} / 0.1), transparent)` }}
-                />
-                
-                <div className="relative z-10 flex items-center gap-4">
-                  <span className="text-4xl group-hover:scale-110 transition-transform duration-300">{sport.emoji}</span>
-                  <div className="flex-1">
-                    <h3 className="font-bold text-foreground text-lg">{sport.name}</h3>
-                    <p className="text-sm text-muted-foreground">{sport.drillCount} drills</p>
-                  </div>
-                  <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all duration-300" />
-                </div>
-              </Link>
-            ))}
+            {sports.length === 0 ? (
+              <div className="max-w-md mx-auto rounded-2xl border border-dashed border-border bg-card p-6 text-center">
+                <p className="font-semibold text-foreground">No sports available yet</p>
+                <p className="text-sm text-muted-foreground mt-1">Check back soon for new training categories.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {sports.map((sport, index) => (
+                  <Link
+                    key={sport.slug}
+                    to={`/sports/${sport.slug}`}
+                    className="animate-fade-in group relative bg-card hover:bg-card/80 border border-border rounded-2xl p-6 shadow-soft hover:shadow-card transition-all duration-300 hover:-translate-y-1"
+                    style={{ animationDelay: `${index * 0.05}s` }}
+                  >
+                    <div
+                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"
+                      style={{ background: `linear-gradient(135deg, rgb(${sport.color} / 0.1), transparent)` }}
+                    />
+
+                    <div className="relative z-10 flex items-center gap-4">
+                      <span className="text-4xl group-hover:scale-110 transition-transform duration-300">{sport.emoji}</span>
+                      <div className="flex-1">
+                        <h3 className="font-bold text-foreground text-lg">{sport.name}</h3>
+                        <p className="text-sm text-muted-foreground">{sport.drillCount} drills</p>
+                      </div>
+                      <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all duration-300" />
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
-        </div>
+        )}
       </main>
       <Footer />
     </div>

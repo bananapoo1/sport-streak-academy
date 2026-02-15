@@ -1,10 +1,23 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Flame, Trophy, Menu, X, User, LogIn, LogOut, Moon, Sun, Swords, Settings } from "lucide-react";
+import {
+  Flame,
+  Trophy,
+  User,
+  LogIn,
+  LogOut,
+  Moon,
+  Sun,
+  Swords,
+  Settings,
+  Bell,
+  EllipsisVertical,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProgress } from "@/hooks/useProgress";
 import { useChallenges } from "@/hooks/useChallenges";
+import { useFriends } from "@/hooks/useFriends";
 import NotificationDropdown from "@/components/NotificationDropdown";
 import {
   DropdownMenu,
@@ -18,7 +31,11 @@ const getMobileTitle = (pathname: string) => {
   if (pathname === "/") return "Home";
   if (pathname === "/sports") return "Sports";
   if (pathname.startsWith("/sports/")) return "Sport Details";
+  if (pathname === "/drills") return "Drills";
   if (pathname.startsWith("/drill/")) return "Drill";
+  if (pathname === "/leagues") return "Leagues";
+  if (pathname === "/achievements") return "Achievements";
+  if (pathname === "/pricing") return "Pricing";
   if (pathname === "/challenges") return "Challenges";
   if (pathname === "/profile") return "Profile";
   if (pathname.startsWith("/profile/")) return "Athlete Profile";
@@ -28,22 +45,20 @@ const getMobileTitle = (pathname: string) => {
 };
 
 export const Navbar = () => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { streak } = useProgress();
   const { pendingChallenges } = useChallenges();
+  const { pendingRequests } = useFriends();
+
+  const totalNotifications = pendingChallenges.length + pendingRequests.length;
 
   useEffect(() => {
     const isDark = localStorage.getItem("darkMode") !== "false";
     setDarkMode(isDark);
-    if (isDark) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
+    document.documentElement.classList.toggle("dark", isDark);
   }, []);
 
   const toggleDarkMode = () => {
@@ -51,20 +66,6 @@ export const Navbar = () => {
     setDarkMode(newMode);
     localStorage.setItem("darkMode", String(newMode));
     document.documentElement.classList.toggle("dark", newMode);
-  };
-
-  const handleNavClick = (hash: string) => {
-    setMobileMenuOpen(false);
-    if (location.pathname !== "/") {
-      navigate("/" + hash);
-      setTimeout(() => {
-        const element = document.querySelector(hash);
-        element?.scrollIntoView({ behavior: "smooth" });
-      }, 100);
-    } else {
-      const element = document.querySelector(hash);
-      element?.scrollIntoView({ behavior: "smooth" });
-    }
   };
 
   const handleSignOut = async () => {
@@ -76,43 +77,33 @@ export const Navbar = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-lg border-b border-border">
       <div className="container mx-auto px-4">
         <div className="flex items-center h-16">
-          {/* Desktop Logo */}
           <Link to="/" className="hidden md:flex items-center gap-2 hover:opacity-80 transition-opacity">
             <span className="text-2xl">⚽</span>
             <span className="font-extrabold text-xl text-foreground">DrillZone</span>
           </Link>
 
-          {/* Mobile Section Header */}
           <div className="md:hidden flex items-center gap-2">
             <span className="text-xl">⚽</span>
             <span className="font-bold text-lg text-foreground">{getMobileTitle(location.pathname)}</span>
           </div>
 
-          {/* Desktop Nav - Centered */}
           <div className="hidden md:flex items-center justify-center flex-1">
-            <div className="flex items-center gap-8">
-              <button onClick={() => handleNavClick("#sports")} className="font-medium text-muted-foreground hover:text-primary transition-colors">
-                Sports
-              </button>
-              <button onClick={() => handleNavClick("#drills")} className="font-medium text-muted-foreground hover:text-primary transition-colors">
-                Drills
-              </button>
-              <button onClick={() => handleNavClick("#leagues")} className="font-medium text-muted-foreground hover:text-primary transition-colors">
-                Leagues
-              </button>
-              <button onClick={() => handleNavClick("#pricing")} className="font-medium text-muted-foreground hover:text-primary transition-colors">
-                Pricing
-              </button>
+            <div className="flex items-center gap-6">
+              <Link to="/sports" className="font-medium text-muted-foreground hover:text-primary transition-colors">Sports</Link>
+              <Link to="/drills" className="font-medium text-muted-foreground hover:text-primary transition-colors">Drills</Link>
+              <Link to="/leagues" className="font-medium text-muted-foreground hover:text-primary transition-colors">Leagues</Link>
+              <Link to="/achievements" className="font-medium text-muted-foreground hover:text-primary transition-colors">Achievements</Link>
+              <Link to="/pricing" className="font-medium text-muted-foreground hover:text-primary transition-colors">Pricing</Link>
             </div>
           </div>
 
-          {/* Desktop Stats & CTA */}
           <div className="hidden md:flex items-center gap-4">
             <Button size="icon" variant="ghost" onClick={toggleDarkMode} className="w-9 h-9">
               {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </Button>
             {user && (
               <>
+                <NotificationDropdown />
                 <Link to="/challenges" className="relative">
                   <Button size="icon" variant="ghost" className="w-9 h-9">
                     <Swords className="w-4 h-4" />
@@ -123,7 +114,6 @@ export const Navbar = () => {
                     )}
                   </Button>
                 </Link>
-                <NotificationDropdown />
                 <div className="flex items-center gap-1 text-streak">
                   <Flame className="w-5 h-5 fill-current" />
                   <span className="font-bold">{streak}</span>
@@ -158,108 +148,55 @@ export const Navbar = () => {
             )}
           </div>
 
-          {/* Mobile actions */}
           <div className="md:hidden flex items-center gap-1 ml-auto">
-            {user && (
-              <Link to="/challenges" className="relative">
-                <Button size="icon" variant="ghost" className="w-9 h-9">
-                  <Swords className="w-4 h-4" />
-                  {pendingChallenges.length > 0 && (
-                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center font-bold">
-                      {pendingChallenges.length}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="icon" variant="ghost" className="w-9 h-9 relative">
+                  <EllipsisVertical className="w-4 h-4" />
+                  {user && totalNotifications > 0 && (
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-destructive text-destructive-foreground text-[10px] rounded-full flex items-center justify-center font-bold">
+                      {totalNotifications}
                     </span>
                   )}
                 </Button>
-              </Link>
-            )}
-
-            {user && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button size="icon" variant="ghost" className="w-9 h-9">
-                    <User className="w-4 h-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => navigate("/profile")}>Profile</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/profile")}> 
-                    <Settings className="w-4 h-4 mr-2" />
-                    Settings
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52">
+                {user ? (
+                  <>
+                    <DropdownMenuItem onClick={() => navigate("/challenges")}> 
+                      <Bell className="w-4 h-4 mr-2" />
+                      Notifications
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/profile")}>
+                      <User className="w-4 h-4 mr-2" />
+                      Profile
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/profile")}>
+                      <Settings className="w-4 h-4 mr-2" />
+                      Settings
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                ) : (
+                  <DropdownMenuItem onClick={() => navigate("/auth")}>
+                    <LogIn className="w-4 h-4 mr-2" />
+                    Sign In
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut}>Sign Out</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-
-            <Button size="icon" variant="ghost" onClick={toggleDarkMode} className="w-9 h-9">
-              {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </Button>
-            <button
-              className="p-2 text-foreground"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
+                )}
+                <DropdownMenuItem onClick={toggleDarkMode}>
+                  {darkMode ? <Sun className="w-4 h-4 mr-2" /> : <Moon className="w-4 h-4 mr-2" />}
+                  {darkMode ? "Light mode" : "Dark mode"}
+                </DropdownMenuItem>
+                {user && (
+                  <DropdownMenuItem onClick={handleSignOut}>
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign Out
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
-
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-border animate-fade-in">
-            <div className="flex flex-col gap-4">
-              <button onClick={() => handleNavClick("#sports")} className="font-medium text-muted-foreground hover:text-primary transition-colors py-2 text-left">
-                Sports
-              </button>
-              <button onClick={() => handleNavClick("#drills")} className="font-medium text-muted-foreground hover:text-primary transition-colors py-2 text-left">
-                Drills
-              </button>
-              <button onClick={() => handleNavClick("#leagues")} className="font-medium text-muted-foreground hover:text-primary transition-colors py-2 text-left">
-                Leagues
-              </button>
-              <button onClick={() => handleNavClick("#pricing")} className="font-medium text-muted-foreground hover:text-primary transition-colors py-2 text-left">
-                Pricing
-              </button>
-              {user && (
-                <>
-                  <div className="flex items-center gap-4 pt-2">
-                    <div className="flex items-center gap-1 text-streak">
-                      <Flame className="w-5 h-5 fill-current" />
-                      <span className="font-bold">{streak}</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-league-gold">
-                      <Trophy className="w-5 h-5" />
-                      <span className="font-bold text-sm">Gold</span>
-                    </div>
-                  </div>
-                  <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>
-                    <Button className="mt-2 w-full" variant="outline">
-                      <User className="w-4 h-4" />
-                      Profile
-                    </Button>
-                  </Link>
-                  <Button className="w-full" variant="ghost" onClick={handleSignOut}>
-                    <LogOut className="w-4 h-4" />
-                    Sign Out
-                  </Button>
-                </>
-              )}
-              {!user && (
-                <>
-                  <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
-                    <Button className="mt-2 w-full" variant="outline">
-                      <LogIn className="w-4 h-4" />
-                      Sign In
-                    </Button>
-                  </Link>
-                  <Link to="/sports" onClick={() => setMobileMenuOpen(false)}>
-                    <Button className="w-full">Get Started</Button>
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-        )}
       </div>
     </nav>
   );
