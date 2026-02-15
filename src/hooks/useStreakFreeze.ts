@@ -43,7 +43,8 @@ export const useStreakFreeze = () => {
         .single();
 
       if (fetchError) throw fetchError;
-      const currentFreezes = currentProfile?.streak_freezes || 0;
+      if (!currentProfile) return { success: false };
+      const currentFreezes = currentProfile.streak_freezes || 0;
       if (currentFreezes <= 0) return { success: false };
 
       // Decrement freeze count
@@ -95,7 +96,8 @@ export const useStreakFreeze = () => {
         .single();
 
       if (fetchError) throw fetchError;
-      const currentFreezes = currentProfile?.streak_freezes || 0;
+      if (!currentProfile) return { success: false };
+      const currentFreezes = currentProfile.streak_freezes || 0;
 
       const { error } = await supabase
         .from("profiles")
