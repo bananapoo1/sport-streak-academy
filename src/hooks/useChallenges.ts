@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -31,7 +31,7 @@ export const useChallenges = () => {
   const [activeChallenges, setActiveChallenges] = useState<Challenge[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const updateChallengesState = (data: Challenge[]) => {
+  const updateChallengesState = useCallback((data: Challenge[]) => {
     setChallenges(data);
     setPendingChallenges(data.filter(c => 
       c.status === "pending" && c.challenged_id === user?.id
@@ -39,9 +39,9 @@ export const useChallenges = () => {
     setActiveChallenges(data.filter(c => 
       c.status === "accepted"
     ));
-  };
+  }, [user?.id]);
 
-  const fetchChallenges = async () => {
+  const fetchChallenges = useCallback(async () => {
     if (!user) {
       setLoading(false);
       return;
@@ -85,7 +85,7 @@ export const useChallenges = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, updateChallengesState]);
 
   // Real-time subscription for challenge updates
   useEffect(() => {
@@ -111,7 +111,7 @@ export const useChallenges = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [user, fetchChallenges]);
 
   const sendChallenge = async (friendId: string, drillId: string, sport: string) => {
     if (!user) return { success: false, error: "Not logged in" };
@@ -257,7 +257,7 @@ export const useChallenges = () => {
 
   useEffect(() => {
     fetchChallenges();
-  }, [user]);
+  }, [fetchChallenges]);
 
   return {
     challenges,

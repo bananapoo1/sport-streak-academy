@@ -85,7 +85,7 @@ Deno.serve(async (req) => {
     // Get drill details for enrichment
     const drillIds = [...new Set(completedDrills?.map(c => c.drill_id) || [])];
     
-    let drillDetails: Record<string, unknown> = {};
+    const drillDetails: Record<string, unknown> = {};
     if (drillIds.length > 0) {
       const { data: drills } = await supabaseAdmin
         .from("drills")

@@ -25,6 +25,10 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   award: Award,
 };
 
+type WindowWithWebkitAudio = Window & typeof globalThis & {
+  webkitAudioContext?: typeof AudioContext;
+};
+
 const rarityConfig = {
   common: {
     gradient: "from-slate-400 to-slate-600",
@@ -83,7 +87,9 @@ const AchievementUnlockOverlay = ({ isOpen, onClose, achievement }: AchievementU
   const playSoundEffect = (rarity: "common" | "rare" | "epic" | "legendary") => {
     try {
       if (!audioContextRef.current) {
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const audioCtor = window.AudioContext || (window as WindowWithWebkitAudio).webkitAudioContext;
+        if (!audioCtor) return;
+        audioContextRef.current = new audioCtor();
       }
       const ctx = audioContextRef.current;
       

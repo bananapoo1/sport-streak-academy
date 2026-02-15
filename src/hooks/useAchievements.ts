@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -119,7 +119,7 @@ export const useAchievements = () => {
   });
   const [loading, setLoading] = useState(true);
 
-  const fetchUserStats = async () => {
+  const fetchUserStats = useCallback(async () => {
     if (!user) {
       setUserStats({ totalDrills: 0, currentStreak: 0, longestStreak: 0, totalXp: 0 });
       setLoading(false);
@@ -151,11 +151,11 @@ export const useAchievements = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     fetchUserStats();
-  }, [user]);
+  }, [fetchUserStats]);
 
   const achievements = useMemo((): ComputedAchievement[] => {
     return achievementDefinitions.map((achievement) => {

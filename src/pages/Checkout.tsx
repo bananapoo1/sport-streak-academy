@@ -25,7 +25,7 @@ const Checkout = () => {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <main className="pt-24 pb-16">
+        <main className="pt-20 pb-24 md:pt-24 md:pb-16">
           <div className="container mx-auto px-4 max-w-lg text-center">
             <div className="bg-card border-2 border-success rounded-3xl p-8 shadow-card">
               <CheckCircle className="w-16 h-16 text-success mx-auto mb-4" />
@@ -60,7 +60,7 @@ const Checkout = () => {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <main className="pt-24 pb-16">
+        <main className="pt-20 pb-24 md:pt-24 md:pb-16">
           <div className="container mx-auto px-4 max-w-lg text-center">
             <div className="bg-card border-2 border-border rounded-3xl p-8 shadow-card">
               <XCircle className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
@@ -95,7 +95,7 @@ const Checkout = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="pt-24 pb-16">
+      <main className="pt-20 pb-24 md:pt-24 md:pb-16">
         <div className="container mx-auto px-4 max-w-lg text-center">
           <div className="bg-card border-2 border-border rounded-3xl p-8 shadow-card">
             <Loader2 className="w-12 h-12 text-primary mx-auto mb-4 animate-spin" />

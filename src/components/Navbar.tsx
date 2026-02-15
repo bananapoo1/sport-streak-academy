@@ -1,11 +1,32 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Flame, Trophy, Menu, X, User, LogIn, LogOut, Moon, Sun, Swords } from "lucide-react";
+import { Flame, Trophy, Menu, X, User, LogIn, LogOut, Moon, Sun, Swords, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProgress } from "@/hooks/useProgress";
 import { useChallenges } from "@/hooks/useChallenges";
 import NotificationDropdown from "@/components/NotificationDropdown";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+const getMobileTitle = (pathname: string) => {
+  if (pathname === "/") return "Home";
+  if (pathname === "/sports") return "Sports";
+  if (pathname.startsWith("/sports/")) return "Sport Details";
+  if (pathname.startsWith("/drill/")) return "Drill";
+  if (pathname === "/challenges") return "Challenges";
+  if (pathname === "/profile") return "Profile";
+  if (pathname.startsWith("/profile/")) return "Athlete Profile";
+  if (pathname === "/checkout") return "Checkout";
+  if (pathname === "/auth") return "Sign In";
+  return "DrillZone";
+};
+
 export const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
@@ -52,14 +73,20 @@ export const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-lg border-b border-border">
       <div className="container mx-auto px-4">
         <div className="flex items-center h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+          {/* Desktop Logo */}
+          <Link to="/" className="hidden md:flex items-center gap-2 hover:opacity-80 transition-opacity">
             <span className="text-2xl">⚽</span>
             <span className="font-extrabold text-xl text-foreground">DrillZone</span>
           </Link>
+
+          {/* Mobile Section Header */}
+          <div className="md:hidden flex items-center gap-2">
+            <span className="text-xl">⚽</span>
+            <span className="font-bold text-lg text-foreground">{getMobileTitle(location.pathname)}</span>
+          </div>
 
           {/* Desktop Nav - Centered */}
           <div className="hidden md:flex items-center justify-center flex-1">
@@ -79,14 +106,13 @@ export const Navbar = () => {
             </div>
           </div>
 
-          {/* Stats & CTA */}
+          {/* Desktop Stats & CTA */}
           <div className="hidden md:flex items-center gap-4">
             <Button size="icon" variant="ghost" onClick={toggleDarkMode} className="w-9 h-9">
               {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </Button>
             {user && (
               <>
-                {/* Notifications */}
                 <Link to="/challenges" className="relative">
                   <Button size="icon" variant="ghost" className="w-9 h-9">
                     <Swords className="w-4 h-4" />
@@ -132,8 +158,40 @@ export const Navbar = () => {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center gap-2 ml-auto">
+          {/* Mobile actions */}
+          <div className="md:hidden flex items-center gap-1 ml-auto">
+            {user && (
+              <Link to="/challenges" className="relative">
+                <Button size="icon" variant="ghost" className="w-9 h-9">
+                  <Swords className="w-4 h-4" />
+                  {pendingChallenges.length > 0 && (
+                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center font-bold">
+                      {pendingChallenges.length}
+                    </span>
+                  )}
+                </Button>
+              </Link>
+            )}
+
+            {user && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button size="icon" variant="ghost" className="w-9 h-9">
+                    <User className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => navigate("/profile")}>Profile</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/profile")}> 
+                    <Settings className="w-4 h-4 mr-2" />
+                    Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut}>Sign Out</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+
             <Button size="icon" variant="ghost" onClick={toggleDarkMode} className="w-9 h-9">
               {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </Button>

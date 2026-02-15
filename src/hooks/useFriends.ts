@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -26,7 +26,7 @@ export const useFriends = () => {
   const [sentRequests, setSentRequests] = useState<SentRequest[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchFriends = async () => {
+  const fetchFriends = useCallback(async () => {
     if (!user) return;
 
     // Fetch accepted friendships
@@ -117,7 +117,7 @@ export const useFriends = () => {
     }
 
     setLoading(false);
-  };
+  }, [user]);
 
   const sendFriendRequest = async (friendUsername: string) => {
     if (!user) return { success: false, error: "Not logged in" };
@@ -205,7 +205,7 @@ export const useFriends = () => {
     } else {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, fetchFriends]);
 
   return {
     friends,

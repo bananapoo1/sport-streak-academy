@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
 
 export interface DrillFromAPI {
   id: string;
@@ -40,7 +39,6 @@ interface UseDrillsOptions {
 }
 
 export const useDrills = (options: UseDrillsOptions = {}) => {
-  const { user } = useAuth();
   const [drills, setDrills] = useState<DrillFromAPI[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -82,7 +80,7 @@ export const useDrills = (options: UseDrillsOptions = {}) => {
     } finally {
       setLoading(false);
     }
-  }, [options.sport, options.category, options.level, user?.id]);
+  }, [options.sport, options.category, options.level]);
 
   useEffect(() => {
     fetchDrills();
@@ -97,7 +95,6 @@ export const useDrills = (options: UseDrillsOptions = {}) => {
 };
 
 export const useDrill = (drillId: string | undefined) => {
-  const { user } = useAuth();
   const [drill, setDrill] = useState<DrillFromAPI & {
     equipment: unknown[] | null;
     steps: unknown[] | null;
@@ -147,7 +144,7 @@ export const useDrill = (drillId: string | undefined) => {
     } finally {
       setLoading(false);
     }
-  }, [drillId, user?.id]);
+  }, [drillId]);
 
   useEffect(() => {
     fetchDrill();

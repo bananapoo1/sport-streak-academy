@@ -3,7 +3,7 @@ import { Heart } from "lucide-react";
 
 export const Footer = () => {
   return (
-    <footer className="py-12 bg-slate-900 dark:bg-slate-950 text-slate-100">
+    <footer className="hidden md:block py-12 bg-slate-900 dark:bg-slate-950 text-slate-100">
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-4 gap-8 mb-8">
           {/* Brand */}

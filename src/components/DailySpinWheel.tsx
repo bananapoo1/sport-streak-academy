@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Gift, Zap, Snowflake, Star, Crown, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -26,6 +26,10 @@ const rewards: Reward[] = [
   { id: "xp_1000", name: "+1000 XP", icon: <Sparkles className="w-6 h-6" />, color: "hsl(45 93% 55%)", probability: 3, value: 1000, type: "xp" },
 ];
 
+type WindowWithWebkitAudio = Window & typeof globalThis & {
+  webkitAudioContext?: typeof AudioContext;
+};
+
 const DailySpinWheel = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -38,14 +42,8 @@ const DailySpinWheel = () => {
   const wheelRef = useRef<HTMLDivElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
 
-  useEffect(() => {
-    if (user) {
-      checkSpinAvailability();
-    }
-  }, [user]);
-
   // Server-side check for spin availability
-  const checkSpinAvailability = async () => {
+  const checkSpinAvailability = useCallback(async () => {
     if (!user) return;
     
     setIsLoading(true);
@@ -74,7 +72,13 @@ const DailySpinWheel = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      checkSpinAvailability();
+    }
+  }, [user, checkSpinAvailability]);
 
   const selectReward = (): Reward => {
     const totalProbability = rewards.reduce((sum, r) => sum + r.probability, 0);
@@ -90,7 +94,9 @@ const DailySpinWheel = () => {
   const playSpinSound = () => {
     try {
       if (!audioContextRef.current) {
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const audioCtor = window.AudioContext || (window as WindowWithWebkitAudio).webkitAudioContext;
+        if (!audioCtor) return;
+        audioContextRef.current = new audioCtor();
       }
       const ctx = audioContextRef.current;
       
@@ -122,7 +128,9 @@ const DailySpinWheel = () => {
   const playWinSound = () => {
     try {
       if (!audioContextRef.current) {
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const audioCtor = window.AudioContext || (window as WindowWithWebkitAudio).webkitAudioContext;
+        if (!audioCtor) return;
+        audioContextRef.current = new audioCtor();
       }
       const ctx = audioContextRef.current;
       

@@ -128,7 +128,7 @@ const DrillDetail = () => {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <main className="pt-24 pb-16">
+        <main className="pt-20 pb-24 md:pt-24 md:pb-16">
           <div className="container mx-auto px-4 max-w-4xl text-center">
             <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
             <p className="text-muted-foreground">Loading drill...</p>
@@ -143,7 +143,7 @@ const DrillDetail = () => {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <main className="pt-24 pb-16">
+        <main className="pt-20 pb-24 md:pt-24 md:pb-16">
           <div className="container mx-auto px-4 max-w-4xl text-center">
             <h1 className="text-2xl font-bold text-foreground mb-4">Drill Not Found</h1>
             <Link to={sportSlug ? `/sports/${sportSlug}` : "/sports"}>
@@ -164,7 +164,7 @@ const DrillDetail = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="pt-24 pb-16">
+      <main className="pt-20 pb-24 md:pt-24 md:pb-16">
         <div className="container mx-auto px-4 max-w-4xl">
           <Link 
             to={`/sports/${sportSlug}`} 

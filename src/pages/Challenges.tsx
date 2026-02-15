@@ -64,7 +64,7 @@ const Challenges = () => {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <main className="pt-24 pb-16 flex items-center justify-center">
+        <main className="pt-20 pb-24 md:pt-24 md:pb-16 flex items-center justify-center">
           <div className="text-center">
             <Swords className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-foreground mb-2">Sign in to view challenges</h2>
@@ -80,7 +80,7 @@ const Challenges = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="pt-24 pb-16">
+      <main className="pt-20 pb-24 md:pt-24 md:pb-16">
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="flex items-center gap-3 mb-8">
             <Swords className="w-8 h-8 text-primary" />

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -40,7 +40,7 @@ export const useProgress = () => {
   const [streak, setStreak] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  const fetchTodayProgress = async () => {
+  const fetchTodayProgress = useCallback(async () => {
     if (!user) return;
 
     const today = new Date().toISOString().split("T")[0];
@@ -60,9 +60,9 @@ export const useProgress = () => {
         goal_minutes: data.goal_minutes || 30,
       });
     }
-  };
+  }, [user]);
 
-  const fetchWeekProgress = async () => {
+  const fetchWeekProgress = useCallback(async () => {
     if (!user) return;
 
     const days = ["S", "M", "T", "W", "T", "F", "S"];
@@ -93,9 +93,9 @@ export const useProgress = () => {
     }
 
     setWeekProgress(weekData);
-  };
+  }, [user]);
 
-  const fetchStreak = async () => {
+  const fetchStreak = useCallback(async () => {
     if (!user) return;
 
     const { data: profile } = await supabase
@@ -145,9 +145,9 @@ export const useProgress = () => {
     }
 
     setStreak(currentStreak);
-  };
+  }, [user]);
 
-  const completeTraining = async (
+  const completeTraining = useCallback(async (
     sport: string, 
     drillId: string,
     options?: {
@@ -216,7 +216,7 @@ export const useProgress = () => {
       console.error("Error completing training:", error);
       return { success: false, error: "Network error" };
     }
-  };
+  }, [user, fetchTodayProgress, fetchWeekProgress, fetchStreak]);
 
   useEffect(() => {
     if (user) {
@@ -227,7 +227,7 @@ export const useProgress = () => {
     } else {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, fetchTodayProgress, fetchWeekProgress, fetchStreak]);
 
   return {
     todayProgress,
@@ -235,10 +235,10 @@ export const useProgress = () => {
     streak,
     loading,
     completeTraining,
-    refreshProgress: () => {
+    refreshProgress: useCallback(() => {
       fetchTodayProgress();
       fetchWeekProgress();
       fetchStreak();
-    },
+    }, [fetchTodayProgress, fetchWeekProgress, fetchStreak]),
   };
 };

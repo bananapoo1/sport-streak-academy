@@ -14,7 +14,7 @@ const getTestAccounts = (): string[] => {
   return envValue.split(",").map(email => email.trim().toLowerCase()).filter(Boolean);
 };
 
-const logStep = (step: string, details?: any) => {
+const logStep = (step: string, details?: unknown) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[CHECK-SUBSCRIPTION] ${step}${detailsStr}`);
 };
