@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, LogIn } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProgress } from "@/hooks/useProgress";
+import DailyCard from "@/components/DailyCard";
 
 const HomeProgress = () => {
   const { user } = useAuth();
@@ -32,6 +33,16 @@ const HomeProgress = () => {
       <section className="py-12 bg-gradient-warm">
         <div className="container mx-auto px-4">
           <div className="max-w-md mx-auto text-center">
+            <div className="mb-6">
+              <DailyCard
+                userId="guest_user"
+                defaultCategory="shooting"
+                onNavigateToSession={() => {
+                  window.location.assign("/drills");
+                }}
+              />
+            </div>
+
             <div className="mb-8">
               <DailyStats xp={0} minutes={0} drillsCompleted={0} streak={0} />
             </div>
@@ -88,6 +99,16 @@ const HomeProgress = () => {
     <section className="py-12 bg-gradient-warm">
       <div className="container mx-auto px-4">
         <div className="max-w-md mx-auto text-center">
+          <div className="mb-6">
+            <DailyCard
+              userId={user.id}
+              defaultCategory="shooting"
+              onNavigateToSession={() => {
+                window.location.assign("/drills");
+              }}
+            />
+          </div>
+
           {/* Daily Stats */}
           <div className="mb-8">
             <DailyStats

@@ -211,6 +211,21 @@
   animation: tab-route-enter 220ms ease-out;
 }
 
+.animate-confetti-drop {
+  animation: confetti-drop 780ms cubic-bezier(.2,.8,.2,1) forwards;
+}
+
+@keyframes confetti-drop {
+  from {
+    transform: translateY(-8px) rotate(0deg);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(220px) rotate(240deg);
+    opacity: 0;
+  }
+}
+
 @keyframes tab-route-enter {
   from {
     opacity: 0;
@@ -225,5 +240,33 @@
 @media (prefers-reduced-motion: reduce) {
   .route-transition {
     animation: none;
+  }
+
+  .animate-confetti-drop {
+    animation: none;
+  }
+}
+
+/* Mobile app-like overscroll behavior */
+html, body {
+  overscroll-behavior-y: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent text selection on interactive elements for app feel */
+button, a, [role="button"] {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Smooth touch scrolling */
+.overflow-y-auto, .overflow-auto, main {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Safe area support for notched devices */
+@supports (padding: env(safe-area-inset-bottom)) {
+  main {
+    padding-bottom: env(safe-area-inset-bottom);
   }
 }
