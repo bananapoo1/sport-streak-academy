@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
-import HomeProgress from "@/components/HomeProgress";
 import Footer from "@/components/Footer";
+import DrillsSection from "@/components/DrillsSection";
 import MobileQuickActions from "@/components/MobileQuickActions";
 import TabSkeleton from "@/components/TabSkeleton";
 
-const Index = () => {
+const Drills = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -16,13 +16,13 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="pt-20 pb-24 md:pb-0">
+      <main className="pt-20 pb-24 md:pt-24 md:pb-16">
         <MobileQuickActions />
-        {loading ? <TabSkeleton /> : <HomeProgress />}
+        {loading ? <TabSkeleton /> : <DrillsSection />}
       </main>
       <Footer />
     </div>
   );
 };
 
-export default Index;
+export default Drills;
