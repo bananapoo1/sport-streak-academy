@@ -1,13 +1,22 @@
 import { useEffect, useCallback } from "react";
+import type { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+
+interface ChallengeRealtimeRow {
+  challenged_id: string;
+  challenger_id: string;
+  status: string;
+  winner_id: string | null;
+  xp_bonus: number;
+}
 
 export const useRealtimeChallenges = (onNewChallenge?: () => void) => {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const handleNewChallenge = useCallback(async (payload: any) => {
+  const handleNewChallenge = useCallback(async (payload: RealtimePostgresChangesPayload<ChallengeRealtimeRow>) => {
     if (!user) return;
     
     const newChallenge = payload.new;

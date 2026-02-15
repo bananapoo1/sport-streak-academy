@@ -1,7 +1,14 @@
 import { useEffect, useCallback } from "react";
+import type { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+
+interface DailyProgressRealtimeRow {
+  user_id: string;
+  minutes_completed: number;
+  goal_minutes: number | null;
+}
 
 export const useFriendActivity = () => {
   const { user } = useAuth();
@@ -63,7 +70,7 @@ export const useFriendActivity = () => {
             table: 'daily_progress',
           },
           async (payload) => {
-            const progress = payload.new as any;
+            const progress = payload.new as DailyProgressRealtimeRow;
             
             // Check if this is a friend's progress
             if (!friendIds.includes(progress.user_id)) return;

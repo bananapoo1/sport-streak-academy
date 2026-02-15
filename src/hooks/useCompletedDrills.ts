@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -12,7 +12,7 @@ export const useCompletedDrills = (sport?: string) => {
   const [completedDrills, setCompletedDrills] = useState<CompletedDrill[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchCompletedDrills = async () => {
+  const fetchCompletedDrills = useCallback(async () => {
     if (!user) {
       setCompletedDrills([]);
       setLoading(false);
@@ -34,11 +34,11 @@ export const useCompletedDrills = (sport?: string) => {
       setCompletedDrills(data);
     }
     setLoading(false);
-  };
+  }, [user, sport]);
 
   useEffect(() => {
     fetchCompletedDrills();
-  }, [user, sport]);
+  }, [fetchCompletedDrills]);
 
   const isDrillCompleted = (drillId: string): boolean => {
     return completedDrills.some((d) => d.drill_id === drillId);

@@ -697,7 +697,7 @@ Deno.serve(async (req) => {
 
     let newStreak = profile?.current_streak ?? 0;
     let longestStreak = profile?.longest_streak ?? 0;
-    let newTotalXp = (profile?.total_xp ?? 0) + xpEarned;
+    const newTotalXp = (profile?.total_xp ?? 0) + xpEarned;
 
     // Check if daily goal met for streak
     const { data: todayProgress } = await supabaseAdmin

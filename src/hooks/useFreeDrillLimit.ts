@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -12,7 +12,7 @@ export const useFreeDrillLimit = () => {
   const [todayCompletedDrills, setTodayCompletedDrills] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  const fetchTodayCompleted = async () => {
+  const fetchTodayCompleted = useCallback(async () => {
     if (!user) {
       setTodayCompletedDrills(0);
       setLoading(false);
@@ -33,11 +33,11 @@ export const useFreeDrillLimit = () => {
       setTodayCompletedDrills(count);
     }
     setLoading(false);
-  };
+  }, [user]);
 
   useEffect(() => {
     fetchTodayCompleted();
-  }, [user]);
+  }, [fetchTodayCompleted]);
 
   // User can do more drills if they're subscribed or haven't hit the daily limit
   const canDoMoreDrills = subscribed || todayCompletedDrills < FREE_DRILL_LIMIT;

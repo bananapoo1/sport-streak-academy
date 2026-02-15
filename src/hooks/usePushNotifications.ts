@@ -128,7 +128,7 @@ export const usePushNotifications = () => {
     }
   }, [registration, toast]);
 
-  const sendLocalNotification = useCallback((title: string, body: string, data?: any) => {
+  const sendLocalNotification = useCallback((title: string, body: string, data?: unknown) => {
     if (permission !== "granted") return;
 
     registration?.showNotification(title, {

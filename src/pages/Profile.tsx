@@ -19,6 +19,7 @@ import { useStreakFreeze } from "@/hooks/useStreakFreeze";
 import { useDailyGoal } from "@/hooks/useDailyGoal";
 import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 import DailyGoalSetter from "@/components/DailyGoalSetter";
 import StreakFreezeCard from "@/components/StreakFreezeCard";
 import WeeklyLeaderboard from "@/components/WeeklyLeaderboard";
@@ -73,6 +74,8 @@ const drillOptions = [
   { id: "basketball-shooting-1-level-1", name: "Form Shooting", sport: "basketball", xp: 30 },
 ];
 
+type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
+
 const Profile = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -85,7 +88,7 @@ const Profile = () => {
   const { isPro } = useSubscription();
   const [selectedAvatar, setSelectedAvatar] = useState("⚽");
   const [selectedFrame, setSelectedFrame] = useState("default");
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [friendUsername, setFriendUsername] = useState("");
   const [inAppReminders, setInAppReminders] = useState(true);
@@ -189,7 +192,7 @@ const Profile = () => {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <main className="pt-24 pb-16 flex items-center justify-center">
+        <main className="pt-20 pb-24 md:pt-24 md:pb-16 flex items-center justify-center">
           <div className="animate-pulse text-muted-foreground">Loading...</div>
         </main>
       </div>
@@ -199,7 +202,7 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="pt-24 pb-16">
+      <main className="pt-20 pb-24 md:pt-24 md:pb-16">
         <div className="container mx-auto px-4 max-w-4xl">
           <h1 className="text-3xl font-extrabold text-foreground mb-8">My Profile</h1>
 

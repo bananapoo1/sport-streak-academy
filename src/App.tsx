@@ -16,6 +16,7 @@ import Auth from "./pages/Auth";
 import Challenges from "./pages/Challenges";
 import NotFound from "./pages/NotFound";
 import DailySpinWheel from "./components/DailySpinWheel";
+import MobileTabBar from "./components/MobileTabBar";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
           <DailySpinWheel />
+          <MobileTabBar />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
