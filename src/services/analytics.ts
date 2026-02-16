@@ -1,6 +1,7 @@
 export type EventName =
   | "home_daily_card_view"
   | "home_cta_click"
+  | "onboarding_completed"
   | "session_start"
   | "session_complete"
   | "drill_assigned"

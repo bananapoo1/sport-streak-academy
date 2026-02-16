@@ -428,6 +428,33 @@ export type Database = {
           },
         ]
       }
+      onboarding_responses: {
+        Row: {
+          id: string
+          user_id: string
+          created_at: string
+          data: Json
+          version: number
+          source: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          created_at?: string
+          data: Json
+          version?: number
+          source?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          created_at?: string
+          data?: Json
+          version?: number
+          source?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_id: string | null

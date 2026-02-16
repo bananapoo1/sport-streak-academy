@@ -1,7 +1,7 @@
 export const MOBILE_TABS = [
   { label: "Home", href: "/" },
-  { label: "Sports", href: "/sports" },
-  { label: "Drills", href: "/drills" },
+  { label: "Drills", href: "/sports" },
+  { label: "Awards", href: "/achievements" },
   { label: "Leagues", href: "/leagues" },
   { label: "Profile", href: "/profile" },
 ] as const;

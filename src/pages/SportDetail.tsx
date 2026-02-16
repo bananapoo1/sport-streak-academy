@@ -12,20 +12,16 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Sport metadata for all 12 supported sports
+// Sport metadata for all 8 supported sports
 const sportMeta: Record<string, { name: string; emoji: string; color: string }> = {
   football: { name: "Football", emoji: "⚽", color: "#22c55e" },
   basketball: { name: "Basketball", emoji: "🏀", color: "#f97316" },
   tennis: { name: "Tennis", emoji: "🎾", color: "#eab308" },
   golf: { name: "Golf", emoji: "⛳", color: "#22c55e" },
   cricket: { name: "Cricket", emoji: "🏏", color: "#3b82f6" },
-  padel: { name: "Padel", emoji: "🎾", color: "#8b5cf6" },
   rugby: { name: "Rugby", emoji: "🏉", color: "#dc2626" },
-  "table-tennis": { name: "Table Tennis", emoji: "🏓", color: "#0ea5e9" },
-  baseball: { name: "Baseball", emoji: "⚾", color: "#ef4444" },
-  "american-football": { name: "American Football", emoji: "🏈", color: "#854d0e" },
-  "field-hockey": { name: "Field Hockey", emoji: "🏑", color: "#0d9488" },
-  volleyball: { name: "Volleyball", emoji: "🏐", color: "#d946ef" },
+  "field-hockey": { name: "Hockey", emoji: "🏑", color: "#0d9488" },
+  padel: { name: "Padel", emoji: "🎾", color: "#8b5cf6" },
 };
 
 const SportDetail = () => {

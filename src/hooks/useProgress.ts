@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -34,11 +34,13 @@ export const useProgress = () => {
     minutes_completed: 0,
     xp_earned: 0,
     drills_completed: 0,
-    goal_minutes: 30,
+    goal_minutes: 10,
   });
   const [weekProgress, setWeekProgress] = useState<WeekDay[]>([]);
   const [streak, setStreak] = useState(0);
+  const [previousStreak, setPreviousStreak] = useState(0);
   const [loading, setLoading] = useState(true);
+  const streakRef = useRef(0);
 
   const fetchTodayProgress = useCallback(async () => {
     if (!user) return;
@@ -57,39 +59,56 @@ export const useProgress = () => {
         minutes_completed: data.minutes_completed || 0,
         xp_earned: data.xp_earned || 0,
         drills_completed: data.drills_completed || 0,
-        goal_minutes: data.goal_minutes || 30,
+        goal_minutes: data.goal_minutes || 10,
       });
     }
   }, [user]);
 
+  // Fetch entire week in ONE query instead of 7 individual queries
   const fetchWeekProgress = useCallback(async () => {
     if (!user) return;
 
-    const days = ["S", "M", "T", "W", "T", "F", "S"];
+    const dayLabels = ["S", "M", "T", "W", "T", "F", "S"];
     const today = new Date();
-    const weekData: WeekDay[] = [];
+    
+    // Calculate date range for past 7 days
+    const startDate = new Date(today);
+    startDate.setDate(startDate.getDate() - 6);
+    const startStr = startDate.toISOString().split("T")[0];
+    const endStr = today.toISOString().split("T")[0];
 
+    // Single query for all 7 days
+    const { data } = await supabase
+      .from("daily_progress")
+      .select("date, minutes_completed, goal_minutes")
+      .eq("user_id", user.id)
+      .gte("date", startStr)
+      .lte("date", endStr);
+
+    // Build a lookup map from the results
+    const progressByDate = new Map<string, { minutes: number; goal: number }>();
+    if (data) {
+      for (const row of data) {
+        progressByDate.set(row.date, {
+          minutes: row.minutes_completed || 0,
+          goal: row.goal_minutes || 10,
+        });
+      }
+    }
+
+    // Build the 7-day array
+    const weekData: WeekDay[] = [];
     for (let i = 6; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
       const dateStr = date.toISOString().split("T")[0];
       const dayIndex = date.getDay();
-
-      const { data } = await supabase
-        .from("daily_progress")
-        .select("minutes_completed, goal_minutes")
-        .eq("user_id", user.id)
-        .eq("date", dateStr)
-        .maybeSingle();
-
-      const minutes = data?.minutes_completed || 0;
-      const goal = data?.goal_minutes || 30;
+      const entry = progressByDate.get(dateStr);
+      const minutes = entry?.minutes || 0;
+      const goal = entry?.goal || 10;
       const progress = Math.min((minutes / goal) * 100, 100);
 
-      weekData.push({
-        day: days[dayIndex],
-        progress,
-      });
+      weekData.push({ day: dayLabels[dayIndex], progress });
     }
 
     setWeekProgress(weekData);
@@ -122,7 +141,7 @@ export const useProgress = () => {
         .maybeSingle();
 
       const yesterdayGoalMet = yesterdayProgress
-        && (yesterdayProgress.minutes_completed ?? 0) >= (yesterdayProgress.goal_minutes ?? 30);
+        && (yesterdayProgress.minutes_completed ?? 0) >= (yesterdayProgress.goal_minutes ?? 10);
 
       if (!yesterdayGoalMet) {
         // Check for streak freeze
@@ -144,6 +163,9 @@ export const useProgress = () => {
       }
     }
 
+    // Track previous streak value for milestone detection
+    setPreviousStreak(streakRef.current);
+    streakRef.current = currentStreak;
     setStreak(currentStreak);
   }, [user]);
 
@@ -233,6 +255,7 @@ export const useProgress = () => {
     todayProgress,
     weekProgress,
     streak,
+    previousStreak,
     loading,
     completeTraining,
     refreshProgress: useCallback(() => {

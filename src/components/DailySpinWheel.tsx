@@ -261,17 +261,18 @@ const DailySpinWheel = () => {
       <button
         onClick={() => setIsOpen(true)}
         className={`
-          fixed bottom-24 right-6 z-40
-          w-16 h-16 rounded-full
+          fixed bottom-28 right-4 z-40
+          w-14 h-14 rounded-full
           bg-gradient-to-br from-amber-400 to-orange-500
           shadow-lg shadow-amber-500/30
           flex items-center justify-center
           transition-all duration-300
           ${canSpin && !isLoading ? "animate-bounce hover:scale-110" : "opacity-70"}
+          md:bottom-8 md:right-8 md:w-16 md:h-16
         `}
         aria-label="Daily Spin Wheel"
       >
-        <Gift className="w-8 h-8 text-white" />
+        <Gift className="w-7 h-7 text-white md:w-8 md:h-8" />
         {canSpin && !isLoading && (
           <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive rounded-full flex items-center justify-center text-[10px] text-destructive-foreground font-bold">
             1
@@ -281,7 +282,7 @@ const DailySpinWheel = () => {
 
       {/* Spin Wheel Dialog */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto mx-auto w-[calc(100%-2rem)]">
           <DialogHeader>
             <DialogTitle className="text-center text-2xl font-extrabold">
               🎡 Daily Spin Wheel
@@ -290,7 +291,7 @@ const DailySpinWheel = () => {
 
           <div className="flex flex-col items-center py-4">
             {/* Wheel Container */}
-            <div className="relative w-72 h-72 mb-6">
+            <div className="relative w-56 h-56 sm:w-72 sm:h-72 mb-6">
               {/* Pointer */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 z-10">
                 <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-t-[20px] border-l-transparent border-r-transparent border-t-primary" />

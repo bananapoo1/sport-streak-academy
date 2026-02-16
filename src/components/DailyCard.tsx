@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, CircleCheck, Sparkles } from "lucide-react";
+import { ArrowRight, Clock, Sparkles, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import ProgressRing from "@/components/ProgressRing";
 import CompletionModal from "@/components/CompletionModal";
 import { trackEvent } from "@/services/analytics";
@@ -11,10 +11,11 @@ import { useDailyHabitSession } from "@/hooks/useDailyHabitSession";
 type Props = {
   userId: string;
   defaultCategory?: string;
+  sport?: string;
   onNavigateToSession?: (drillId?: string) => void;
 };
 
-export default function DailyCard({ userId, defaultCategory = "shooting", onNavigateToSession }: Props) {
+export default function DailyCard({ userId, defaultCategory = "shooting", sport = "football", onNavigateToSession }: Props) {
   const {
     beginSession,
     finishSession,
@@ -31,9 +32,7 @@ export default function DailyCard({ userId, defaultCategory = "shooting", onNavi
   const [lastOutcome, setLastOutcome] = useState<DrillOutcome | undefined>(undefined);
 
   const progress = useMemo(() => {
-    if (!assignedDrill) {
-      return 0;
-    }
+    if (!assignedDrill) return 0;
     return Math.min(100, Math.max(15, Math.round((assignedDrill.difficultyScore / 100) * 100)));
   }, [assignedDrill]);
 
@@ -56,13 +55,13 @@ export default function DailyCard({ userId, defaultCategory = "shooting", onNavi
     onNavigateToSession?.(response.assignedDrill?.id);
   };
 
-  const handleComplete = async (outcome: DrillOutcome) => {
+  const handleComplete = async () => {
     if (!assignedDrill) return;
 
     trackEvent("drill_attempt", {
       drillId: assignedDrill.id,
       category: assignedDrill.category,
-      outcome,
+      outcome: "success",
     }, userId);
 
     const result = await finishSession({
@@ -70,80 +69,79 @@ export default function DailyCard({ userId, defaultCategory = "shooting", onNavi
       xpEarned: 25,
       completed: true,
       drillId: assignedDrill.id,
-      drillOutcome: outcome,
+      drillOutcome: "success",
     });
 
     if (result) {
-      setLastOutcome(outcome);
+      setLastOutcome("success");
       setCompletionOpen(true);
     }
   };
 
   return (
-    <Card className="text-left" aria-label="Daily home card">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-xl">
-          <Sparkles className="h-5 w-5 text-primary" />
-          Daily Habit
-        </CardTitle>
-        <CardDescription>One focused drill. One tap to start.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex items-center justify-between rounded-xl bg-secondary p-3">
-          <div>
-            <div className="text-xs uppercase text-muted-foreground">Current streak</div>
-            <div className="text-lg font-bold text-streak">{streakState.current} days</div>
-          </div>
-          <ProgressRing progress={progress} size={86} stroke={8} label="Readiness" animate />
-        </div>
+    <Card className="text-left overflow-hidden border-2 hover:border-primary/50 transition-colors" aria-label="Daily home card">
+      <CardContent className="p-0">
+        {/* Top accent bar */}
+        <div className="h-1 bg-gradient-to-r from-primary via-streak to-xp" />
 
-        <div className="rounded-xl border bg-card p-3">
-          <div className="text-xs uppercase text-muted-foreground">Assigned drill</div>
+        <div className="p-4 space-y-4">
+          {/* Header row: title + readiness ring */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              <div>
+                <h3 className="font-bold text-foreground">Today's Drill</h3>
+                <p className="text-xs text-muted-foreground">Personalized for you</p>
+              </div>
+            </div>
+            <ProgressRing progress={progress} size={56} stroke={5} label="" animate />
+          </div>
+
+          {/* Drill info or prompt */}
           {assignedDrill ? (
-            <>
-              <div className="mt-1 font-semibold text-foreground">{assignedDrill.title}</div>
-              <div className="text-sm text-muted-foreground">{assignedDrill.content.summary}</div>
-              <div className="mt-2 text-xs text-muted-foreground">Difficulty {assignedDrill.difficultyScore}/100 • {assignedDrill.category}</div>
-            </>
+            <div className="rounded-xl bg-secondary/50 p-3 space-y-2">
+              <div className="font-semibold text-foreground">{assignedDrill.title}</div>
+              <p className="text-sm text-muted-foreground leading-snug">{assignedDrill.content.summary}</p>
+              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <Clock className="h-3.5 w-3.5" />
+                  {assignedDrill.content.durationMinutes} min
+                </span>
+                <span className="flex items-center gap-1">
+                  <Zap className="h-3.5 w-3.5 text-xp" />
+                  +25 XP
+                </span>
+                <span className="capitalize">{assignedDrill.category}</span>
+              </div>
+            </div>
           ) : (
-            <div className="mt-1 text-sm text-muted-foreground">Tap start to get your personalized drill.</div>
+            <div className="rounded-xl border border-dashed border-border p-4 text-center">
+              <p className="text-sm text-muted-foreground">Tap below to get your personalized drill</p>
+            </div>
+          )}
+
+          {/* Single primary action */}
+          {!assignedDrill ? (
+            <Button
+              onClick={handleStart}
+              disabled={starting}
+              className="w-full h-12 text-base font-bold"
+              aria-label="Start daily session"
+            >
+              {starting ? "Finding your drill..." : "Get Today's Drill"}
+              <ArrowRight className="h-4 w-4 ml-1" />
+            </Button>
+          ) : (
+            <Button
+              onClick={handleComplete}
+              disabled={completing}
+              className="w-full h-12 text-base font-bold bg-success hover:bg-success/90"
+              aria-label="Complete drill"
+            >
+              {completing ? "Saving..." : "I Did It! ✓"}
+            </Button>
           )}
         </div>
-
-        <Button
-          onClick={handleStart}
-          disabled={starting}
-          className="w-full"
-          aria-label="Start daily session"
-        >
-          {starting ? "Assigning drill..." : ctaVariant.text}
-          <ArrowRight className="h-4 w-4" />
-        </Button>
-
-        {assignedDrill ? (
-          <div className="grid grid-cols-2 gap-2">
-            <Button
-              variant="secondary"
-              onClick={() => handleComplete("partial")}
-              disabled={completing}
-              aria-label="Complete session with partial outcome"
-            >
-              Mark Partial
-            </Button>
-            <Button
-              onClick={() => handleComplete("success")}
-              disabled={completing}
-              aria-label="Complete session successfully"
-            >
-              Complete
-              <CircleCheck className="h-4 w-4" />
-            </Button>
-          </div>
-        ) : null}
-
-        <a href="/drills" className="inline-block text-sm text-primary underline" aria-label="Show drill alternatives">
-          Show alternatives
-        </a>
 
         <CompletionModal
           open={completionOpen}

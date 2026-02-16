@@ -216,46 +216,6 @@ const tennisDrills: SportDrills = {
   ],
 };
 
-// American Football drills data
-const americanFootballDrills: SportDrills = {
-  name: 'American Football',
-  slug: 'american-football',
-  color: 'hsl(30 41% 35%)',
-  emoji: '🏈',
-  categories: [
-    {
-      name: 'Throwing',
-      description: 'Quarterback precision training',
-      icon: '🎯',
-      drills: generateDrillLevels('american-football', 'throwing', 'Throwing', [
-        { title: 'Short Routes', description: 'Quick timing patterns and slants' },
-        { title: 'Deep Balls', description: 'Long passes with touch and accuracy' },
-        { title: 'Pocket Movement', description: 'Throw while evading pressure' },
-      ]),
-    },
-    {
-      name: 'Receiving',
-      description: 'Become a reliable target',
-      icon: '🤲',
-      drills: generateDrillLevels('american-football', 'receiving', 'Receiving', [
-        { title: 'Route Running', description: 'Crisp cuts and precise routes' },
-        { title: 'Catching Drills', description: 'Secure the ball in all situations' },
-        { title: 'YAC Training', description: 'Yards after catch techniques' },
-      ]),
-    },
-    {
-      name: 'Agility',
-      description: 'Explosive athletic movement',
-      icon: '⚡',
-      drills: generateDrillLevels('american-football', 'agility', 'Agility', [
-        { title: 'Cone Drills', description: 'Quick feet and direction changes' },
-        { title: 'Ladder Work', description: 'Foot speed and coordination' },
-        { title: 'Explosion Training', description: 'First-step quickness and power' },
-      ]),
-    },
-  ],
-};
-
 // Padel drills data
 const padelDrills: SportDrills = {
   name: 'Padel',
@@ -416,85 +376,7 @@ const rugbyDrills: SportDrills = {
   ],
 };
 
-// Table Tennis drills data
-const tableTennisDrills: SportDrills = {
-  name: 'Table Tennis',
-  slug: 'table-tennis',
-  color: 'hsl(199 89% 48%)',
-  emoji: '🏓',
-  categories: [
-    {
-      name: 'Strokes',
-      description: 'Basic stroke production',
-      icon: '🏓',
-      drills: generateDrillLevels('table-tennis', 'strokes', 'Strokes', [
-        { title: 'Forehand Drive', description: 'Consistent forehand topspin' },
-        { title: 'Backhand Push', description: 'Control the pace with backspin' },
-        { title: 'Loop Attack', description: 'Heavy topspin for offensive play' },
-      ]),
-    },
-    {
-      name: 'Serve',
-      description: 'Start points with advantage',
-      icon: '🎯',
-      drills: generateDrillLevels('table-tennis', 'serve', 'Serve', [
-        { title: 'Backspin Serve', description: 'Keep the ball low and tricky' },
-        { title: 'Sidespin Serve', description: 'Curve the ball off the table' },
-        { title: 'Fast Serve', description: 'Quick serves to catch opponents off guard' },
-      ]),
-    },
-    {
-      name: 'Footwork',
-      description: 'Move efficiently around the table',
-      icon: '👟',
-      drills: generateDrillLevels('table-tennis', 'footwork', 'Footwork', [
-        { title: 'Side to Side', description: 'Lateral movement patterns' },
-        { title: 'In and Out', description: 'Moving toward and away from the table' },
-        { title: 'Pivot Footwork', description: 'Using your forehand from the backhand corner' },
-      ]),
-    },
-  ],
-};
 
-// Baseball drills data
-const baseballDrills: SportDrills = {
-  name: 'Baseball',
-  slug: 'baseball',
-  color: 'hsl(0 84% 60%)',
-  emoji: '⚾',
-  categories: [
-    {
-      name: 'Hitting',
-      description: 'Make solid contact',
-      icon: '🏏',
-      drills: generateDrillLevels('baseball', 'hitting', 'Hitting', [
-        { title: 'Tee Work', description: 'Develop consistent swing mechanics' },
-        { title: 'Soft Toss', description: 'Timing and hand-eye coordination' },
-        { title: 'Live Batting', description: 'Track and hit live pitching' },
-      ]),
-    },
-    {
-      name: 'Pitching',
-      description: 'Throw with control and movement',
-      icon: '💪',
-      drills: generateDrillLevels('baseball', 'pitching', 'Pitching', [
-        { title: 'Fastball Mechanics', description: 'Velocity and accuracy on the heater' },
-        { title: 'Off-Speed Pitches', description: 'Changeups and breaking balls' },
-        { title: 'Pitch Sequencing', description: 'Set up hitters strategically' },
-      ]),
-    },
-    {
-      name: 'Fielding',
-      description: 'Make every play',
-      icon: '🧤',
-      drills: generateDrillLevels('baseball', 'fielding', 'Fielding', [
-        { title: 'Ground Balls', description: 'Clean fielding fundamentals' },
-        { title: 'Fly Balls', description: 'Track and catch in the outfield' },
-        { title: 'Double Plays', description: 'Quick transfers and accurate throws' },
-      ]),
-    },
-  ],
-};
 
 // Field Hockey drills data
 const fieldHockeyDrills: SportDrills = {
@@ -536,60 +418,16 @@ const fieldHockeyDrills: SportDrills = {
   ],
 };
 
-// Volleyball drills data
-const volleyballDrills: SportDrills = {
-  name: 'Volleyball',
-  slug: 'volleyball',
-  color: 'hsl(280 87% 60%)',
-  emoji: '🏐',
-  categories: [
-    {
-      name: 'Passing',
-      description: 'First touch fundamentals',
-      icon: '🤲',
-      drills: generateDrillLevels('volleyball', 'passing', 'Passing', [
-        { title: 'Forearm Pass', description: 'Receive serves and attacks' },
-        { title: 'Overhead Pass', description: 'Set the ball for attackers' },
-        { title: 'Defensive Dig', description: 'Save hard-hit balls' },
-      ]),
-    },
-    {
-      name: 'Attacking',
-      description: 'Terminate points',
-      icon: '💥',
-      drills: generateDrillLevels('volleyball', 'attacking', 'Attacking', [
-        { title: 'Approach Footwork', description: 'Generate power with your approach' },
-        { title: 'Arm Swing', description: 'Contact the ball at the highest point' },
-        { title: 'Shot Selection', description: 'Tips, rolls, and power swings' },
-      ]),
-    },
-    {
-      name: 'Blocking',
-      description: 'Stop attacks at the net',
-      icon: '🛡️',
-      drills: generateDrillLevels('volleyball', 'blocking', 'Blocking', [
-        { title: 'Solo Block', description: 'Timing and positioning basics' },
-        { title: 'Double Block', description: 'Coordinate with teammates' },
-        { title: 'Transition', description: 'Block and prepare to attack' },
-      ]),
-    },
-  ],
-};
-
 // All sports data
 export const sportsData: Record<string, SportDrills> = {
   football: footballDrills,
   basketball: basketballDrills,
   tennis: tennisDrills,
-  'american-football': americanFootballDrills,
   padel: padelDrills,
   golf: golfDrills,
   cricket: cricketDrills,
   rugby: rugbyDrills,
-  'table-tennis': tableTennisDrills,
-  baseball: baseballDrills,
   'field-hockey': fieldHockeyDrills,
-  volleyball: volleyballDrills,
 };
 
 // Get sport data by slug

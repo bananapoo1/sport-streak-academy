@@ -1,0 +1,12 @@
+[
+  {"id": "F1", "title": "Daily Home Card", "priority": 1, "estimate": 3},
+  {"id": "F2", "title": "One-tap Start CTA", "priority": 1, "estimate": 1},
+  {"id": "F3", "title": "Animated ProgressRing", "priority": 1, "estimate": 2},
+  {"id": "F4", "title": "Completion Modal + Confetti", "priority": 1, "estimate": 2},
+  {"id": "F5", "title": "Adaptive Drill Assignment Engine", "priority": 1, "estimate": 5},
+  {"id": "F6", "title": "XP, Levels & Streaks Backend Model", "priority": 2, "estimate": 4},
+  {"id": "F7", "title": "Analytics & Events", "priority": 1, "estimate": 2},
+  {"id": "F8", "title": "Feature Flags & AB Test Setup", "priority": 2, "estimate": 1},
+  {"id": "F9", "title": "Accessibility & Motion Preferences", "priority": 1, "estimate": 1},
+  {"id": "F10", "title": "Tests: unit + e2e", "priority": 1, "estimate": 4}
+]

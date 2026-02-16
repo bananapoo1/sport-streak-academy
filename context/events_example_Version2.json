@@ -1,0 +1,13 @@
+{
+  "name": "drill_assigned",
+  "userId": "user_123",
+  "timestampISO": "2026-02-15T09:12:00Z",
+  "properties": {
+    "category": "shooting",
+    "drillId": "drill_456",
+    "confidenceBefore": 0.42,
+    "dTarget": 35,
+    "isReinforcement": true,
+    "assignmentReason": "lowConfidence_reinforcement_similar"
+  }
+}

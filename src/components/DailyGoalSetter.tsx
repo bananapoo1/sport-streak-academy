@@ -10,10 +10,10 @@ interface DailyGoalSetterProps {
 }
 
 const goalOptions = [
-  { minutes: 5, label: "Casual", description: "Perfect for busy days", icon: "🌱" },
-  { minutes: 10, label: "Regular", description: "Build consistent habits", icon: "⚡" },
-  { minutes: 15, label: "Serious", description: "See real improvement", icon: "🔥" },
-  { minutes: 30, label: "Intense", description: "Maximum gains", icon: "💪" },
+  { minutes: 5, label: "Quick", description: "Perfect for busy days", icon: "🌱" },
+  { minutes: 10, label: "Daily", description: "Build consistent habits", icon: "⚡", recommended: true },
+  { minutes: 15, label: "Focused", description: "See real improvement", icon: "🔥" },
+  { minutes: 20, label: "Committed", description: "Serious progress", icon: "💪" },
 ];
 
 const DailyGoalSetter = ({ currentGoal, onGoalChange, compact = false }: DailyGoalSetterProps) => {

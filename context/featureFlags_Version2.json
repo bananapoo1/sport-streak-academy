@@ -1,0 +1,12 @@
+{
+  "daily_card_v2": { "enabled": true, "rollout": 0.5 },
+  "adaptive_assignment": { "enabled": true, "rollout": 1.0 },
+  "celebration_confetti": { "enabled": true, "rollout": 1.0 },
+  "cta_variant_text": {
+    "variants": [
+      {"id": "A", "text": "Start 10-min session", "weight": 0.5},
+      {"id": "B", "text": "Quick session — 10 min", "weight": 0.5}
+    ]
+  },
+  "reduce_motion": { "default": false }
+}

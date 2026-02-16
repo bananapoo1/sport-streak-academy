@@ -1,0 +1,28 @@
+{
+  "project": "Sport Streak Academy - Daily Habit + Adaptive Drill Assignment",
+  "objective": "Increase daily active use by making a single daily training experience irresistible and low friction, with personalized drill assignment that adapts difficulty based on user confidence and performance.",
+  "primary_kpis": {
+    "day_1_retention": "increase",
+    "day_7_retention": "increase",
+    "avg_sessions_per_user_week": "increase",
+    "streak_length_avg": "increase",
+    "drill_success_rate": "improve",
+    "confidence_growth": "increase"
+  },
+  "constraints": {
+    "platforms": ["web", "iOS", "Android"],
+    "languages": ["TypeScript", "Swift (mobile)"],
+    "accessibility": "WCAG AA",
+    "performance": "Initial home load <= 1s on mobile network"
+  },
+  "deliverables": [
+    "Daily Home Card UI (one-tap start)",
+    "Animated ProgressRing component",
+    "Completion Modal (confetti, XP, streak update)",
+    "Adaptive drill assignment service (client + server contract)",
+    "XP & streak persistence model",
+    "Analytics events and instrumentation",
+    "Feature flags and A/B test configs",
+    "Unit and E2E tests"
+  ]
+}
