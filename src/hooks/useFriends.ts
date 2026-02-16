@@ -164,6 +164,7 @@ export const useFriends = () => {
       description: `Request sent to ${friendUsername}`,
     });
 
+    await fetchFriends();
     return { success: true };
   };
 

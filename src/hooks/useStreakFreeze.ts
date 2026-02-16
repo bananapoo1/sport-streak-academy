@@ -35,10 +35,22 @@ export const useStreakFreeze = () => {
     if (!user || freezeCount <= 0) return { success: false };
 
     try {
+      // Fetch the current freeze count from the database to avoid stale state
+      const { data: currentProfile, error: fetchError } = await supabase
+        .from("profiles")
+        .select("streak_freezes")
+        .eq("id", user.id)
+        .single();
+
+      if (fetchError) throw fetchError;
+      if (!currentProfile) return { success: false };
+      const currentFreezes = currentProfile.streak_freezes || 0;
+      if (currentFreezes <= 0) return { success: false };
+
       // Decrement freeze count
       const { error: updateError } = await supabase
         .from("profiles")
-        .update({ streak_freezes: freezeCount - 1 })
+        .update({ streak_freezes: currentFreezes - 1 })
         .eq("id", user.id);
 
       if (updateError) throw updateError;
@@ -53,7 +65,7 @@ export const useStreakFreeze = () => {
 
       if (logError) throw logError;
 
-      setFreezeCount(prev => prev - 1);
+      setFreezeCount(currentFreezes - 1);
       
       toast({
         title: "❄️ Streak Freeze Used!",
@@ -76,18 +88,30 @@ export const useStreakFreeze = () => {
     if (!user) return { success: false };
 
     try {
+      // Fetch the current freeze count from the database to avoid stale state
+      const { data: currentProfile, error: fetchError } = await supabase
+        .from("profiles")
+        .select("streak_freezes")
+        .eq("id", user.id)
+        .single();
+
+      if (fetchError) throw fetchError;
+      if (!currentProfile) return { success: false };
+      const currentFreezes = currentProfile.streak_freezes || 0;
+
       const { error } = await supabase
         .from("profiles")
-        .update({ streak_freezes: freezeCount + amount })
+        .update({ streak_freezes: currentFreezes + amount })
         .eq("id", user.id);
 
       if (error) throw error;
       
-      setFreezeCount(prev => prev + amount);
+      const newTotal = currentFreezes + amount;
+      setFreezeCount(newTotal);
       
       toast({
         title: "❄️ Streak Freezes Added!",
-        description: `You now have ${freezeCount + amount} streak freezes.`,
+        description: `You now have ${newTotal} streak freezes.`,
       });
 
       return { success: true };
@@ -95,7 +119,7 @@ export const useStreakFreeze = () => {
       console.error("Error adding freezes:", error);
       return { success: false };
     }
-  }, [user, freezeCount, toast]);
+  }, [user, toast]);
 
   useEffect(() => {
     fetchFreezeCount();

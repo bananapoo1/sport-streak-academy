@@ -45,7 +45,8 @@ export const useFriendActivity = () => {
   useEffect(() => {
     if (!user) return;
 
-    // First, get friend IDs
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
     const setupSubscription = async () => {
       const { data: friendships } = await supabase
         .from("friendships")
@@ -60,7 +61,7 @@ export const useFriendActivity = () => {
       );
 
       // Subscribe to daily_progress changes from friends
-      const channel = supabase
+      channel = supabase
         .channel('friend-activity')
         .on(
           'postgres_changes',
@@ -96,13 +97,15 @@ export const useFriendActivity = () => {
           }
         )
         .subscribe();
-
-      return () => {
-        supabase.removeChannel(channel);
-      };
     };
 
     setupSubscription();
+
+    return () => {
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+    };
   }, [user, toast]);
 
   return { notifyFriendsOfCompletion };
