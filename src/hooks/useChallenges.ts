@@ -209,8 +209,9 @@ export const useChallenges = () => {
       }
 
       // Submit score via server-side edge function for validation
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const response = await fetch(
-        "https://nikvolkksngggjkvpzrd.supabase.co/functions/v1/submit-challenge-score",
+        `${supabaseUrl}/functions/v1/submit-challenge-score`,
         {
           method: "POST",
           headers: {

@@ -63,8 +63,9 @@ export const useDrills = (options: UseDrillsOptions = {}) => {
         headers["Authorization"] = `Bearer ${session.access_token}`;
       }
 
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const response = await fetch(
-        `https://nikvolkksngggjkvpzrd.supabase.co/functions/v1/get-drills?${params.toString()}`,
+        `${supabaseUrl}/functions/v1/get-drills?${params.toString()}`,
         { headers }
       );
 
@@ -123,8 +124,9 @@ export const useDrill = (drillId: string | undefined) => {
         headers["Authorization"] = `Bearer ${session.access_token}`;
       }
 
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const response = await fetch(
-        `https://nikvolkksngggjkvpzrd.supabase.co/functions/v1/get-drill?id=${encodeURIComponent(drillId)}`,
+        `${supabaseUrl}/functions/v1/get-drill?id=${encodeURIComponent(drillId)}`,
         { headers }
       );
 
@@ -173,8 +175,9 @@ export const useCategories = (sport: string | undefined) => {
     setError(null);
 
     try {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const response = await fetch(
-        `https://nikvolkksngggjkvpzrd.supabase.co/functions/v1/get-categories?sport=${encodeURIComponent(sport)}`,
+        `${supabaseUrl}/functions/v1/get-categories?sport=${encodeURIComponent(sport)}`,
         {
           headers: { "Content-Type": "application/json" },
         }
