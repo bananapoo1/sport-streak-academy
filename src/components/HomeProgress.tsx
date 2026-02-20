@@ -3,7 +3,7 @@ import ProgressCircle from "./ProgressCircle";
 import DailyStats from "./DailyStats";
 import WeekProgress from "./WeekProgress";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, LogIn, Flame, Trophy, Sparkles, ChevronRight } from "lucide-react";
+import { ArrowRight, LogIn, Flame, Trophy, ChevronRight, Target, Calendar } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProgress } from "@/hooks/useProgress";
 import DailyCard from "@/components/DailyCard";
@@ -35,15 +35,67 @@ const HomeProgress = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { todayProgress, weekProgress, streak, loading } = useProgress();
-  const { activeSport, defaultCategory, sports: selectedSports, switchSport } = useOnboardingPreferences();
+  const {
+    activeSport,
+    defaultCategory,
+    sports: selectedSports,
+    switchSport,
+    skillLevel,
+    goal,
+    personalTag,
+    sessionMinutes,
+    weeklyDays,
+  } = useOnboardingPreferences();
 
   const sportInfo = sportsData[activeSport];
 
+  // Use onboarding sessionMinutes as the real daily goal
+  const effectiveGoalMinutes = sessionMinutes > 0 ? sessionMinutes : todayProgress.goal_minutes;
+
   const progressPercent = Math.min(
-    (todayProgress.minutes_completed / todayProgress.goal_minutes) * 100,
+    (todayProgress.minutes_completed / effectiveGoalMinutes) * 100,
     100
   );
-  const goalComplete = todayProgress.minutes_completed >= todayProgress.goal_minutes;
+  const goalComplete = todayProgress.minutes_completed >= effectiveGoalMinutes;
+
+  /** Personalized greeting based on time of day and personalTag */
+  const getGreeting = (): string => {
+    const hour = new Date().getHours();
+    const name = personalTag ? `, ${personalTag}` : "";
+    if (hour < 12) return `Good morning${name}`;
+    if (hour < 17) return `Good afternoon${name}`;
+    return `Good evening${name}`;
+  };
+
+  /** Goal-specific motivational subtext */
+  const getGoalMessage = (): string | null => {
+    if (!goal) return null;
+    switch (goal) {
+      case "improve": return "Every rep brings you closer to mastery.";
+      case "fun": return "Have fun — consistency is the secret.";
+      case "compete": return "Train hard, compete harder.";
+      case "fitness": return "Move more, feel better.";
+      default: return null;
+    }
+  };
+
+  /** Skill-level badge */
+  const getSkillLabel = (): string | null => {
+    switch (skillLevel) {
+      case "beginner": return "Beginner";
+      case "intermediate": return "Intermediate";
+      case "advanced": return "Advanced";
+      default: return null;
+    }
+  };
+
+  /** Which days user chose to train */
+  const isTrainingDay = (): boolean => {
+    if (!weeklyDays || weeklyDays.length === 0) return true;
+    const dayMap: Record<string, number> = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
+    const today = new Date().getDay();
+    return weeklyDays.some((d) => dayMap[d] === today);
+  };
 
   // Default week data for non-logged-in users
   const defaultWeekData = [
@@ -115,6 +167,27 @@ const HomeProgress = () => {
       <div className="container mx-auto px-4">
         <div className="max-w-md mx-auto space-y-5">
 
+          {/* ── 0. Personalized Greeting ── */}
+          <div className="space-y-1">
+            <h2 className="text-xl font-extrabold text-foreground">{getGreeting()}</h2>
+            <div className="flex items-center gap-2 flex-wrap">
+              {getGoalMessage() && (
+                <p className="text-sm text-muted-foreground">{getGoalMessage()}</p>
+              )}
+              {getSkillLabel() && (
+                <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-semibold">
+                  {getSkillLabel()}
+                </span>
+              )}
+            </div>
+            {!isTrainingDay() && (
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-1.5 mt-1">
+                <Calendar className="w-3.5 h-3.5" />
+                <span>Rest day — but bonus drills still earn XP!</span>
+              </div>
+            )}
+          </div>
+
           {/* ── 1. Streak Banner (always visible, Duolingo-style) ── */}
           <div className="flex items-center justify-between bg-card border-2 border-border rounded-2xl p-4 shadow-soft">
             <div className="flex items-center gap-3">
@@ -138,12 +211,12 @@ const HomeProgress = () => {
               size="xl"
               showMinutes
               minutes={todayProgress.minutes_completed}
-              goalMinutes={todayProgress.goal_minutes}
+              goalMinutes={effectiveGoalMinutes}
             />
             <p className="text-sm text-muted-foreground font-medium">
               {goalComplete
                 ? "🎉 Daily goal complete! Bonus drills earn extra XP."
-                : `${todayProgress.goal_minutes - todayProgress.minutes_completed} min to hit your daily goal`}
+                : `${effectiveGoalMinutes - todayProgress.minutes_completed} min to hit your daily goal`}
             </p>
           </div>
 
@@ -185,12 +258,12 @@ const HomeProgress = () => {
             userId={user.id}
             defaultCategory={defaultCategory}
             sport={activeSport}
-            onNavigateToSession={(drillId) => {
-              if (drillId) {
-                navigate(`/drill/${activeSport}/${drillId}`);
-              } else {
-                navigate(`/sports/${activeSport}`);
-              }
+            sessionMinutes={sessionMinutes}
+            skillLevel={skillLevel}
+            goal={goal}
+            onNavigateToSession={() => {
+              // Navigate to sport page for full drill browsing
+              navigate(`/sports/${activeSport}`);
             }}
           />
 
@@ -217,9 +290,9 @@ const HomeProgress = () => {
               <span className="text-sm font-medium text-foreground">Achievements</span>
               <ChevronRight className="w-4 h-4 text-muted-foreground ml-auto" />
             </Link>
-            <Link to="/leagues" className="bg-card border border-border rounded-xl p-3 flex items-center gap-2 hover:border-primary/50 transition-colors">
-              <Sparkles className="w-5 h-5 text-xp" />
-              <span className="text-sm font-medium text-foreground">Leagues</span>
+            <Link to="/challenges" className="bg-card border border-border rounded-xl p-3 flex items-center gap-2 hover:border-primary/50 transition-colors">
+              <Target className="w-5 h-5 text-primary" />
+              <span className="text-sm font-medium text-foreground">Challenges</span>
               <ChevronRight className="w-4 h-4 text-muted-foreground ml-auto" />
             </Link>
           </div>

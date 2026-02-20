@@ -1,3 +1,5 @@
+import { canTrackAnalytics } from "@/services/consent";
+
 export type EventName =
   | "home_daily_card_view"
   | "home_cta_click"
@@ -23,6 +25,10 @@ interface AnalyticsEvent {
 const EVENTS_KEY = "ssa.analytics.events";
 
 export function trackEvent(name: EventName, properties?: Record<string, unknown>, userId?: string) {
+  if (!canTrackAnalytics()) {
+    return;
+  }
+
   const event: AnalyticsEvent = {
     name,
     userId,

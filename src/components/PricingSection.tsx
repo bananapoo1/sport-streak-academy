@@ -6,7 +6,7 @@ const pricingPlans = [
     name: "Free",
     price: "£0",
     period: "forever",
-    description: "Perfect for trying out DrillZone",
+    description: "Perfect for trying out Sport Streak Academy",
     features: [
       { text: "3 free drills per sport", included: true },
       { text: "1 drill per day for streak", included: true },

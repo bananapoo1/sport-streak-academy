@@ -120,7 +120,7 @@ const Auth = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <img src={logo} alt="DrillZone" className="h-16 w-16" />
+            <img src={logo} alt="Sport Streak Academy" className="h-16 w-16" />
           </div>
           <CardTitle className="text-2xl font-bold text-foreground">
             {isSignUp ? "Create Account" : "Welcome Back"}

@@ -18,7 +18,7 @@ export const Mascot = ({ size = "md", animate = true, className = "" }: MascotPr
     <div className={`${sizeClasses[size]} ${animate ? "animate-float" : ""} ${className}`}>
       <img
         src={mascotImage}
-        alt="Rally the Red Panda - DrillZone mascot"
+        alt="Rally the Red Panda - Sport Streak Academy mascot"
         className="w-full h-full object-contain drop-shadow-lg"
       />
     </div>

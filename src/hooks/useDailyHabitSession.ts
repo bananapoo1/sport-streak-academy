@@ -28,6 +28,8 @@ export function useDailyHabitSession(userId: string, defaultCategory = "shooting
       difficulty?: "easy" | "medium" | "hard";
       category?: string;
       adaptiveEnabled?: boolean;
+      skillLevel?: string | null;
+      goal?: string | null;
     },
   ) {
     setStarting(true);
@@ -59,6 +61,8 @@ export function useDailyHabitSession(userId: string, defaultCategory = "shooting
         suggestedDuration: options?.duration ?? 10,
         difficulty: options?.difficulty ?? "medium",
         category: options?.category ?? defaultCategory,
+        skillLevel: options?.skillLevel,
+        goal: options?.goal,
       });
 
       setSession(response);

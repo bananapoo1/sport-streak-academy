@@ -69,7 +69,7 @@ export const HeroSection = () => {
               <div className="absolute inset-0 gradient-primary rounded-full blur-3xl opacity-20 scale-75" />
               <img 
                 src={logoSports} 
-                alt="DrillZone - Sports Training" 
+                alt="Sport Streak Academy - Sports Training" 
                 className="relative z-10 w-64 h-64 md:w-80 md:h-80 object-contain animate-float"
               />
             </div>

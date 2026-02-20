@@ -1,19 +1,19 @@
 project_id = "nikvolkksngggjkvpzrd"
 
 [functions.create-checkout]
-verify_jwt = false
+verify_jwt = true
 
 [functions.check-subscription]
-verify_jwt = false
+verify_jwt = true
 
 [functions.customer-portal]
-verify_jwt = false
+verify_jwt = true
 
 [functions.submit-challenge-score]
-verify_jwt = false
+verify_jwt = true
 
 [functions.complete-drill]
-verify_jwt = false
+verify_jwt = true
 
 [functions.get-drills]
 verify_jwt = false
@@ -25,4 +25,7 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.get-user-completed-drills]
+verify_jwt = true
+
+[functions.report-client-error]
 verify_jwt = false

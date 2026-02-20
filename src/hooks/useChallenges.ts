@@ -101,7 +101,9 @@ export const useChallenges = () => {
           table: 'challenges',
         },
         async (payload) => {
-          console.log("Challenge update received:", payload);
+          if (import.meta.env.DEV) {
+            console.info("Challenge update received:", payload);
+          }
           // Refetch all challenges to get accurate state
           await fetchChallenges();
         }

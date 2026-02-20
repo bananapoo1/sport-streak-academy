@@ -1,5 +1,5 @@
 /**
- * Shared constants for DrillZone app
+ * Shared constants for Sport Streak Academy app
  * Used by both client and server (edge functions mirror these values)
  */
 

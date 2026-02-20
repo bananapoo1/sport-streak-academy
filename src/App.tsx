@@ -21,10 +21,12 @@ import Leagues from "./pages/Leagues";
 import Achievements from "./pages/Achievements";
 import Pricing from "./pages/Pricing";
 import Onboarding from "./pages/Onboarding";
-import DailySpinWheel from "./components/DailySpinWheel";
+import Feed from "./pages/Feed";
+import PrivacySettings from "./pages/PrivacySettings";
 import MobileTabBar from "./components/MobileTabBar";
 import DefaultTabOnboarding from "./components/DefaultTabOnboarding";
 import StreakMilestone from "./components/StreakMilestone";
+import AnalyticsConsentBanner from "./components/AnalyticsConsentBanner";
 import { useProgress } from "./hooks/useProgress";
 import { DEFAULT_TAB_STORAGE_KEY, deepLinkToPath } from "./lib/mobileNav";
 import { supabase } from "@/integrations/supabase/client";
@@ -134,12 +136,13 @@ const RoutedApp = () => {
           <Route path="/drills" element={<Drills />} />
           <Route path="/leagues" element={<Leagues />} />
           <Route path="/achievements" element={<Achievements />} />
+          <Route path="/feed" element={<Feed />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/privacy-settings" element={<PrivacySettings />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
-      <DailySpinWheel />
       <StreakMilestone streak={streak} previousStreak={previousStreak} />
       <MobileTabBar />
       <DefaultTabOnboarding />
@@ -155,6 +158,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <RoutedApp />
+          <AnalyticsConsentBanner />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>

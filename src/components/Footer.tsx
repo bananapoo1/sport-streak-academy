@@ -10,7 +10,7 @@ export const Footer = () => {
           <div className="md:col-span-1">
             <div className="flex items-center gap-2 mb-4">
               <Mascot size="sm" animate={false} className="w-10 h-10" />
-              <span className="font-extrabold text-xl">DrillZone</span>
+              <span className="font-extrabold text-xl">Sport Streak Academy</span>
             </div>
             <p className="text-slate-300 text-sm">
               Level up your sports skills with fun, gamified training drills you can do anywhere.
@@ -44,9 +44,9 @@ export const Footer = () => {
           <div>
             <h4 className="font-bold mb-4 text-white">Legal</h4>
             <ul className="space-y-2 text-sm text-slate-300">
-              <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Cookie Policy</a></li>
+              <li><a href="/legal/privacy-policy.html" className="hover:text-white transition-colors">Privacy Policy</a></li>
+              <li><a href="/legal/terms-of-service.html" className="hover:text-white transition-colors">Terms of Service</a></li>
+              <li><a href="/legal/account-deletion.html" className="hover:text-white transition-colors">Account Deletion</a></li>
             </ul>
           </div>
         </div>
@@ -56,7 +56,7 @@ export const Footer = () => {
             Made with <Heart className="w-4 h-4 text-red-400 fill-current" /> for athletes everywhere
           </p>
           <p className="text-sm text-slate-300">
-            © 2024 DrillZone. All rights reserved.
+            © 2026 Sport Streak Academy. All rights reserved.
           </p>
         </div>
       </div>

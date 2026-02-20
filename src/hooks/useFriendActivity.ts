@@ -38,7 +38,9 @@ export const useFriendActivity = () => {
 
     // For now, we'll store this as a simple notification
     // In a real app, you might want a dedicated notifications table
-    console.log(`${myName} completed their daily training - friends notified!`);
+    if (import.meta.env.DEV) {
+      console.info(`${myName} completed their daily training - friends notified!`);
+    }
   }, [user]);
 
   // Subscribe to friend daily_progress updates

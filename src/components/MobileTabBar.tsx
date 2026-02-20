@@ -1,13 +1,13 @@
-import { Home, Trophy, Dumbbell, Medal, User } from "lucide-react";
+import { Home, Trophy, Dumbbell, User, Rss } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useHaptics } from "@/hooks/useHaptics";
 
 const tabs = [
   { label: "Home", href: "/", icon: Home },
-  { label: "Drills", href: "/sports", icon: Dumbbell },
-  { label: "Awards", href: "/achievements", icon: Trophy },
-  { label: "Leagues", href: "/leagues", icon: Medal },
+  { label: "Train", href: "/sports", icon: Dumbbell },
+  { label: "Feed", href: "/feed", icon: Rss },
+  { label: "Progress", href: "/achievements", icon: Trophy },
   { label: "Profile", href: "/profile", icon: User },
 ];
 

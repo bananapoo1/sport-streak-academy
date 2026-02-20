@@ -38,10 +38,11 @@ const getMobileTitle = (pathname: string) => {
   if (pathname === "/pricing") return "Pricing";
   if (pathname === "/challenges") return "Challenges";
   if (pathname === "/profile") return "Profile";
+  if (pathname === "/privacy-settings") return "Privacy";
   if (pathname.startsWith("/profile/")) return "Athlete Profile";
   if (pathname === "/checkout") return "Checkout";
   if (pathname === "/auth") return "Sign In";
-  return "DrillZone";
+  return "Sport Streak";
 };
 
 export const Navbar = () => {
@@ -79,7 +80,7 @@ export const Navbar = () => {
         <div className="flex items-center h-16">
           <Link to="/" className="hidden md:flex items-center gap-2 hover:opacity-80 transition-opacity">
             <span className="text-2xl">⚽</span>
-            <span className="font-extrabold text-xl text-foreground">DrillZone</span>
+            <span className="font-extrabold text-xl text-foreground">Sport Streak Academy</span>
           </Link>
 
           <div className="md:hidden flex items-center gap-2">

@@ -30,7 +30,7 @@ const Checkout = () => {
             <div className="bg-card border-2 border-success rounded-3xl p-8 shadow-card">
               <CheckCircle className="w-16 h-16 text-success mx-auto mb-4" />
               <h1 className="text-3xl font-extrabold text-foreground mb-4">
-                Welcome to DrillZone Pro!
+                Welcome to Sport Streak Academy Pro!
               </h1>
               <p className="text-muted-foreground mb-6">
                 Your subscription is now active. You have access to all premium features!

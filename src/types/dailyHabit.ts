@@ -42,6 +42,11 @@ export interface AssignMeta {
   reason: string;
 }
 
+export interface AssignmentExplanation {
+  showWhy: boolean;
+  message: string;
+}
+
 export interface AssignResponse {
   drill: Drill;
   meta: AssignMeta;
@@ -53,11 +58,15 @@ export interface SessionStartRequest {
   suggestedDuration: number;
   difficulty: "easy" | "medium" | "hard";
   category?: string;
+  skillLevel?: string | null;
+  goal?: string | null;
 }
 
 export interface SessionStartResponse {
   sessionId: string;
   assignedDrill?: Drill;
+  assignedMeta?: AssignMeta;
+  assignmentExplanation?: AssignmentExplanation;
 }
 
 export interface SessionCompleteRequest {

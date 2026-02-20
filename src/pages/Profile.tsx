@@ -2,13 +2,16 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Trophy, Flame, Target, Zap, Edit2, Lock, Check, Users, UserPlus, Bell, Mail, X, Swords, Crown } from "lucide-react";
-import LeagueBadge from "@/components/LeagueBadge";
-import StreakCounter from "@/components/StreakCounter";
+import {
+  Trophy, Flame, Target, Zap, Edit2, Lock, Check, Users, UserPlus,
+  Bell, Mail, X, Swords, Crown, ChevronRight, LogOut, Settings,
+  Calendar, Award, TrendingUp, Shield, Clock,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -18,13 +21,12 @@ import { useChallenges } from "@/hooks/useChallenges";
 import { useStreakFreeze } from "@/hooks/useStreakFreeze";
 import { useDailyGoal } from "@/hooks/useDailyGoal";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useOnboardingPreferences } from "@/hooks/useOnboardingPreferences";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import DailyGoalSetter from "@/components/DailyGoalSetter";
-import StreakFreezeCard from "@/components/StreakFreezeCard";
-import WeeklyLeaderboard from "@/components/WeeklyLeaderboard";
-import MobileQuickActions from "@/components/MobileQuickActions";
 import { Skeleton } from "@/components/ui/skeleton";
+
 const avatarOptions = [
   { emoji: "⚽", name: "Football", unlocked: true },
   { emoji: "🏀", name: "Basketball", unlocked: true },
@@ -46,28 +48,6 @@ const avatarOptions = [
   { emoji: "🐉", name: "Dragon", unlocked: false, requirement: "30-Day Streak" },
 ];
 
-const frameOptions = [
-  { id: "default", name: "Default", unlocked: true, requirement: "" },
-  { id: "bronze", name: "Bronze Ring", unlocked: true, requirement: "" },
-  { id: "silver", name: "Silver Ring", unlocked: true, requirement: "" },
-  { id: "gold", name: "Gold Ring", unlocked: false, requirement: "Reach Gold League" },
-  { id: "diamond", name: "Diamond Ring", unlocked: false, requirement: "Reach Diamond League" },
-  { id: "fire", name: "Fire Aura", unlocked: false, requirement: "30-Day Streak" },
-  { id: "champion", name: "Champion Crown", unlocked: false, requirement: "Win 10 Challenges" },
-  { id: "legendary", name: "Legendary Aura", unlocked: false, requirement: "Unlock 5 Legendary Achievements" },
-];
-
-const trophies = [
-  { id: "first-drill", name: "First Drill", icon: "🎯", description: "Complete your first drill", unlocked: true },
-  { id: "week-warrior", name: "Week Warrior", icon: "⚡", description: "7-day streak", unlocked: true },
-  { id: "century-club", name: "Century Club", icon: "💯", description: "Complete 100 drills", unlocked: false },
-  { id: "streak-master", name: "Streak Master", icon: "🔥", description: "30-day streak", unlocked: false },
-  { id: "gold-league", name: "Gold Champion", icon: "🥇", description: "Reach Gold League", unlocked: false },
-  { id: "diamond-league", name: "Diamond Elite", icon: "💎", description: "Reach Diamond League", unlocked: false },
-  { id: "all-sports", name: "Versatile", icon: "🌟", description: "Complete drills in all 12 sports", unlocked: false },
-  { id: "pro-member", name: "Pro Athlete", icon: "👑", description: "Subscribe to Pro", unlocked: false },
-];
-
 const drillOptions = [
   { id: "football-ball-control-1-level-1", name: "First Touch", sport: "football", xp: 30 },
   { id: "football-passing-1-level-1", name: "Short Passing", sport: "football", xp: 30 },
@@ -77,26 +57,30 @@ const drillOptions = [
 ];
 
 type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
+type TabId = "stats" | "friends" | "settings";
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { streak, todayProgress } = useProgress();
   const { friends, pendingRequests, sentRequests, sendFriendRequest, acceptFriendRequest, removeFriend } = useFriends();
   const { sendChallenge } = useChallenges();
-  const { freezeCount, loading: freezeLoading } = useStreakFreeze();
-  const { goal, todayProgress: goalProgress, updateGoal } = useDailyGoal();
+  const { freezeCount } = useStreakFreeze();
+  const { goal, updateGoal } = useDailyGoal();
   const { isPro } = useSubscription();
+  const { activeSport, skillLevel, personalTag, sessionMinutes } = useOnboardingPreferences();
+
   const [selectedAvatar, setSelectedAvatar] = useState("⚽");
-  const [selectedFrame, setSelectedFrame] = useState("default");
   const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [friendUsername, setFriendUsername] = useState("");
   const [inAppReminders, setInAppReminders] = useState(true);
   const [emailReminders, setEmailReminders] = useState(false);
   const [challengeDialogOpen, setChallengeDialogOpen] = useState(false);
+  const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
   const [selectedFriend, setSelectedFriend] = useState<{ id: string; username: string } | null>(null);
+  const [activeTab, setActiveTab] = useState<TabId>("stats");
 
   useEffect(() => {
     if (!user) {
@@ -113,13 +97,10 @@ const Profile = () => {
 
       if (data) {
         setProfile(data);
-        // Always default to football emoji if no avatar or "default" avatar
         const avatarValue = data.avatar_id && data.avatar_id !== "default" ? data.avatar_id : "⚽";
         setSelectedAvatar(avatarValue);
-        setSelectedFrame(data.frame_id || "default");
       }
 
-      // Fetch reminder settings
       const { data: settings } = await supabase
         .from("reminder_settings")
         .select("*")
@@ -145,19 +126,8 @@ const Profile = () => {
         .update({ avatar_id: avatar })
         .eq("id", user.id);
     }
+    setAvatarDialogOpen(false);
     toast({ title: "Avatar Updated!", description: `Your avatar is now ${avatar}` });
-  };
-
-  const handleFrameChange = async (frameId: string, unlocked: boolean) => {
-    if (!unlocked) return;
-    setSelectedFrame(frameId);
-    if (user) {
-      await supabase
-        .from("profiles")
-        .update({ frame_id: frameId })
-        .eq("id", user.id);
-    }
-    toast({ title: "Frame Updated!", description: `Profile frame changed` });
   };
 
   const handleAddFriend = async () => {
@@ -167,39 +137,50 @@ const Profile = () => {
       toast({ title: "Error", description: result.error, variant: "destructive" });
     } else {
       setFriendUsername("");
+      toast({ title: "Request Sent" });
     }
   };
 
   const handleReminderChange = async (type: "in_app" | "email", value: boolean) => {
     if (!user) return;
-
     if (type === "in_app") {
       setInAppReminders(value);
-      await supabase
-        .from("reminder_settings")
-        .update({ in_app_reminders: value })
-        .eq("user_id", user.id);
+      await supabase.from("reminder_settings").update({ in_app_reminders: value }).eq("user_id", user.id);
     } else {
       setEmailReminders(value);
-      await supabase
-        .from("reminder_settings")
-        .update({ email_reminders: value })
-        .eq("user_id", user.id);
+      await supabase.from("reminder_settings").update({ email_reminders: value }).eq("user_id", user.id);
     }
-
     toast({ title: "Settings saved" });
   };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/auth");
+  };
+
+  /** Format join date */
+  const joinedDate = profile?.created_at
+    ? new Date(profile.created_at).toLocaleDateString("en-GB", { month: "short", year: "numeric" })
+    : null;
+
+  /** XP level calculation */
+  const totalXp = profile?.total_xp ?? 0;
+  const level = Math.floor(totalXp / 250) + 1;
+  const xpInLevel = totalXp % 250;
+  const xpProgress = (xpInLevel / 250) * 100;
+
+  /** Skill label */
+  const skillLabel = skillLevel === "beginner" ? "Beginner" : skillLevel === "intermediate" ? "Intermediate" : skillLevel === "advanced" ? "Advanced" : null;
 
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <main className="pt-20 pb-24 md:pt-24 md:pb-16">
-          <MobileQuickActions />
-          <div className="container mx-auto px-4 max-w-4xl space-y-4">
-            <Skeleton className="h-12 w-48" />
-            <Skeleton className="h-40 w-full rounded-3xl" />
-            <Skeleton className="h-64 w-full rounded-3xl" />
+        <main className="pt-20 pb-24">
+          <div className="container mx-auto px-4 max-w-md space-y-4">
+            <Skeleton className="h-48 w-full rounded-3xl" />
+            <Skeleton className="h-20 w-full rounded-2xl" />
+            <Skeleton className="h-64 w-full rounded-2xl" />
           </div>
         </main>
       </div>
@@ -209,338 +190,522 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="pt-20 pb-24 md:pt-24 md:pb-16">
-        <MobileQuickActions />
-        <div className="container mx-auto px-4 max-w-4xl">
-          <h1 className="text-3xl font-extrabold text-foreground mb-8">My Profile</h1>
+      <main className="pt-20 pb-24 md:pb-8">
+        <div className="container mx-auto px-4">
+          <div className="max-w-md mx-auto space-y-4">
 
-          {/* Profile Header */}
-          <div className="bg-card border-2 border-border rounded-3xl p-8 shadow-card mb-6">
-            <div className="flex flex-col sm:flex-row items-center gap-6">
-              <div className="relative">
-                <div className="w-24 h-24 bg-secondary rounded-full flex items-center justify-center text-5xl border-4 border-primary">
-                  {selectedAvatar}
-                </div>
-              </div>
-              <div className="text-center sm:text-left flex-1">
-                <h2 className="text-3xl font-extrabold text-foreground mb-2">
-                  {profile?.username || profile?.display_name || "Athlete"}
-                </h2>
-                <p className="text-muted-foreground mb-4">
-                  Joined {profile?.created_at ? new Date(profile.created_at).toLocaleDateString("en-GB", { month: "long", year: "numeric" }) : "Recently"}
-                </p>
-                <div className="flex flex-wrap gap-3 justify-center sm:justify-start">
-                  <LeagueBadge league="silver" rank={12} />
-                  <StreakCounter days={streak} />
-                </div>
-              </div>
-            </div>
-          </div>
+            {/* ══════════ HERO CARD ══════════ */}
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary/10 via-card to-card border border-border shadow-soft">
+              {/* Top accent */}
+              <div className="h-1.5 bg-gradient-to-r from-primary via-streak to-xp" />
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-card border-2 border-border rounded-2xl p-4 text-center shadow-soft">
-              <Trophy className="w-8 h-8 text-league-gold mx-auto mb-2" />
-              <div className="text-2xl font-extrabold text-foreground">{profile?.total_xp?.toLocaleString() || 0}</div>
-              <div className="text-sm text-muted-foreground">Total XP</div>
-            </div>
-            <div className="bg-card border-2 border-border rounded-2xl p-4 text-center shadow-soft">
-              <Target className="w-8 h-8 text-primary mx-auto mb-2" />
-              <div className="text-2xl font-extrabold text-foreground">{todayProgress.drills_completed}</div>
-              <div className="text-sm text-muted-foreground">Today's Drills</div>
-            </div>
-            <div className="bg-card border-2 border-border rounded-2xl p-4 text-center shadow-soft">
-              <Flame className="w-8 h-8 text-streak mx-auto mb-2" />
-              <div className="text-2xl font-extrabold text-foreground">{profile?.longest_streak || 0}</div>
-              <div className="text-sm text-muted-foreground">Best Streak</div>
-            </div>
-            <div className="bg-card border-2 border-border rounded-2xl p-4 text-center shadow-soft">
-              <Zap className="w-8 h-8 text-success mx-auto mb-2" />
-              <div className="text-2xl font-extrabold text-foreground">{todayProgress.xp_earned}</div>
-              <div className="text-sm text-muted-foreground">Today's XP</div>
-            </div>
-          </div>
-
-          {/* Daily Goal & Streak Freeze Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <DailyGoalSetter 
-              currentGoal={goal} 
-              onGoalChange={updateGoal} 
-            />
-            <StreakFreezeCard 
-              freezeCount={freezeCount}
-              hasSubscription={isPro}
-              onGetMore={() => navigate("/#pricing")}
-            />
-          </div>
-
-          {/* Weekly Leaderboard */}
-          <div className="mb-6">
-            <WeeklyLeaderboard />
-          </div>
-
-          {/* Friends Section */}
-          <div className="bg-card border-2 border-border rounded-3xl p-6 mb-6 shadow-soft">
-            <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-              <Users className="w-5 h-5 text-primary" />
-              Friends ({friends.length})
-            </h3>
-
-            {/* Add Friend */}
-            <div className="flex gap-2 mb-4">
-              <Input
-                placeholder="Enter username to add friend"
-                value={friendUsername}
-                onChange={(e) => setFriendUsername(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleAddFriend()}
-              />
-              <Button onClick={handleAddFriend}>
-                <UserPlus className="w-4 h-4" />
-              </Button>
-            </div>
-
-            {/* Pending Requests */}
-            {pendingRequests.length > 0 && (
-              <div className="mb-4">
-                <h4 className="text-sm font-semibold text-muted-foreground mb-2">Pending Requests</h4>
-                <div className="space-y-2">
-                  {pendingRequests.map((request) => (
-                    <div key={request.id} className="flex items-center justify-between bg-secondary/50 p-3 rounded-xl">
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">{request.avatar_id && request.avatar_id !== "default" ? request.avatar_id : "⚽"}</span>
-                        <span className="font-medium">{request.username || "Unknown"}</span>
-                      </div>
-                      <Button size="sm" onClick={() => acceptFriendRequest(request.id)}>
-                        Accept
-                      </Button>
+              <div className="p-5 pb-4">
+                {/* Avatar + Name row */}
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => setAvatarDialogOpen(true)}
+                    className="relative group"
+                    aria-label="Change avatar"
+                  >
+                    <div className="w-[72px] h-[72px] rounded-2xl bg-background/80 border-2 border-primary/30 flex items-center justify-center text-4xl transition-transform group-hover:scale-105 group-active:scale-95">
+                      {selectedAvatar}
                     </div>
-                  ))}
+                    <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
+                      <Edit2 className="w-3 h-3" />
+                    </div>
+                  </button>
+
+                  <div className="flex-1 min-w-0">
+                    <h1 className="text-xl font-extrabold text-foreground truncate">
+                      {profile?.display_name || profile?.username || personalTag || "Athlete"}
+                    </h1>
+                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                      {skillLabel && (
+                        <span className="text-[10px] font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                          {skillLabel}
+                        </span>
+                      )}
+                      {isPro && (
+                        <span className="text-[10px] font-semibold bg-xp/10 text-xp px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                          <Crown className="w-2.5 h-2.5" /> PRO
+                        </span>
+                      )}
+                      {joinedDate && (
+                        <span className="text-[10px] text-muted-foreground">Since {joinedDate}</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* XP Level bar */}
+                <div className="mt-4 space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-foreground">Level {level}</span>
+                    <span className="text-muted-foreground">{xpInLevel} / 250 XP</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-muted/60 overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-primary to-xp transition-all duration-500"
+                      style={{ width: `${xpProgress}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Quick stats chips */}
+                <div className="grid grid-cols-4 gap-2 mt-4">
+                  <div className="text-center">
+                    <div className="text-lg font-extrabold text-foreground">{totalXp.toLocaleString()}</div>
+                    <div className="text-[10px] text-muted-foreground">Total XP</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-extrabold text-streak">{streak}</div>
+                    <div className="text-[10px] text-muted-foreground">Streak</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-extrabold text-foreground">{profile?.longest_streak ?? 0}</div>
+                    <div className="text-[10px] text-muted-foreground">Best</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-extrabold text-foreground">{friends.length}</div>
+                    <div className="text-[10px] text-muted-foreground">Friends</div>
+                  </div>
                 </div>
               </div>
-            )}
+            </div>
 
-            {/* Sent Requests (Awaiting acceptance) */}
-            {sentRequests.length > 0 && (
-              <div className="mb-4">
-                <h4 className="text-sm font-semibold text-muted-foreground mb-2">Sent Requests (Awaiting)</h4>
-                <div className="space-y-2">
-                  {sentRequests.map((request) => (
-                    <div key={request.id} className="flex items-center justify-between bg-primary/5 p-3 rounded-xl border border-primary/20">
+            {/* ══════════ TODAY'S SNAPSHOT ══════════ */}
+            <div className="grid grid-cols-3 gap-2">
+              <Card className="border-border">
+                <CardContent className="p-3 text-center">
+                  <Zap className="w-4 h-4 text-xp mx-auto mb-1" />
+                  <div className="text-base font-extrabold text-foreground">{todayProgress.xp_earned}</div>
+                  <div className="text-[10px] text-muted-foreground">XP Today</div>
+                </CardContent>
+              </Card>
+              <Card className="border-border">
+                <CardContent className="p-3 text-center">
+                  <Target className="w-4 h-4 text-primary mx-auto mb-1" />
+                  <div className="text-base font-extrabold text-foreground">{todayProgress.drills_completed}</div>
+                  <div className="text-[10px] text-muted-foreground">Drills</div>
+                </CardContent>
+              </Card>
+              <Card className="border-border">
+                <CardContent className="p-3 text-center">
+                  <Clock className="w-4 h-4 text-success mx-auto mb-1" />
+                  <div className="text-base font-extrabold text-foreground">{todayProgress.minutes_completed}</div>
+                  <div className="text-[10px] text-muted-foreground">Minutes</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* ══════════ TAB SWITCHER ══════════ */}
+            <div className="flex rounded-xl bg-muted/50 p-1 gap-1">
+              {([
+                { id: "stats" as const, label: "Stats", icon: TrendingUp },
+                { id: "friends" as const, label: "Friends", icon: Users },
+                { id: "settings" as const, label: "Settings", icon: Settings },
+              ]).map((tab) => {
+                const Icon = tab.icon;
+                const active = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                      active
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* ══════════ STATS TAB ══════════ */}
+            {activeTab === "stats" && (
+              <div className="space-y-3">
+                {/* Daily Goal */}
+                <DailyGoalSetter currentGoal={goal} onGoalChange={updateGoal} />
+
+                {/* Streak Freeze */}
+                <Card className="border-border">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <span className="text-2xl">{request.avatar_id || "⚽"}</span>
+                        <div className="w-10 h-10 rounded-xl bg-sky-500/10 flex items-center justify-center">
+                          <Shield className="w-5 h-5 text-sky-500" />
+                        </div>
                         <div>
-                          <span className="font-medium block">{request.username || "Unknown"}</span>
-                          <span className="text-xs text-muted-foreground">Waiting for response...</span>
+                          <p className="font-semibold text-foreground text-sm">Streak Freezes</p>
+                          <p className="text-xs text-muted-foreground">Protect your streak on rest days</p>
                         </div>
                       </div>
-                      <span className="text-xs text-primary font-medium px-2 py-1 bg-primary/10 rounded-full">Pending</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Friends List */}
-            {friends.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {friends.map((friend) => (
-                  <div key={friend.id} className="flex items-center justify-between bg-secondary/30 p-3 rounded-xl">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">{friend.avatar_id && friend.avatar_id !== "default" ? friend.avatar_id : "⚽"}</span>
-                      <div>
-                        <span className="font-medium block">{friend.username || "Unknown"}</span>
-                        <span className="text-xs text-streak flex items-center gap-1">
-                          <Flame className="w-3 h-3" /> {friend.current_streak} day streak
-                        </span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-xl font-extrabold text-foreground">{freezeCount}</span>
+                        <span className="text-xs text-muted-foreground">left</span>
                       </div>
                     </div>
-                    <div className="flex gap-1">
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => {
-                          setSelectedFriend({ id: friend.id, username: friend.username || "Friend" });
-                          setChallengeDialogOpen(true);
-                        }}
-                      >
-                        <Swords className="w-4 h-4" />
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={() => removeFriend(friend.id)}>
-                        <X className="w-4 h-4" />
-                      </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Quick Achievements */}
+                <Card className="border-border">
+                  <CardContent className="p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold text-foreground text-sm flex items-center gap-2">
+                        <Award className="w-4 h-4 text-league-gold" />
+                        Achievements
+                      </h3>
+                      <Link to="/achievements" className="text-xs text-primary font-medium flex items-center gap-0.5">
+                        View all <ChevronRight className="w-3 h-3" />
+                      </Link>
                     </div>
-                  </div>
-                ))}
+                    <div className="grid grid-cols-4 gap-2">
+                      {[
+                        { icon: "🎯", label: "First Drill", done: true },
+                        { icon: "⚡", label: "7-Day", done: streak >= 7 },
+                        { icon: "💯", label: "100 Drills", done: false },
+                        { icon: "🔥", label: "30 Days", done: streak >= 30 },
+                      ].map((a) => (
+                        <div
+                          key={a.label}
+                          className={`rounded-xl p-2 text-center ${
+                            a.done ? "bg-primary/5 border border-primary/20" : "bg-muted/50 border border-border opacity-50"
+                          }`}
+                        >
+                          <span className={`text-xl ${!a.done ? "grayscale" : ""}`}>{a.icon}</span>
+                          <p className="text-[9px] text-muted-foreground mt-1 leading-tight">{a.label}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Leagues link */}
+                <Link to="/leagues">
+                  <Card className="border-border hover:border-primary/30 transition-colors cursor-pointer">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-league-gold/10 flex items-center justify-center">
+                            <Trophy className="w-5 h-5 text-league-gold" />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-foreground text-sm">Leagues</p>
+                            <p className="text-xs text-muted-foreground">Compete on the leaderboard</p>
+                          </div>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
               </div>
-            ) : (
-              <p className="text-muted-foreground text-center py-4">No friends yet. Add someone above!</p>
             )}
-          </div>
 
-          {/* Challenge Friend Dialog */}
-          <Dialog open={challengeDialogOpen} onOpenChange={setChallengeDialogOpen}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Challenge {selectedFriend?.username}</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-3 mt-4">
-                <p className="text-sm text-muted-foreground">Select a drill to challenge your friend:</p>
-                {drillOptions.map((drill) => (
-                  <button
-                    key={drill.id}
-                    onClick={async () => {
-                      if (selectedFriend) {
-                        await sendChallenge(selectedFriend.id, drill.id, drill.sport);
-                        setChallengeDialogOpen(false);
-                        setSelectedFriend(null);
-                      }
-                    }}
-                    className="w-full flex items-center justify-between p-3 rounded-xl bg-secondary/50 hover:bg-primary/10 border border-border hover:border-primary transition-all"
-                  >
-                    <div className="text-left">
-                      <span className="font-medium block">{drill.name}</span>
-                      <span className="text-xs text-muted-foreground capitalize">{drill.sport}</span>
+            {/* ══════════ FRIENDS TAB ══════════ */}
+            {activeTab === "friends" && (
+              <div className="space-y-3">
+                {/* Add Friend */}
+                <Card className="border-border">
+                  <CardContent className="p-4 space-y-3">
+                    <h3 className="font-semibold text-foreground text-sm flex items-center gap-2">
+                      <UserPlus className="w-4 h-4 text-primary" />
+                      Add Friend
+                    </h3>
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Enter username"
+                        value={friendUsername}
+                        onChange={(e) => setFriendUsername(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleAddFriend()}
+                        className="h-10"
+                      />
+                      <Button onClick={handleAddFriend} size="sm" className="h-10 px-4">
+                        Add
+                      </Button>
                     </div>
-                    <span className="text-sm text-primary font-bold">+{drill.xp} XP</span>
-                  </button>
-                ))}
-              </div>
-            </DialogContent>
-          </Dialog>
+                  </CardContent>
+                </Card>
 
-          {/* Streak Reminders */}
-          <div className="bg-card border-2 border-border rounded-3xl p-6 mb-6 shadow-soft">
-            <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-              <Bell className="w-5 h-5 text-streak" />
-              Streak Reminders
-            </h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Bell className="w-5 h-5 text-muted-foreground" />
-                  <Label htmlFor="in-app-reminders">In-app reminders</Label>
-                </div>
-                <Switch
-                  id="in-app-reminders"
-                  checked={inAppReminders}
-                  onCheckedChange={(v) => handleReminderChange("in_app", v)}
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Mail className="w-5 h-5 text-muted-foreground" />
-                  <Label htmlFor="email-reminders">Email reminders</Label>
-                </div>
-                <Switch
-                  id="email-reminders"
-                  checked={emailReminders}
-                  onCheckedChange={(v) => handleReminderChange("email", v)}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Friends can remind you to keep your streak going!
-              </p>
-            </div>
-          </div>
+                {/* Pending Requests */}
+                {pendingRequests.length > 0 && (
+                  <Card className="border-primary/20">
+                    <CardContent className="p-4 space-y-2">
+                      <h3 className="text-xs font-semibold text-primary uppercase">
+                        Pending · {pendingRequests.length}
+                      </h3>
+                      {pendingRequests.map((req) => (
+                        <div key={req.id} className="flex items-center justify-between py-2">
+                          <div className="flex items-center gap-2.5">
+                            <span className="text-xl">{req.avatar_id && req.avatar_id !== "default" ? req.avatar_id : "⚽"}</span>
+                            <span className="font-medium text-sm text-foreground">{req.username || "Unknown"}</span>
+                          </div>
+                          <Button size="sm" variant="default" className="h-8" onClick={() => acceptFriendRequest(req.id)}>
+                            Accept
+                          </Button>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                )}
 
-          {/* Customize Section */}
-          <div className="bg-card border-2 border-border rounded-3xl p-6 mb-6 shadow-soft">
-            <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-              <Edit2 className="w-5 h-5 text-primary" />
-              Customize Avatar
-            </h3>
-            <div className="flex flex-wrap gap-3">
-              {avatarOptions.map((avatar) => (
-                <button
-                  key={avatar.emoji}
-                  onClick={() => avatar.unlocked && handleAvatarChange(avatar.emoji)}
-                  className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl border-2 transition-all relative ${
-                    avatar.unlocked ? "hover:scale-110 cursor-pointer" : "opacity-50 cursor-not-allowed"
-                  } ${
-                    selectedAvatar === avatar.emoji
-                      ? "border-primary bg-primary/10"
-                      : "border-border bg-secondary hover:border-primary/50"
-                  }`}
-                  title={avatar.unlocked ? avatar.name : `🔒 ${avatar.requirement}`}
-                >
-                  {avatar.emoji}
-                  {!avatar.unlocked && (
-                    <Lock className="w-4 h-4 absolute -bottom-1 -right-1 text-muted-foreground bg-card rounded-full p-0.5" />
-                  )}
-                </button>
-              ))}
-            </div>
-            <p className="text-xs text-muted-foreground mt-3">
-              Unlock more avatars by completing achievements!
-            </p>
-          </div>
+                {/* Sent Requests */}
+                {sentRequests.length > 0 && (
+                  <Card className="border-border">
+                    <CardContent className="p-4 space-y-2">
+                      <h3 className="text-xs font-semibold text-muted-foreground uppercase">
+                        Sent · {sentRequests.length}
+                      </h3>
+                      {sentRequests.map((req) => (
+                        <div key={req.id} className="flex items-center justify-between py-2">
+                          <div className="flex items-center gap-2.5">
+                            <span className="text-xl">{req.avatar_id || "⚽"}</span>
+                            <div>
+                              <span className="font-medium text-sm text-foreground block">{req.username || "Unknown"}</span>
+                              <span className="text-[10px] text-muted-foreground">Waiting...</span>
+                            </div>
+                          </div>
+                          <span className="text-[10px] text-muted-foreground bg-muted px-2 py-1 rounded-full">Pending</span>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                )}
 
-          {/* Profile Frames */}
-          <div className="bg-card border-2 border-border rounded-3xl p-6 mb-6 shadow-soft">
-            <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-              <Zap className="w-5 h-5 text-xp" />
-              Profile Frames
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {frameOptions.map((frame) => (
-                <button
-                  key={frame.id}
-                  onClick={() => handleFrameChange(frame.id, frame.unlocked)}
-                  className={`p-4 rounded-2xl border-2 transition-all text-left ${
-                    frame.unlocked
-                      ? selectedFrame === frame.id
-                        ? "border-primary bg-primary/10"
-                        : "border-border hover:border-primary cursor-pointer"
-                      : "border-border/50 opacity-60 cursor-not-allowed"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-semibold text-foreground">{frame.name}</span>
-                    {frame.unlocked ? (
-                      selectedFrame === frame.id ? (
-                        <Check className="w-5 h-5 text-primary" />
-                      ) : (
-                        <Check className="w-5 h-5 text-success" />
-                      )
-                    ) : (
-                      <Lock className="w-5 h-5 text-muted-foreground" />
-                    )}
+                {/* Friends List */}
+                {friends.length > 0 ? (
+                  <div className="space-y-2">
+                    {friends.map((friend) => (
+                      <Card key={friend.id} className="border-border">
+                        <CardContent className="p-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <span className="text-2xl">{friend.avatar_id && friend.avatar_id !== "default" ? friend.avatar_id : "⚽"}</span>
+                              <div>
+                                <span className="font-semibold text-sm text-foreground block">{friend.username || "Unknown"}</span>
+                                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                  <Flame className="w-3 h-3 text-streak" /> {friend.current_streak} day streak
+                                </span>
+                              </div>
+                            </div>
+                            <div className="flex gap-1">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-8 w-8 p-0"
+                                onClick={() => {
+                                  setSelectedFriend({ id: friend.id, username: friend.username || "Friend" });
+                                  setChallengeDialogOpen(true);
+                                }}
+                              >
+                                <Swords className="w-3.5 h-3.5" />
+                              </Button>
+                              <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => removeFriend(friend.id)}>
+                                <X className="w-3.5 h-3.5" />
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
                   </div>
-                  {!frame.unlocked && (
-                    <p className="text-xs text-muted-foreground">{frame.requirement}</p>
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
+                ) : (
+                  <Card className="border-dashed border-border">
+                    <CardContent className="p-6 text-center">
+                      <Users className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                      <p className="text-sm text-muted-foreground">No friends yet. Add someone above!</p>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            )}
 
-          {/* Trophies */}
-          <div className="bg-card border-2 border-border rounded-3xl p-6 shadow-soft">
-            <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-              <Trophy className="w-5 h-5 text-league-gold" />
-              Trophies ({trophies.filter(t => t.unlocked).length}/{trophies.length})
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {trophies.map((trophy) => (
-                <div
-                  key={trophy.id}
-                  className={`p-4 rounded-2xl text-center transition-all ${
-                    trophy.unlocked
-                      ? "bg-secondary border-2 border-league-gold/30"
-                      : "bg-muted/50 border-2 border-border opacity-50"
-                  }`}
+            {/* ══════════ SETTINGS TAB ══════════ */}
+            {activeTab === "settings" && (
+              <div className="space-y-3">
+                {/* Reminders */}
+                <Card className="border-border">
+                  <CardContent className="p-4 space-y-4">
+                    <h3 className="font-semibold text-foreground text-sm flex items-center gap-2">
+                      <Bell className="w-4 h-4 text-streak" />
+                      Notifications
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          <Bell className="w-4 h-4 text-muted-foreground" />
+                          <Label htmlFor="in-app-reminders" className="text-sm">In-app reminders</Label>
+                        </div>
+                        <Switch
+                          id="in-app-reminders"
+                          checked={inAppReminders}
+                          onCheckedChange={(v) => handleReminderChange("in_app", v)}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          <Mail className="w-4 h-4 text-muted-foreground" />
+                          <Label htmlFor="email-reminders" className="text-sm">Email reminders</Label>
+                        </div>
+                        <Switch
+                          id="email-reminders"
+                          checked={emailReminders}
+                          onCheckedChange={(v) => handleReminderChange("email", v)}
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Avatar Customization */}
+                <Card className="border-border">
+                  <CardContent className="p-4">
+                    <button
+                      onClick={() => setAvatarDialogOpen(true)}
+                      className="w-full flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-xl">
+                          {selectedAvatar}
+                        </div>
+                        <div className="text-left">
+                          <p className="font-semibold text-foreground text-sm">Change Avatar</p>
+                          <p className="text-xs text-muted-foreground">
+                            {avatarOptions.filter((a) => a.unlocked).length} unlocked
+                          </p>
+                        </div>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                    </button>
+                  </CardContent>
+                </Card>
+
+                {/* Account links */}
+                <Card className="border-border">
+                  <CardContent className="p-1">
+                    {!isPro && (
+                      <Link
+                        to="/pricing"
+                        className="flex items-center justify-between p-3 rounded-xl hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <Crown className="w-5 h-5 text-xp" />
+                          <span className="font-medium text-sm text-foreground">Upgrade to Pro</span>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                      </Link>
+                    )}
+                    <Link
+                      to="/privacy-settings"
+                      className="flex items-center justify-between p-3 rounded-xl hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Shield className="w-5 h-5 text-primary" />
+                        <span className="font-medium text-sm text-foreground">Privacy Settings</span>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                    </Link>
+                    <Link
+                      to="/onboarding"
+                      className="flex items-center justify-between p-3 rounded-xl hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Calendar className="w-5 h-5 text-primary" />
+                        <span className="font-medium text-sm text-foreground">Redo Onboarding</span>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                    </Link>
+                  </CardContent>
+                </Card>
+
+                {/* Sign out */}
+                <Button
+                  variant="outline"
+                  className="w-full h-11 text-destructive hover:text-destructive hover:bg-destructive/5 border-destructive/20"
+                  onClick={handleSignOut}
                 >
-                  <span className={`text-3xl ${!trophy.unlocked && "grayscale"}`}>
-                    {trophy.icon}
-                  </span>
-                  <h4 className="font-bold text-sm text-foreground mt-2">{trophy.name}</h4>
-                  <p className="text-xs text-muted-foreground mt-1">{trophy.description}</p>
-                </div>
-              ))}
-            </div>
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </Button>
+
+                <p className="text-center text-[10px] text-muted-foreground">
+                  {user?.email}
+                </p>
+              </div>
+            )}
+
           </div>
         </div>
       </main>
+
+      {/* ══════════ AVATAR DIALOG ══════════ */}
+      <Dialog open={avatarDialogOpen} onOpenChange={setAvatarDialogOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Choose Avatar</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-6 gap-2 mt-2">
+            {avatarOptions.map((avatar) => (
+              <button
+                key={avatar.emoji}
+                onClick={() => avatar.unlocked && handleAvatarChange(avatar.emoji)}
+                className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl border-2 transition-all relative ${
+                  avatar.unlocked ? "hover:scale-110 cursor-pointer active:scale-95" : "opacity-40 cursor-not-allowed"
+                } ${
+                  selectedAvatar === avatar.emoji
+                    ? "border-primary bg-primary/10"
+                    : "border-border bg-secondary hover:border-primary/50"
+                }`}
+                title={avatar.unlocked ? avatar.name : `🔒 ${avatar.requirement}`}
+              >
+                {avatar.emoji}
+                {!avatar.unlocked && (
+                  <Lock className="w-3 h-3 absolute -bottom-0.5 -right-0.5 text-muted-foreground bg-card rounded-full p-0.5" />
+                )}
+              </button>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground text-center">
+            Unlock more by hitting milestones!
+          </p>
+        </DialogContent>
+      </Dialog>
+
+      {/* ══════════ CHALLENGE DIALOG ══════════ */}
+      <Dialog open={challengeDialogOpen} onOpenChange={setChallengeDialogOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Challenge {selectedFriend?.username}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 mt-2">
+            <p className="text-xs text-muted-foreground">Pick a drill:</p>
+            {drillOptions.map((drill) => (
+              <button
+                key={drill.id}
+                onClick={async () => {
+                  if (selectedFriend) {
+                    await sendChallenge(selectedFriend.id, drill.id, drill.sport);
+                    setChallengeDialogOpen(false);
+                    setSelectedFriend(null);
+                  }
+                }}
+                className="w-full flex items-center justify-between p-3 rounded-xl bg-secondary/50 hover:bg-primary/10 border border-border hover:border-primary/30 transition-all"
+              >
+                <div className="text-left">
+                  <span className="font-medium text-sm block">{drill.name}</span>
+                  <span className="text-[10px] text-muted-foreground capitalize">{drill.sport}</span>
+                </div>
+                <span className="text-xs text-primary font-bold">+{drill.xp} XP</span>
+              </button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <Footer />
     </div>
   );

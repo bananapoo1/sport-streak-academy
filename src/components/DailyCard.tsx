@@ -12,24 +12,28 @@ type Props = {
   userId: string;
   defaultCategory?: string;
   sport?: string;
+  sessionMinutes?: number;
+  skillLevel?: string | null;
+  goal?: string | null;
   onNavigateToSession?: (drillId?: string) => void;
 };
 
-export default function DailyCard({ userId, defaultCategory = "shooting", sport = "football", onNavigateToSession }: Props) {
+export default function DailyCard({ userId, defaultCategory = "shooting", sport = "football", sessionMinutes = 10, skillLevel = null, goal = null, onNavigateToSession }: Props) {
   const {
     beginSession,
     finishSession,
+    session,
     assignedDrill,
     completion,
     ctaVariant,
     flags,
     starting,
     completing,
-    streakState,
   } = useDailyHabitSession(userId, defaultCategory);
 
   const [completionOpen, setCompletionOpen] = useState(false);
   const [lastOutcome, setLastOutcome] = useState<DrillOutcome | undefined>(undefined);
+  const [selectedOutcome, setSelectedOutcome] = useState<DrillOutcome>("success");
 
   const progress = useMemo(() => {
     if (!assignedDrill) return 0;
@@ -45,23 +49,39 @@ export default function DailyCard({ userId, defaultCategory = "shooting", sport 
   }
 
   const handleStart = async () => {
-    const response = await beginSession({
+    const difficultyFromSkill =
+      skillLevel === "beginner"
+        ? "easy"
+        : skillLevel === "advanced"
+          ? "hard"
+          : "medium";
+
+    await beginSession({
       category: defaultCategory,
-      duration: 10,
-      difficulty: "medium",
+      duration: sessionMinutes,
+      difficulty: difficultyFromSkill,
       adaptiveEnabled: flags.adaptiveEnabled,
+      skillLevel,
+      goal,
     });
     trackEvent("home_cta_click", { category: defaultCategory, ctaVariant: ctaVariant.id }, userId);
-    onNavigateToSession?.(response.assignedDrill?.id);
+    setSelectedOutcome("success");
   };
 
-  const handleComplete = async () => {
+  const handleComplete = async (outcome: DrillOutcome) => {
     if (!assignedDrill) return;
+
+    const confidenceAfter =
+      outcome === "success"
+        ? 0.76
+        : outcome === "partial"
+          ? 0.52
+          : 0.38;
 
     trackEvent("drill_attempt", {
       drillId: assignedDrill.id,
       category: assignedDrill.category,
-      outcome: "success",
+      outcome,
     }, userId);
 
     const result = await finishSession({
@@ -69,11 +89,12 @@ export default function DailyCard({ userId, defaultCategory = "shooting", sport 
       xpEarned: 25,
       completed: true,
       drillId: assignedDrill.id,
-      drillOutcome: "success",
+      drillOutcome: outcome,
+      confidenceAfter,
     });
 
     if (result) {
-      setLastOutcome("success");
+      setLastOutcome(outcome);
       setCompletionOpen(true);
     }
   };
@@ -102,6 +123,11 @@ export default function DailyCard({ userId, defaultCategory = "shooting", sport 
             <div className="rounded-xl bg-secondary/50 p-3 space-y-2">
               <div className="font-semibold text-foreground">{assignedDrill.title}</div>
               <p className="text-sm text-muted-foreground leading-snug">{assignedDrill.content.summary}</p>
+              {session?.assignmentExplanation?.showWhy && (
+                <div className="text-xs bg-primary/10 text-primary rounded-lg px-2.5 py-2">
+                  <span className="font-semibold">Why this drill:</span> {session.assignmentExplanation.message}
+                </div>
+              )}
               <div className="flex items-center gap-3 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Clock className="h-3.5 w-3.5" />
@@ -133,13 +159,45 @@ export default function DailyCard({ userId, defaultCategory = "shooting", sport 
             </Button>
           ) : (
             <Button
-              onClick={handleComplete}
+              onClick={() => handleComplete(selectedOutcome)}
               disabled={completing}
               className="w-full h-12 text-base font-bold bg-success hover:bg-success/90"
               aria-label="Complete drill"
             >
-              {completing ? "Saving..." : "I Did It! ✓"}
+              {completing ? "Saving..." : "Save Result"}
             </Button>
+          )}
+
+          {assignedDrill && (
+            <div className="grid grid-cols-3 gap-2">
+              <Button
+                type="button"
+                variant={selectedOutcome === "success" ? "default" : "outline"}
+                className="h-9 text-xs font-semibold"
+                onClick={() => setSelectedOutcome("success")}
+                disabled={completing}
+              >
+                Easy
+              </Button>
+              <Button
+                type="button"
+                variant={selectedOutcome === "partial" ? "default" : "outline"}
+                className="h-9 text-xs font-semibold"
+                onClick={() => setSelectedOutcome("partial")}
+                disabled={completing}
+              >
+                Good
+              </Button>
+              <Button
+                type="button"
+                variant={selectedOutcome === "fail" ? "default" : "outline"}
+                className="h-9 text-xs font-semibold"
+                onClick={() => setSelectedOutcome("fail")}
+                disabled={completing}
+              >
+                Hard
+              </Button>
+            </div>
           )}
         </div>
 

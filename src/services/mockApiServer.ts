@@ -191,17 +191,82 @@ function parseBody<T>(request: Request): Promise<T> {
   return request.json() as Promise<T>;
 }
 
+function daysSinceIso(iso?: string) {
+  if (!iso) return 999;
+  const then = new Date(iso).getTime();
+  const now = Date.now();
+  return Math.max(0, Math.floor((now - then) / (1000 * 60 * 60 * 24)));
+}
+
+function mapSkillToConfidenceSeed(skillLevel: string | null) {
+  switch (skillLevel) {
+    case "beginner":
+      return 0.32;
+    case "intermediate":
+      return 0.5;
+    case "advanced":
+      return 0.72;
+    default:
+      return null;
+  }
+}
+
+function mapDifficultyToBias(difficulty: string | null) {
+  switch (difficulty) {
+    case "easy":
+      return -0.12;
+    case "hard":
+      return 0.12;
+    default:
+      return 0;
+  }
+}
+
+function mapGoalToBias(goal: string | null) {
+  switch (goal) {
+    case "pro":
+      return 0.08;
+    case "scouted":
+      return 0.06;
+    case "scholarship":
+      return 0.04;
+    case "best-team":
+      return 0.02;
+    default:
+      return 0;
+  }
+}
+
 async function handleAssign(request: Request) {
   const url = new URL(request.url);
   const userId = url.searchParams.get("userId") ?? "guest_user";
   const category = url.searchParams.get("category") ?? "shooting";
+  const requestedDifficulty = url.searchParams.get("difficulty");
+  const skillLevel = url.searchParams.get("skillLevel");
+  const goal = url.searchParams.get("goal");
 
   const db = readDB();
   const user = getOrCreateUser(db, userId);
 
+  const categoryAttempts = user.attempts.filter((attempt) => attempt.category === category);
+  const lastCategoryAttempt = categoryAttempts[categoryAttempts.length - 1];
+  const inactivityDays = daysSinceIso(lastCategoryAttempt?.timestampISO);
+  const recoveryBias = inactivityDays >= 2 ? -0.14 : 0;
+  const confidenceSeed = mapSkillToConfidenceSeed(skillLevel);
+  if (categoryAttempts.length === 0 && confidenceSeed !== null) {
+    user.confidenceByCategory[category] = confidenceSeed;
+  }
+
+  const storedConfidence = user.confidenceByCategory[category] ?? 0.5;
+  const assignmentConfidence = clamp(
+    storedConfidence + mapDifficultyToBias(requestedDifficulty) + mapGoalToBias(goal) + recoveryBias,
+    0,
+    1,
+  );
+
   const assignment: AssignResponse = assignDrill({
     category,
-    confidence: user.confidenceByCategory[category] ?? 0.5,
+    confidence: assignmentConfidence,
     drills: db.drills,
     history: user.attempts,
     reinforcementQueue: user.reinforcementQueue[category] ?? [],
@@ -222,6 +287,7 @@ async function handleAssign(request: Request) {
     dTarget: assignment.meta.dTarget,
     isReinforcement: assignment.meta.isReinforcement,
     assignmentReason: assignment.meta.reason,
+    recoveryMode: inactivityDays >= 2,
   }, userId);
 
   writeDB(db);
@@ -281,20 +347,39 @@ async function handleDrillResult(request: Request) {
 async function handleSessionStart(request: Request) {
   const body = await parseBody<SessionStartRequest>(request);
   const db = readDB();
-  getOrCreateUser(db, body.userId);
+  const user = getOrCreateUser(db, body.userId);
 
   const sessionId = `session_${Math.random().toString(36).slice(2, 10)}`;
   const category = body.category ?? "shooting";
   let assignedDrill: Drill | undefined;
+  let assignedMeta: AssignResponse["meta"] | undefined;
+
+  const categoryAttempts = user.attempts.filter((attempt) => attempt.category === category);
+  const lastCategoryAttempt = categoryAttempts[categoryAttempts.length - 1];
+  const inactivityDays = daysSinceIso(lastCategoryAttempt?.timestampISO);
+  const recoveryMode = inactivityDays >= 2;
+  const effectiveDuration = recoveryMode
+    ? Math.min(body.suggestedDuration, 10)
+    : body.suggestedDuration;
 
   const assignRequestUrl = new URL(request.url, window.location.origin);
   assignRequestUrl.searchParams.set("userId", body.userId);
   assignRequestUrl.searchParams.set("category", category);
+  assignRequestUrl.searchParams.set("difficulty", body.difficulty);
+  assignRequestUrl.searchParams.set("skillLevel", body.skillLevel ?? "");
+  assignRequestUrl.searchParams.set("goal", body.goal ?? "");
 
   const assignResponse = await handleAssign(new Request(assignRequestUrl.toString()));
   if (assignResponse.ok) {
     const assigned = (await assignResponse.json()) as AssignResponse;
-    assignedDrill = assigned.drill;
+    assignedMeta = assigned.meta;
+    assignedDrill = {
+      ...assigned.drill,
+      content: {
+        ...assigned.drill.content,
+        durationMinutes: effectiveDuration,
+      },
+    };
     db.sessions[sessionId] = {
       sessionId,
       userId: body.userId,
@@ -308,16 +393,41 @@ async function handleSessionStart(request: Request) {
   trackEvent("session_start", {
     sessionId,
     category,
-    suggestedDuration: body.suggestedDuration,
+    suggestedDuration: effectiveDuration,
+    requestedDuration: body.suggestedDuration,
+    recoveryMode,
     difficulty: body.difficulty,
     assignedDrillId: assignedDrill?.id,
   }, body.userId);
 
   writeDB(db);
 
+  const attemptsInCategory = user.attempts.filter((attempt) => attempt.category === category).length;
+  const shouldShowWhy = attemptsInCategory < 5 || attemptsInCategory % 5 === 0;
+  const reasonBits: string[] = [];
+  if (recoveryMode) {
+    reasonBits.push("eased back in after a short break");
+  }
+  if (body.skillLevel) {
+    reasonBits.push(`matched to your ${body.skillLevel} level`);
+  }
+  if (body.goal) {
+    reasonBits.push(`aligned with your ${body.goal.replace(/-/g, " ")} goal`);
+  }
+  if (assignedDrill?.category) {
+    reasonBits.push(`focused on ${assignedDrill.category}`);
+  }
+
   const response: SessionStartResponse = {
     sessionId,
     assignedDrill,
+    assignedMeta,
+    assignmentExplanation: {
+      showWhy: shouldShowWhy,
+      message: reasonBits.length > 0
+        ? `Chosen because it ${reasonBits.join(" and ")}.`
+        : "Chosen to match your current momentum and keep progress steady.",
+    },
   };
 
   return json(response);

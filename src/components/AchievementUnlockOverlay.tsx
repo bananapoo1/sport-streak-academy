@@ -135,8 +135,8 @@ const AchievementUnlockOverlay = ({ isOpen, onClose, achievement }: AchievementU
           oscillator.stop(ctx.currentTime + 0.6);
         }, 600);
       }
-    } catch (e) {
-      console.log("Audio not supported");
+    } catch {
+      // no-op
     }
   };
 
